@@ -11,8 +11,11 @@ local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
+local vicious = require("vicious")
 local key = require("keys")
 local autostart = require("autostart")
+local pulse = require("pulse")
+local common = require("common")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -53,7 +56,7 @@ naughty.config.presets.warning = {
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
 --beautiful.set_font("terminus 8")
-beautiful.init("/usr/share/awesome/themes/default/theme.lua")
+beautiful.init("/home/xentec/.config/awesome/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "urxvt"
@@ -66,6 +69,8 @@ editor_cmd = terminal .. " -e " .. editor
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 -- However, you can use another modifier like Mod1, but it may interact with others.
 modkey = key.mod;
+
+mainscreen = 1
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 layouts =
@@ -99,7 +104,7 @@ end
 -- {{{ Tags
 -- Define a tag table which hold all screen tags.
 tags = {}
-tags[1] = awful.tag({ "main", "web", "code", "other" }, 1, layouts[1])
+tags[1] = awful.tag({ "main", "web", "code", "script", "media", "gaming", "other" }, 1, layouts[1])
 tags[2] = awful.tag({ "chat", "news", "media"}, 2, layouts[1])
 -- }}}
 
@@ -111,99 +116,199 @@ tags[2] = awful.tag({ "chat", "news", "media"}, 2, layouts[1])
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
 
--- {{{ Wibox
--- Create a textclock widget
-mytextclock = awful.widget.textclock()
+-- ########################################
+-- ## Bars
+-- ########################################
 
+-- ## HBar
 -- Create a wibox for each screen and add it
-mywibox = {}
-mypromptbox = {}
-mylayoutbox = {}
-mytaglist = {}
-mytaglist.buttons = awful.util.table.join(
-						awful.button({ }, 1, awful.tag.viewonly),
+local hbar = {}
+hbar.wibox = {}
+hbar.prompt = {}
+hbar.taglist = {}
+hbar.taglist.buttons = awful.util.table.join(
+						awful.button({ update}, 1, awful.tag.viewonly),
 						awful.button({ modkey }, 1, awful.client.movetotag),
 						awful.button({ }, 3, awful.tag.viewtoggle),
 						awful.button({ modkey }, 3, awful.client.toggletag),
 						awful.button({ }, 4, function(t) awful.tag.viewnext(awful.tag.getscreen(t)) end),
 						awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
 					)
-mytasklist = {}
-mytasklist.buttons = awful.util.table.join(
-					 awful.button({ }, 1, function (c)
-											  if c == client.focus then
-												  c.minimized = true
-											  else
-												  -- Without this, the following
-												  -- :isvisible() makes no sense
-												  c.minimized = false
-												  if not c:isvisible() then
-													  awful.tag.viewonly(c:tags()[1])
-												  end
-												  -- This will also un-minimize
-												  -- the client, if needed
-												  client.focus = c
-												  c:raise()
-											  end
-										  end),
-					 awful.button({ }, 3, function ()
-											  if instance then
-												  instance:hide()
-												  instance = nil
-											  else
-												  instance = awful.menu.clients({ width=250 })
-											  end
-										  end),
-					 awful.button({ }, 4, function ()
-											  awful.client.focus.byidx(1)
-											  if client.focus then client.focus:raise() end
-										  end),
-					 awful.button({ }, 5, function ()
-											  awful.client.focus.byidx(-1)
-											  if client.focus then client.focus:raise() end
-										  end))
+hbar.tasklist = {}
+hbar.tasklist.buttons = awful.util.table.join(
+						awful.button({ }, 1, function (c)
+							if c == client.focus then
+								c.minimized = true
+							else
+								-- Without this, the following
+								-- :isvisible() makes no sense
+								c.minimized = false
+								if not c:isvisible() then
+									awful.tag.viewonly(c:tags()[1])
+								end
+								-- This will also un-minimize
+								-- the client, if needed
+								client.focus = c
+								c:raise()
+							end
+						end),
+						 awful.button({ }, 3, function ()
+							if instance then
+								instance:hide()
+								instance = nil
+							else
+								instance = awful.menu.clients({ width=250 })
+							end
+						end),
+						awful.button({ }, 4, function ()
+							awful.client.focus.byidx(1)
+							if client.focus then client.focus:raise() end
+						end),
+						awful.button({ }, 5, function ()
+							awful.client.focus.byidx(-1)
+							if client.focus then client.focus:raise() end
+						end)
+					)
+
+hbar.tasklist.update = common.list_update
+
+-- ########################################
+-- ## Widgets
+-- ########################################
+
+local widget = {}
+widget.spacer = {}
+widget.spacer.h = wibox.widget.textbox('<span color="gray"> ┆ </span>')
+widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄ </span>')
+
+-- Layout
+widget.layoutbox = {}
+
+-- Clock
+widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
+
+-- Network
+widget.network = wibox.widget.textbox()
+--vicious.register(widget.network, vicious.widgets.net, '', 1, 'enp4s0')
+
+-- Volume  
+widget.volume = awful.widget.progressbar({ width = 5, height = 60 })
+widget.volume:set_vertical(true)
+widget.volume:set_background_color(beautiful.bg_minimize)
+widget.volume:set_color(beautiful.bg_focus)
+--widget.volume:set_width(20)
+--widget.volume:set_height(5)
+widget.volume:set_ticks(true)
+--widget.volume:set_border_color("aqua")
+widget.volume:set_max_value(100)
+
+local volume = pulse(function(muted, val)
+	if muted then
+		widget.volume:set_color("#AA0000")
+	else
+		widget.volume:set_color(beautiful.bg_focus)
+	end
+	widget.volume:set_value(val)
+	--Rnaughty.notify({title = muted and "Muted" or "Unmuted"})
+end)
+
+-- CPU
+widget.cpu = awful.widget.graph()
+widget.cpu:set_width(50)
+widget.cpu:set_background_color("#494B4F")
+widget.cpu:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#FF5656"}, {0.5, "#88A175"}, 
+                    {1, "#AECF96" }}})
+-- Register widget
+vicious.register(widget.cpu, vicious.widgets.cpu, "$1")
+
+-- ########################################
+-- ## Main screen
+-- ########################################
+hbar.prompt[mainscreen] = awful.widget.prompt()
+-- Create an imagebox widget which will contains an icon indicating which layout we're using.
+-- We need one layoutbox per screen.
+widget.layoutbox[mainscreen] = awful.widget.layoutbox(mainscreen)
+widget.layoutbox[mainscreen]:buttons(awful.util.table.join(
+								awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
+								awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
+								awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
+								awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)
+								)
+							)
+-- Create a taglist widget
+hbar.taglist[mainscreen] = awful.widget.taglist(mainscreen, awful.widget.taglist.filter.all, hbar.taglist.buttons)
+
+-- Create a tasklist widget
+-- function tasklist.new(screen, filter, buttons, style, update_function, base_widget)
+hbar.tasklist[mainscreen] = awful.widget.tasklist(mainscreen, awful.widget.tasklist.filter.currenttags, hbar.tasklist.buttons, nil, hbar.tasklist.update)
+
+-----------------------------------------------------
+-- Create the wibox
+hbar.wibox[mainscreen] = awful.wibox({ position = "top", screen = mainscreen })
+
+-- Widgets that are aligned to the left
+local left_layout = wibox.layout.fixed.horizontal()
+left_layout:add(hbar.taglist[mainscreen])
+left_layout:add(widget.spacer.h)
+left_layout:add(hbar.prompt[mainscreen])
+
+-- Widgets that are aligned to the right
+local right_layout = wibox.layout.fixed.horizontal()
+right_layout:add(widget.spacer.h)
+right_layout:add(wibox.widget.systray())
+right_layout:add(widget.spacer.h)
+right_layout:add(widget.clock)
+right_layout:add(widget.spacer.h)
+right_layout:add(widget.layoutbox[mainscreen])
+
+-- Now bring it all together (with the tasklist in the middle)
+local layout = wibox.layout.align.horizontal()
+layout:set_left(left_layout)
+layout:set_middle(hbar.tasklist[mainscreen])
+layout:set_right(right_layout)
+
+hbar.wibox[mainscreen]:set_widget(layout)
+-----------------------------------------------------
+-- ########################################
+-- ## Futher screens
+-- ########################################
 
 for s = 1, screen.count() do
-	-- Create a promptbox for each screen
-	mypromptbox[s] = awful.widget.prompt()
-	-- Create an imagebox widget which will contains an icon indicating which layout we're using.
-	-- We need one layoutbox per screen.
-	mylayoutbox[s] = awful.widget.layoutbox(s)
-	mylayoutbox[s]:buttons(awful.util.table.join(
-						   awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
-						   awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
-						   awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
-						   awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)))
-	-- Create a taglist widget
-	mytaglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, mytaglist.buttons)
+	if s ~= mainscreen then
+		-- Create an imagebox widget which will contains an icon indicating which layout we're using.
+		-- We need one layoutbox per screen.
+		widget.layoutbox[s] = awful.widget.layoutbox(s)
+		widget.layoutbox[s]:buttons(awful.util.table.join(
+													 awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
+													 awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
+													 awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
+													 awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)))
+		-- Create a taglist widget
+		hbar.taglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, hbar.taglist.buttons)
 
-	-- Create a tasklist widget
-	mytasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, mytasklist.buttons)
+		-- Create a tasklist widget
+		hbar.tasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, hbar.tasklist.buttons)
 
-	-- Create the wibox
-	mywibox[s] = awful.wibox({ position = "top", screen = s })
+		-- Create the wibox
+		hbar.wibox[s] = awful.wibox({ position = "top", screen = s })
 
-	-- Widgets that are aligned to the left
-	local left_layout = wibox.layout.fixed.horizontal()
---	left_layout:add(mylauncher)
-	left_layout:add(mytaglist[s])
-	left_layout:add(mypromptbox[s])
+		-- Widgets that are aligned to the left
+		local left_layout = wibox.layout.fixed.horizontal()
+		left_layout:add(hbar.taglist[s])
 
-	-- Widgets that are aligned to the right
-	local right_layout = wibox.layout.fixed.horizontal()
-	if s == 1 then 
-		right_layout:add(wibox.widget.systray()) 
+		-- Widgets that are aligned to the right
+		local right_layout = wibox.layout.fixed.horizontal()
+		right_layout:add(widget.clock)
+		right_layout:add(widget.layoutbox[s])
+
+		-- Now bring it all together (with the tasklist in the middle)
+		local layout = wibox.layout.align.horizontal()
+		layout:set_left(left_layout)
+		layout:set_middle(hbar.tasklist[s])
+		layout:set_right(right_layout)
+
+		hbar.wibox[s]:set_widget(layout)
 	end
-	right_layout:add(mytextclock)
-	right_layout:add(mylayoutbox[s])
-
-	-- Now bring it all together (with the tasklist in the middle)
-	local layout = wibox.layout.align.horizontal()
-	layout:set_left(left_layout)
-	layout:set_middle(mytasklist[s])
-	layout:set_right(right_layout)
-
-	mywibox[s]:set_widget(layout)
 end
 -- }}}
 

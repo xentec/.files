@@ -101,8 +101,6 @@ awful.util.spawn("nitrogen --restore")
 --end
 -- }}}
 
-
-
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
@@ -174,14 +172,14 @@ vbar.wibox = {}
 
 local widget = {}
 widget.spacer = {}
-widget.spacer.h = wibox.widget.textbox('<span color="gray"> | </span>')
-widget.spacer.v = wibox.widget.textbox('<span color="gray">  </span>')
+widget.spacer.h = wibox.widget.textbox('<span color="gray"> ┆ </span>')
+widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄ </span>')
 
 -- Layout
 widget.layoutbox = {}
 
 -- Clock
-widget.clock = awful.widget.textclock()
+widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
 
 --Battery 
 widget.battery = awful.widget.progressbar({ width = 5, height = 60 })
@@ -315,7 +313,7 @@ for s = 1, screen.count() do
 		hbar.taglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, hbar.taglist.buttons)
 
 		-- Create a tasklist widget
-		hbar.tasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, hbar.tasklist.buttons)
+		hbar.tasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, hbar.tasklist.buttons, nil, hbar.tasklist.update)
 
 		-- Create the wibox
 		hbar.wibox[s] = awful.wibox({ position = "top", screen = s })
