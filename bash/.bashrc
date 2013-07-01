@@ -23,6 +23,6 @@ alias snano='sudo nano'
 alias lg='sudo -iu $1'
 
 # Defaults
-EDITOR=nano
+export EDITOR=nano
 
 # source .bashrc.d/archnews
