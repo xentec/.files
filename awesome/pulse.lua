@@ -5,32 +5,28 @@ local util = require("awful.util")
 
 local pulse = { mt = {} }
 
-local function update()
-	pulse.value = util.pread("ponymix get-volume")
-	pulse.muted = util.pread("sh -c 'ponymix is-muted; echo -n $?;'") == "0"
-	pulse.update(pulse.muted, pulse.value)
-end
-
-local function ponymix(arg)
-	local ret = util.pread("ponymix "..arg)
-	update()
-	return ret
+local function ponymix(arg, updateval, updatemute)
+	return util.pread("ponymix "..arg)
 end
 
 function pulse.new(update_func, step)
 	if type(update_func) ~= "function" then return nil end
 	pulse.step = step or 1
 	pulse.update = update_func
-	update()
+	pulse.value = util.pread("ponymix get-volume")
+	pulse.muted = util.pread("sh -c 'ponymix is-muted; echo -n $?;'") == "0"
+	pulse.update(pulse.muted, pulse.value)
 	return pulse
 end
 
 function pulse.increase()
-	ponymix("increase "..pulse.step or 1)
+	pulse.value = ponymix("increase "..pulse.step or 1, false)
+	pulse.update(pulse.muted, pulse.value)
 end
 
 function pulse.decrease()
-	ponymix("decrease "..pulse.step or 1)
+	pulse.value = ponymix("decrease "..pulse.step or 1, false)
+	pulse.update(pulse.muted, pulse.value)
 end
 
 function pulse.mute(bool)
@@ -39,6 +35,8 @@ function pulse.mute(bool)
 	else
 		ponymix("unmute")
 	end
+	pulse.muted = bool
+	pulse.update(pulse.muted, pulse.value)
 end
 
 function pulse.togglemute()
