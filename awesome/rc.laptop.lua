@@ -167,7 +167,7 @@ bar.main.layout_buttons = awful.util.table.join(
 
 -- ## bar.info
 -- Create a wibox for each screen and add it
-local bar.info = {}
+bar.info = {}
 bar.info.wibox = {}
 
 -- ########################################
@@ -268,6 +268,7 @@ right_layout:add(widget.spacer.h)
 right_layout:add(wibox.widget.systray())
 right_layout:add(widget.spacer.h)
 right_layout:add(widget.clock)
+right_layout:add(widget.spacer.h)
 right_layout:add(widget.layoutbox[mainscreen])
 
 -- Now bring it all together (with the tasklist in the middle)
