@@ -9,8 +9,8 @@
 export PATH=~/.local/bin:$PATH
 
 # Colors
-source .bashrc.d/colors
-eval $(dircolors -b .bashrc.d/dir_colors)
+source ~/.bashrc.d/colors
+dircolors -b ~/.bashrc.d/dir_colors
 
 UC=$G                   	# user's color
 [ $UID -eq "0" ] && UC=$R       # root's color
