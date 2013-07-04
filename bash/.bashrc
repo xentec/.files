@@ -5,6 +5,9 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+# Path
+export PATH=~/.local/bin:$PATH
+
 # Colors
 source .bashrc.d/colors
 eval $(dircolors -b .bashrc.d/dir_colors)
