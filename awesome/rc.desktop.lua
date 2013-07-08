@@ -168,7 +168,7 @@ vicious.register(widget.cpu, vicious.widgets.cpu, "$1")
 -- ## Bars
 -- ########################################
 
-local bar = {}
+bar = {}
 bar.main = {}
 bar.main.wibox = {}
 bar.main.prompt = {}
@@ -290,6 +290,8 @@ repeat
 	-- Widgets that are aligned to the left
 	local left_layout = wibox.layout.fixed.horizontal()
 	left_layout:add(bar.main.taglist[mainscreen.info])
+	left_layout:add(widget.spacer.h)
+	left_layout:add(bar.main.prompt[mainscreen.main])
 
 	-- Widgets that are aligned to the right
 	local right_layout = wibox.layout.fixed.horizontal()
@@ -337,6 +339,8 @@ for s = 1, screen.count() do
 		-- Widgets that are aligned to the left
 		local left_layout = wibox.layout.fixed.horizontal()
 		left_layout:add(bar.main.taglist[s])
+		left_layout:add(widget.spacer.h)
+		left_layout:add(bar.main.prompt[mainscreen.main])
 
 		-- Widgets that are aligned to the right
 		local right_layout = wibox.layout.fixed.horizontal()
