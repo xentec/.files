@@ -21,7 +21,8 @@ PS1="$UC\u$N@$EMC\h$N :: $B\t$N :: \w \n \$(RET=\$?; [[ \$RET != 0 ]] && echo '$
 
 # Aliases
 ###########################
-alias ls='ls --color=auto'
+alias ls='ls -F --color=auto'
+alias ll='ls -l'
 alias snano='sudo nano'
 alias lg='sudo -iu $1'
 
