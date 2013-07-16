@@ -273,6 +273,7 @@ repeat
 	bar.main.wibox[mainscreen.main]:set_widget(layout)
 until true
 
+if screen.count() > 1 then
 	-- Info ###################################
 	-- ########################################
 	widget.layoutbox[mainscreen.info] = awful.widget.layoutbox(mainscreen.info)
@@ -315,7 +316,7 @@ repeat
 
 	bar.info.wibox[mainscreen.info]:set_widget(info_layout)
 until true
-
+end
 
 -- ########################################
 -- ## Futher screens
@@ -369,24 +370,24 @@ root.buttons(awful.util.table.join(
 root.keys(key.global);
 -- }}}
 
-clientbuttons = awful.util.table.join(
-	awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
-	awful.button({ modkey }, 1, awful.mouse.client.move),
-	awful.button({ modkey }, 3, awful.mouse.client.resize))
-
 -- {{{ Rules
-awful.rules.rules = {
+awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
+local rules = {
 	-- All clients will match this rule.
 	{ rule = { },	properties = {
 						border_width = beautiful.border_width,
 						border_color = beautiful.border_normal,
 						focus = awful.client.focus.filter,
 						keys = key.client,
-						buttons = clientbuttons 
+						buttons = awful.util.table.join(
+							awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
+							awful.button({ modkey }, 1, awful.mouse.client.move),
+							awful.button({ modkey }, 3, awful.mouse.client.resize)
+						) 
 					}
 	},
 }
-awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
+awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 -- }}}
 
 -- {{{ Signals
