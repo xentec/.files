@@ -190,15 +190,17 @@ widget.battery = awful.widget.progressbar({ width = 5, height = 60 })
 widget.battery:set_vertical(true)
 widget.battery:set_background_color("#00AAAA")
 vicious.register(widget.battery, vicious.widgets.bat, function(w, data)
---[[    
-		["Full\n"]        = "↯",
+	local low = 40
+	local critical = 10
+   
+--[[	["Full\n"]        = "↯",
         ["Unknown\n"]     = "⌁",
         ["Charged\n"]     = "↯",
         ["Charging\n"]    = "+",
-        ["Discharging\n"] = "-" 
-]]--
-	w:set_color(data[1] == '↯' and '#00CCCC' or data[2] > 50 and '#03cc00' or data[2] > 20 and '#FF7B00' or '#EE0000')
-	w:set_border_color(data[1] == '+' and '#00CCCC' or data[1] == '-' and data[2] <= 20 and '#AA0000' or beautiful.bg_focus)
+        ["Discharging\n"] = "-"		]]--
+
+	w:set_color(data[1] == '↯' and '#00CCCC' or data[2] > low and '#03cc00' or data[2] > critical and '#FF7B00' or '#EE0000')
+	w:set_border_color(data[1] == '+' and '#00CCCC' or data[1] == '-' and data[2] <= critical and '#AA0000' or beautiful.bg_focus)
 	w:set_background_color(data[1] == '⌁' and '#AA0000' or beautiful.bg_minimize)
 	--naughty.notify({title = data[1], text = data[2]})
 	return data[2]
