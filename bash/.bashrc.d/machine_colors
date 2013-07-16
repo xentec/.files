@@ -1,0 +1,16 @@
+source .bashrc.d/colors
+declare -A MACHINE
+###############################
+
+# Workstations
+MACHINE["d4e9b7412962454691ed755677a86c03"]=$EMC # Xen
+MACHINE["605ba19d14d340d4bd6f1843a4b1813d"]=$EMY # Thinker
+
+# Server
+MACHINE["6cf56dff5dbd452a9015a094aebc60d6"]=$EMM # Keeper
+MACHINE["cc6cf540a55d4b60a495b5e599cca4ef"]=$EMR # DIA
+
+###############################
+
+ID=$(cat /etc/machine-id)
+MACOL=${MACHINE[$ID]}
