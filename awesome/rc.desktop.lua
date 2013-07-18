@@ -454,5 +454,12 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 -- }}}
 
 -- {{{ Autostart
-autostart.init()
+autostart.add({
+		"pulseaudio",
+		"nitrogen --restore",
+		{"dropboxd","dropbox"},
+		"steam",
+		"pidgin",
+	})
+autostart.launch()
 -- }}}
