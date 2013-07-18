@@ -12,7 +12,7 @@ local beautiful = require("beautiful")
 local naughty = require("naughty")
 local menubar = require("menubar")
 local vicious = require("vicious")
-local key = require("keys")
+local keys = require("keys")
 local autostart = require("autostart")
 local pulse = require("pulse")
 local common = require("common")
@@ -68,7 +68,7 @@ editor_cmd = terminal .. " -e " .. editor
 -- If you do not like this or do not have such a key,
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 -- However, you can use another modifier like Mod1, but it may interact with others.
-modkey = key.mod;
+modkey = keys.mod;
 
 mainscreen = { main = 1, info = 2 }
 
@@ -367,25 +367,15 @@ root.buttons(awful.util.table.join(
 -- }}}
 
 -- Set keys
-root.keys(key.global);
+root.keys(keys.global);
 -- }}}
 
 -- {{{ Rules
 awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
 local rules = {
-	-- All clients will match this rule.
-	{ rule = { },	properties = {
-						border_width = beautiful.border_width,
-						border_color = beautiful.border_normal,
-						focus = awful.client.focus.filter,
-						keys = key.client,
-						buttons = awful.util.table.join(
-							awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
-							awful.button({ modkey }, 1, awful.mouse.client.move),
-							awful.button({ modkey }, 3, awful.mouse.client.resize)
-						) 
-					}
-	},
+	{ rule = { class = "Chromium" },	properties = { tag = tags[1][2] } },
+	{ rule = { class = "Pidgin" },		properties = { tag = tags[2][1] } },
+	{ rule = { class = "Steam" },		properties = { tag = tags[1][6] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 -- }}}
