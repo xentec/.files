@@ -14,10 +14,10 @@ export PATH=~/.local/bin:$PATH
 
 # Colors
 ##########################
-source .bashrc.d/colors
-eval $(dircolors -b .bashrc.d/dir_colors)
+source .bash.d/colors
+eval $(dircolors -b .bash.d/dir_colors)
  # Host color
-source .bashrc.d/machine_colors
+source .bash.d/machine_colors
 
 UC=$G                   	# user's color
 [ $UID -eq "0" ] && UC=$R       # root's color
@@ -35,7 +35,7 @@ alias lg='sudo -iu $1'
 # Defaults
 export EDITOR=nano
 
-# source .bashrc.d/archnews
+# source .bash.d/archnews
 ##########################
 # Getting back
 cd $PWDIR

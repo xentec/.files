@@ -1,4 +1,4 @@
-source .bashrc.d/colors
+source .bash.d/colors
 declare -A MACHINE
 ###############################
 
