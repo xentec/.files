@@ -14,6 +14,7 @@ local vicious = require("vicious")
 local keys = require("keys")
 local pulse = require("pulse")
 local common = require("common")
+local autostart = require("autostart")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
