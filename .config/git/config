@@ -1,0 +1,15 @@
+#
+# XDG git config
+#
+# note to myself:
+# never put security leaks in here
+#
+
+[push]
+        default = simple
+[color]
+        ui = true
+[branch]
+        autosetuprebase = always
+
+
