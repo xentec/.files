@@ -2,6 +2,9 @@
 # ~/.bashrc
 #
 
+# Path
+export PATH=~/.local/bin:$PATH
+
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
@@ -9,18 +12,14 @@
 PWDIR=$(pwd)
 cd $(dirname $(readlink -fn ${BASH_SOURCE[0]}))
 
-# Path
-export PATH=~/.local/bin:$PATH
-
 # Colors
 ##########################
-source .bash.d/colors
 eval $(dircolors -b .bash.d/dir_colors)
- # Host color
+source .bash.d/colors
 source .bash.d/machine_colors
 
-UC=$G                   	# user's color
-[ $UID -eq "0" ] && UC=$R       # root's color
+UC=$G						# user's color
+[ $UID -eq "0" ] && UC=$R	# root's color
 
 # Prompt
 ##########################
