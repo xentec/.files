@@ -24,7 +24,11 @@ UC=$G                   	# user's color
 
 # Prompt
 ##########################
-PS1="$UC\u$N@$MACOL\h$N :: $B\t$N :: \w $G(\$(ls -1 | wc -l | sed 's: ::g') files, \$(LC_ALL=C ls -lah | grep -m 1 total | sed 's/total //')b)$N \n \$(RET=\$?; [[ \$RET != 0 ]] && echo '$R'\$RET'$N ' )$EMY»$N "
+PS1=\
+"$UC\u$N@$MACOL\h$N :: \
+$B\t$N :: \
+\w $G(\$(ls -1 | wc -l | sed 's: ::g')+.\$(ls -A1 | grep '^\.' | wc -l | sed 's: ::g') files, \$(LC_ALL=C ls -lah | grep -m 1 total | sed 's/total //')b)$N \n \
+\$(RET=\$?; [[ \$RET != 0 ]] && echo '$R'\$RET'$N ' )$EMY»$N "
 
 # Aliases
 alias ls='ls -F --color=auto'
