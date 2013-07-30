@@ -88,20 +88,7 @@ for s = 2, screen.count() do
 end
 -- }}}
 
--- {{{ Wallpaper
-wallpaper_path = "/home/xentec/BGs/"
-wallpapers = {
-	[1] = ""
-			}
-
-awful.util.spawn("nitrogen --restore")
---if beautiful.wallpaper then
---    for s = 1, screen.count() do
---        gears.wallpaper.maximized(beautiful.wallpaper, s, false, { -200, -200 })
---    end
---end
--- }}}
-
+-- {{{ Menu
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
@@ -439,7 +426,7 @@ autostart.add({
 		"pulseaudio",
 		"nitrogen --restore",
 		{"dropboxd","dropbox"},
-		{"irssi", shell = true},
+		{"irssi", term = true},
 	})
 autostart.launch()
 -- }}}

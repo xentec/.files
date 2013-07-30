@@ -90,17 +90,6 @@ layouts =
 }
 -- }}}
 
--- {{{ Wallpaper 
---[[
-if beautiful.wallpaper then
-	for s = 1, screen.count() do
-	   gears.wallpaper.maximized(beautiful.wallpaper, s, true)
-	end
-end
-]]
---awful.util.spawn("nitrogen --restore")
--- }}}
-
 -- {{{ Tags
 -- Define a tag table which hold all screen tags.
 tags = {}
@@ -109,9 +98,6 @@ tags[2] = awful.tag({ "chat", "news", "media"}, 2, layouts[1])
 -- }}}
 
 -- {{{ Menu
--- Create a laucher widget and a main menu
--- mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon, menu = nil })
-
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
