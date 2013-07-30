@@ -32,6 +32,12 @@ for CONFIG in .config/*; do
 	lnk $PWD/$CONFIG ~/$CONFIG
 done
 
+# Link others
+for DIR in .local/*; do
+	lnk $PWD/$DIR ~/$DIR
+done
+
+
 # Bash
 lnk $PWD/.bashrc ~/.bashrc
 lnk $PWD/.bash.d ~/.bash.d
