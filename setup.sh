@@ -37,10 +37,13 @@ for DIR in .local/*; do
 	lnk $PWD/$DIR ~/$DIR
 done
 
-
 # Bash
 lnk $PWD/.bashrc ~/.bashrc
 lnk $PWD/.bash.d ~/.bash.d
+# X
+lnk $PWD/.xinitrc ~/.xinitrc
+lnk $PWD/.Xdefaults ~/.Xdefaults
+
 
 echo -e ${EMG}Done!$N
 cd $OLDPWD

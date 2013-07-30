@@ -1,0 +1,15 @@
+!## URxvt
+URxvt*transparent: true
+URxvt*shading: 25
+URxvt*font: xft:Terminus:8
+
+URxvt*scrollBar: false
+URxvt.borderLess: false
+
+URxvt.foreground: White
+URxvt.background: Black
+
+!URxvt.depth: 32
+!URxvt.background: rgba:0000/0000/0000/0000
+
+!## URxvt END 
