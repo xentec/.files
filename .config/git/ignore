@@ -2,3 +2,6 @@
 .SyncIgnore
 .SyncID
 .SyncArchive
+
+# Sublime Text
+*.sublime-*
