@@ -42,7 +42,7 @@ lnk $PWD/.bashrc ~/.bashrc
 lnk $PWD/.bash.d ~/.bash.d
 # X
 lnk $PWD/.xinitrc ~/.xinitrc
-lnk $PWD/.Xdefaults ~/.Xdefaults
+lnk $PWD/.Xresources ~/.Xresources
 
 
 echo -e ${EMG}Done!$N

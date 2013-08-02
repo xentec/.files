@@ -13,6 +13,8 @@ fi
 
 export PATH=~/.local/bin:$PATH
 
+[[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources
+
 # Youtube...
 VDPAU_NVIDIA_NO_OVERLAY=1
 
