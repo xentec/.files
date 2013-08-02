@@ -6,6 +6,8 @@ cd $(dirname $(readlink -fn $0))
 N="\033[0m"	# unsets color to term's fg color
 
 G="\033[0;32m"
+Y="\033[0;33m"
+EMY="\033[1;33m"
 EMR="\033[1;31m"
 EMG="\033[1;32m"
 
@@ -14,10 +16,10 @@ function lnk {
 	ln -Ts $1 $2 &> /dev/null
 	if [ $? != 0 ]; then
 		if [ -L $2 ]; then 
-			echo -e "$EMR !W: ${G}$2${N} is a symlink to$G $(readlink -fn $2)${N}"
+			echo -e "$EMR !W: $EMY$2$Y is a symlink to $EMY$(readlink -fn $2)$N"
 		else
 			mv -T $2 $2.old
-			echo -e "$EMR !W: ${G}$2${N} already exists! renamed to $G$2.old${N}"
+			echo -e "$EMR !W: $G${2}$N already exists! renamed to $G${2}.old$N"
 			ln -Ts $1 $2
 			if [ $? != 0 ]; then
 				echo -e "${EMR} !E: Aborted$N"
