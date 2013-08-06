@@ -18,4 +18,7 @@ export PATH=~/.local/bin:$PATH
 # Youtube...
 VDPAU_NVIDIA_NO_OVERLAY=1
 
+# disable pc speaker
+xset -b
+
 exec awesome
