@@ -19,7 +19,7 @@ function autostart.launch()
 		--naughty.notify({timeout=0, text = l_app ..':'..p_app..':'..(apid or "x") })
 		if not apid then
 			if app.term ~= nil and app.term == true then
-				l_app = autostart.terminal ..' -e '.. l_app
+				l_app = autostart.terminal .. ' -name ' .. l_app .. ' -e '.. l_app
 			end
 		--	naughty.notify({ timeout=0,title = "START", text = l_app });
 				awful.util.spawn(l_app)
