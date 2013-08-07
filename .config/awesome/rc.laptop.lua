@@ -177,6 +177,7 @@ widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
 widget.battery = awful.widget.progressbar({ width = 5, height = 60 })
 widget.battery:set_vertical(true)
 widget.battery:set_background_color("#00AAAA")
+widget.battery.warning = {}
 vicious.register(widget.battery, vicious.widgets.bat, function(w, data)
 	local low = 40
 	local critical = 10
@@ -186,7 +187,12 @@ vicious.register(widget.battery, vicious.widgets.bat, function(w, data)
         ["Charged\n"]     = "↯",
         ["Charging\n"]    = "+",
         ["Discharging\n"] = "-"		]]--
-
+	if data[2] < critical and w.warning.critical == nil then
+		naughty.notify({ preset = naughty.config.presets.critical,
+						 title = "Battery charge is critical!",
+						 text = data[2] .. " % remaining. Charge me up!" })
+		w.warning.critical = true
+	end
 	w:set_color(data[1] == '↯' and '#00CCCC' or data[2] > low and '#03cc00' or data[2] > critical and '#FF7B00' or '#EE0000')
 	w:set_border_color(data[1] == '+' and '#00CCCC' or data[1] == '-' and data[2] <= critical and '#AA0000' or beautiful.bg_focus)
 	w:set_background_color(data[1] == '⌁' and '#AA0000' or beautiful.bg_minimize)
