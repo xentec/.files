@@ -355,7 +355,7 @@ root.keys(keys.global)
 awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
 local rules = {
 	{ rule = { class = "Chromium" },				properties = { tag = tags[1][2] } },
-	{ rule = { class = "urxvt", title = "irssi" },	properties = { tag = tags[1][3] } },
+	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[1][3] } },
 	{ rule = { class = "Steam" },					properties = { tag = tags[1][6] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
