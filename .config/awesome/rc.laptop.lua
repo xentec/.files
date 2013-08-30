@@ -45,7 +45,7 @@ end
 -- Themes define colours, icons, and wallpapers
 beautiful.init("/home/xentec/.config/awesome/theme.lua")
 
-browser = "chromium"
+browser = "firefox"
 -- This is used later as the default terminal and editor to run.
 terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "nano"
@@ -355,6 +355,7 @@ root.keys(keys.global)
 awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
 local rules = {
 	{ rule = { class = "Chromium" },				properties = { tag = tags[1][2] } },
+	{ rule = { class = "Firefox" },					properties = { tag = tags[1][2] } },
 	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[1][3] } },
 	{ rule = { class = "Steam" },					properties = { tag = tags[1][6] } },
 }

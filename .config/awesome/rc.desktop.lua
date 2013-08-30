@@ -58,6 +58,8 @@ naughty.config.presets.warning = {
 --beautiful.set_font("terminus 8")
 beautiful.init("/home/xentec/.config/awesome/theme.lua")
 
+browser = "firefox"
+
 -- This is used later as the default terminal and editor to run.
 terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "nano"
@@ -360,6 +362,7 @@ root.keys(keys.global);
 awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
 local rules = {
 	{ rule = { class = "Chromium" },	properties = { tag = tags[1][2] } },
+	{ rule = { class = "Firefox" },		properties = { tag = tags[1][2] } },
 	{ rule = { class = "Pidgin" },		properties = { tag = tags[2][1] } },
 	{ rule = { class = "Steam" },		properties = { tag = tags[1][6] } },
 }
