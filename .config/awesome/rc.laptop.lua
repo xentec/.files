@@ -354,10 +354,11 @@ root.keys(keys.global)
 -- {{{ Rules
 awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
 local rules = {
-	{ rule = { class = "Chromium" },				properties = { tag = tags[1][2] } },
-	{ rule = { class = "Firefox" },					properties = { tag = tags[1][2] } },
+	{ rule = { class = "Chromium" },					properties = { tag = tags[1][2] } },
+	{ rule = { class = "Firefox" },						properties = { tag = tags[1][2] } },
 	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[1][3] } },
-	{ rule = { class = "Steam" },					properties = { tag = tags[1][6] } },
+	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
+	{ rule_any = { class = { "mplayer2", "mplayer" },	properties = { tag = tags[1][5] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 -- }}}
@@ -430,7 +431,7 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 
 -- {{{ Autostart
 autostart.add({
-		"pulseaudio",
+		"pulseaudio --start",
 		"nitrogen --restore",
 		{"dropboxd","dropbox"},
 		{"irssi", term = true},

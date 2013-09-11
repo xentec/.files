@@ -1,6 +1,7 @@
 local awful = require('awful')
 local key = require('keys')
 local beautiful = require('beautiful')
+local screen = screen
 
 -- {{{ Rules
 local rules = {
@@ -19,13 +20,26 @@ local rules = {
 	},
 	-- #######################################
 	{ rule = { class = "Chromium" },	properties = { switchtotag = true } },
+	{ rule = { class = "Firefox" },		properties = { switchtotag = true } },
+
 	{ rule = { class = "CaveStory+" },	properties = { floating = true } },
 	{ rule = { class = "Steam" },		properties = { floating = true } },
-	{ rule = { class = "MPlayer" },		properties = { floating = true } },
+
 	{ rule = { class = "pinentry" },	properties = { floating = true } },
 	{ rule = { class = "gimp" },		properties = { floating = true } },
 	-- Youtube Fullscreen
 	{ rule = { instance = "exe" },		properties = { floating = true } },
+
+	{ rule_any = { class = { "mplayer2", "mplayer" }},
+		properties = { floating = true, switchtotag = true },
+		callback = function (c)
+				local area = screen[c.screen].workarea
+				local geometry = c:geometry()
+        		geometry.x = area.x + (area.width - geometry.width) / 2
+       			geometry.y = area.y + (area.height - geometry.height) / 2
+       			c:geometry(geometry)
+			end
+	},
 }
 return rules
 -- }}}
