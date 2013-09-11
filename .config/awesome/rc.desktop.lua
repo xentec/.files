@@ -121,7 +121,7 @@ widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
 
 -- Network
 widget.network = wibox.widget.textbox()
---vicious.register(widget.network, vicious.widgets.net, '', 1, 'enp4s0')
+vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">${enp5s0 down_mb} mb/s | ${enp5s0 up_mb} mb/s</span>', 1)
 
 -- Volume  
 widget.volume = awful.widget.progressbar({ width = 5, height = 60 })
@@ -140,17 +140,23 @@ local volume = pulse(function(muted, val)
 		widget.volume:set_color(beautiful.bg_focus)
 	end
 	widget.volume:set_value(val)
-	--Rnaughty.notify({title = muted and "Muted" or "Unmuted"})
+	--naughty.notify({title = muted and "Muted" or "Unmuted"})
 end)
 
 -- CPU
 widget.cpu = awful.widget.graph()
 widget.cpu:set_width(50)
 widget.cpu:set_background_color("#494B4F")
-widget.cpu:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#FF5656"}, {0.5, "#88A175"}, 
-                    {1, "#AECF96" }}})
--- Register widget
+widget.cpu:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#FF5656"}, {0.5, "#88A175"}, {1, "#AECF96" }}})
 vicious.register(widget.cpu, vicious.widgets.cpu, "$1")
+
+-- Memory
+widget.mem = awful.widget.graph()
+widget.mem:set_width(50)
+widget.mem:set_background_color("#494B4F")
+widget.mem:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#FF5656"}, {0.5, "#88A175"}, {1, "#AECF96" }}})
+vicious.register(widget.mem, vicious.widgets.mem, "$1")
+
 
 -- ########################################
 -- ## Bars
@@ -285,6 +291,7 @@ repeat
 	-- Widgets that are aligned to the right
 	local right_layout = wibox.layout.fixed.horizontal()
 	right_layout:add(widget.clock)
+	right_layout:add(widget.spacer.h)
 	right_layout:add(widget.layoutbox[mainscreen.info])
 
 	-- Now bring it all together (with the tasklist in the middle)
@@ -300,6 +307,13 @@ repeat
 
 	-- Widgets that are aligned to the left
 	local info_layout = wibox.layout.fixed.horizontal()
+	info_layout:add(widget.spacer.h)
+	info_layout:add(widget.cpu)
+	info_layout:add(widget.spacer.h)
+	info_layout:add(widget.mem)
+	info_layout:add(widget.spacer.h)
+	info_layout:add(widget.network)
+	info_layout:add(widget.spacer.h)
 	info_layout:add(widget.volume)
 
 	bar.info.wibox[mainscreen.info]:set_widget(info_layout)
