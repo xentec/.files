@@ -358,7 +358,7 @@ local rules = {
 	{ rule = { class = "Firefox" },						properties = { tag = tags[1][2] } },
 	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[1][3] } },
 	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
-	{ rule_any = { class = { "mplayer2", "mplayer" },	properties = { tag = tags[1][5] } },
+	{ rule_any = { class = { "mplayer2", "mplayer" }},	properties = { tag = tags[1][5] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 -- }}}
