@@ -165,7 +165,7 @@ bar.info.wibox = {}
 local widget = {}
 widget.spacer = {}
 widget.spacer.h = wibox.widget.textbox('<span color="gray"> ┆ </span>')
-widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄ </span>')
+widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄</span>')
 
 -- Layout
 widget.layoutbox = {}
@@ -202,7 +202,12 @@ end, 10, 'BAT0')
 
 -- Network
 widget.network = wibox.widget.textbox()
---vicious.register(widget.network, vicious.widgets.net, '', 1, 'enp4s0')
+vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">${wlp3s0 down_kb} kb/s | ${wlp3s0 up_kb} kb/s</span>', 2)
+
+-- Wifi
+widget.wifi = wibox.widget.textbox()
+vicious.register(widget.wifi, vicious.widgets.wifi, '<span color="DarkCyan">${ssid} ${linp}%</span>', 5, 'wlp3s0')
+
 
 -- Volume  
 widget.volume = awful.widget.progressbar({ width = 5, height = 60 })
@@ -226,11 +231,9 @@ end)
 
 -- CPU
 widget.cpu = awful.widget.graph()
-widget.cpu:set_width(50)
+widget.cpu:set_width(10)
 widget.cpu:set_background_color("#494B4F")
-widget.cpu:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#FF5656"}, {0.5, "#88A175"}, 
-                    {1, "#AECF96" }}})
--- Register widget
+widget.cpu:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#FF5656"}, {0.5, "#88A175"}, {1, "#AECF96" }}})
 vicious.register(widget.cpu, vicious.widgets.cpu, "$1")
 
 -- ########################################
@@ -263,6 +266,10 @@ local right_layout = wibox.layout.fixed.horizontal()
 right_layout:add(widget.spacer.h)
 right_layout:add(wibox.widget.systray())
 right_layout:add(widget.spacer.h)
+right_layout:add(widget.wifi)
+right_layout:add(widget.spacer.h)
+right_layout:add(widget.network)
+right_layout:add(widget.spacer.h)
 right_layout:add(widget.clock)
 right_layout:add(widget.spacer.h)
 right_layout:add(widget.layoutbox[mainscreen])
@@ -283,8 +290,9 @@ v_layout:fill_space(false)
 
 widget.volume:set_vertical(true)
 
---v_layout:add(wlan)
---v_layout:add(widget.cpu)
+v_layout:add(widget.spacer.v)
+v_layout:add(widget.cpu)
+v_layout:add(widget.spacer.v)
 v_layout:add(widget.battery)
 v_layout:add(widget.spacer.v)
 v_layout:add(widget.volume)
