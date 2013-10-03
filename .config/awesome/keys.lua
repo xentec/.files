@@ -70,10 +70,17 @@ local globalkeys = awful.util.table.join(
 							end),
 		-- Menubar
 		awful.key({ modkey }, "p", function() menubar.show() end),
-				-- Volume
+
+		-- Volume
 		awful.key({ }, "XF86AudioMute",     	pulse.togglemute),
 		awful.key({ }, "XF86AudioRaiseVolume",  pulse.increase),
-		awful.key({ }, "XF86AudioLowerVolume",  pulse.decrease)
+		awful.key({ }, "XF86AudioLowerVolume",  pulse.decrease),
+
+        -- Media
+        awful.key({ }, "XF86AudioPlay", function () awful.util.spawn("ncmpcpp toggle") end),
+        awful.key({ }, "XF86AudioStop", function () awful.util.spawn("ncmpcpp stop") end),
+        awful.key({ }, "XF86AudioPrev", function () awful.util.spawn("ncmpcpp prev") end),
+        awful.key({ }, "XF86AudioNext", function () awful.util.spawn("ncmpcpp next") end)
 )
 
 local clientkeys = awful.util.table.join(
