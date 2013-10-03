@@ -15,7 +15,7 @@ local rules = {
 							awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
 							awful.button({ modkey }, 1, awful.mouse.client.move),
 							awful.button({ modkey }, 3, awful.mouse.client.resize)
-						) 
+						)
 					}
 	},
 	-- #######################################
@@ -30,15 +30,19 @@ local rules = {
 	-- Youtube Fullscreen
 	{ rule = { instance = "exe" },		properties = { floating = true } },
 
-	{ rule_any = { class = { "mplayer2", "mplayer" }},
-		properties = { floating = true, switchtotag = true },
+	{ rule_any = { class = { "mplayer", "mplayer2", "mpv" }},
+		properties = {
+			floating = true,
+			switchtotag = true,
+			border_width = 0
+		},
 		callback = function (c)
-				local area = screen[c.screen].workarea
-				local geometry = c:geometry()
-        		geometry.x = area.x + (area.width - geometry.width) / 2
-       			geometry.y = area.y + (area.height - geometry.height) / 2
-       			c:geometry(geometry)
-			end
+			local area = screen[c.screen].workarea
+			local geometry = c:geometry()
+			geometry.x = area.x + (area.width - geometry.width) / 2
+			geometry.y = area.y + (area.height - geometry.height) / 2
+			c:geometry(geometry)
+		end
 	},
 }
 return rules

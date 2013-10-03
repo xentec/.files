@@ -123,7 +123,7 @@ widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
 widget.network = wibox.widget.textbox()
 vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">${enp5s0 down_mb} mb/s | ${enp5s0 up_mb} mb/s</span>', 1)
 
--- Volume  
+-- Volume
 widget.volume = awful.widget.progressbar({ width = 5, height = 60 })
 widget.volume:set_background_color(beautiful.bg_minimize)
 widget.volume:set_color(beautiful.bg_focus)
@@ -240,7 +240,7 @@ bar.info.wibox = {}
 
 	-----------------------------------------------------
 	-- Create the wibox
-repeat 
+repeat
 	bar.main.wibox[mainscreen.main] = awful.wibox({ position = "top", screen = mainscreen.main })
 
 	-- Widgets that are aligned to the left
@@ -279,7 +279,7 @@ if screen.count() > 1 then
 	bar.main.tasklist[mainscreen.info] = awful.widget.tasklist(mainscreen.info, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update)
 
 	-- Create the wibox
-repeat 
+repeat
 	bar.main.wibox[mainscreen.info] = awful.wibox({ position = "top", screen = mainscreen.info })
 
 	-- Widgets that are aligned to the left
@@ -302,7 +302,7 @@ repeat
 
 	bar.main.wibox[mainscreen.info]:set_widget(layout)
 until true
-repeat 
+repeat
 	bar.info.wibox[mainscreen.info] = awful.wibox({ position = "bottom", screen = mainscreen.info })
 
 	-- Widgets that are aligned to the left
@@ -379,7 +379,7 @@ local rules = {
 	{ rule = { class = "Firefox" },						properties = { tag = tags[1][2] } },
 	{ rule = { class = "Pidgin" },						properties = { tag = tags[2][1] } },
 	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
-	{ rule_any = { class = { "mplayer2", "mplayer" }},	properties = { tag = tags[2][3] } },
+	{ rule_any = { class = { "mplayer", "mplayer2", "mpv" }},	properties = { tag = tags[2][3] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 -- }}}

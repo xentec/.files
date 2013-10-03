@@ -173,7 +173,7 @@ widget.layoutbox = {}
 -- Clock
 widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
 
---Battery 
+--Battery
 widget.battery = awful.widget.progressbar({ width = 5, height = 60 })
 widget.battery:set_vertical(true)
 widget.battery:set_background_color("#00AAAA")
@@ -181,12 +181,12 @@ widget.battery.warning = {}
 vicious.register(widget.battery, vicious.widgets.bat, function(w, data)
 	local low = 40
 	local critical = 10
-   
+
 --[[	["Full\n"]        = "↯",
-        ["Unknown\n"]     = "⌁",
-        ["Charged\n"]     = "↯",
-        ["Charging\n"]    = "+",
-        ["Discharging\n"] = "-"		]]--
+		["Unknown\n"]     = "⌁",
+		["Charged\n"]     = "↯",
+		["Charging\n"]    = "+",
+		["Discharging\n"] = "-"		]]--
 	if data[2] < critical and w.warning.critical == nil then
 		naughty.notify({ preset = naughty.config.presets.critical,
 						 title = "Battery charge is critical!",
@@ -209,7 +209,7 @@ widget.wifi = wibox.widget.textbox()
 vicious.register(widget.wifi, vicious.widgets.wifi, '<span color="DarkCyan">${ssid} ${linp}%</span>', 5, 'wlp3s0')
 
 
--- Volume  
+-- Volume
 widget.volume = awful.widget.progressbar({ width = 5, height = 60 })
 widget.volume:set_background_color(beautiful.bg_minimize)
 widget.volume:set_color(beautiful.bg_focus)
@@ -226,7 +226,7 @@ local volume = pulse(function(muted, val)
 		widget.volume:set_color(beautiful.bg_focus)
 	end
 	widget.volume:set_value(val)
-	--Rnaughty.notify({title = muted and "Muted" or "Unmuted"})
+	--naughty.notify({title = muted and "Muted" or "Unmuted"})
 end)
 
 -- CPU
@@ -366,7 +366,7 @@ local rules = {
 	{ rule = { class = "Firefox" },						properties = { tag = tags[1][2] } },
 	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[1][3] } },
 	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
-	{ rule_any = { class = { "mplayer2", "mplayer" }},	properties = { tag = tags[1][5] } },
+	{ rule_any = { class = { "mplayer2", "mplayer", "mpv" }},	properties = { tag = tags[1][5] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 -- }}}
