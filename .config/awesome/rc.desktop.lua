@@ -96,7 +96,7 @@ layouts =
 -- Define a tag table which hold all screen tags.
 tags = {}
 tags[1] = awful.tag({ "main", "web", "code", "script", "media", "gaming", "other" }, 1, layouts[1])
-tags[2] = awful.tag({ "chat", "news", "media"}, 2, layouts[1])
+tags[2] = awful.tag({ "chat", "web", "media"}, 2, layouts[1])
 -- }}}
 
 -- {{{ Menu
@@ -108,7 +108,7 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- ## Widgets
 -- ########################################
 
-local widget = {}
+widget = {}
 widget.spacer = {}
 widget.spacer.h = wibox.widget.textbox('<span color="gray"> ┆ </span>')
 widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄ </span>')
@@ -156,6 +156,11 @@ widget.mem:set_width(50)
 widget.mem:set_background_color("#494B4F")
 widget.mem:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#FF5656"}, {0.5, "#88A175"}, {1, "#AECF96" }}})
 vicious.register(widget.mem, vicious.widgets.mem, "$1")
+
+-- MPD
+widget.mpd = wibox.widget.textbox()
+vicious.cache(widget.mpd)
+vicious.register(widget.mpd, vicious.widgets.mpd, '<span color="DarkKhaki">${Artist} :: ${Title}</span>', 2, {host = "keeper"})
 
 
 -- ########################################
@@ -313,6 +318,8 @@ repeat
 	info_layout:add(widget.mem)
 	info_layout:add(widget.spacer.h)
 	info_layout:add(widget.network)
+	info_layout:add(widget.spacer.h)
+	info_layout:add(widget.mpd)
 	info_layout:add(widget.spacer.h)
 	info_layout:add(widget.volume)
 

@@ -1,6 +1,7 @@
 local awful = require("awful")
 local menubar = require("menubar")
 local pulse = require("pulse")
+local vicious = require("vicious")
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -77,10 +78,10 @@ local globalkeys = awful.util.table.join(
 		awful.key({ }, "XF86AudioLowerVolume",  pulse.decrease),
 
         -- Media
-        awful.key({ }, "XF86AudioPlay", function () awful.util.spawn("ncmpcpp toggle") end),
-        awful.key({ }, "XF86AudioStop", function () awful.util.spawn("ncmpcpp stop") end),
-        awful.key({ }, "XF86AudioPrev", function () awful.util.spawn("ncmpcpp prev") end),
-        awful.key({ }, "XF86AudioNext", function () awful.util.spawn("ncmpcpp next") end)
+        awful.key({ }, "XF86AudioPlay", function () awful.util.spawn("ncmpcpp toggle"); vicious.force(widget.mpd) end),
+        awful.key({ }, "XF86AudioStop", function () awful.util.spawn("ncmpcpp stop"); vicious.force(widget.mpd) end),
+        awful.key({ }, "XF86AudioPrev", function () awful.util.spawn("ncmpcpp prev"); vicious.force(widget.mpd) end),
+        awful.key({ }, "XF86AudioNext", function () awful.util.spawn("ncmpcpp next"); vicious.force(widget.mpd) end)
 )
 
 local clientkeys = awful.util.table.join(
