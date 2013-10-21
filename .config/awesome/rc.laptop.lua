@@ -162,7 +162,7 @@ bar.info.wibox = {}
 -- ## Widgets
 -- ########################################
 
-local widget = {}
+widget = {}
 widget.spacer = {}
 widget.spacer.h = wibox.widget.textbox('<span color="gray"> ┆ </span>')
 widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄</span>')
