@@ -8,6 +8,7 @@ local autostart = {}
 autostart.terminal = terminal or "urxvt"
 
 function autostart.launch()
+	local started = {}
 	for _,app in pairs(entries) do
 		local exec = app[1] or app
 		local proc = app[2] or exec:match("([^%s.]+)%s*")
@@ -22,18 +23,22 @@ function autostart.launch()
 				exec = autostart.terminal .. ' -name ' .. exec .. ' -e '.. exec
 			end
 			awful.util.spawn(exec)
-			naughty.notify({ timeout = 5, title = 'AutoStart', text = '$ <span color="Lime">'.. exec .. '</span>' });
+			table.insert(started, exec)
 		end
+	end
+	if #started > 0 then
+		naughty.notify({ timeout = 5,
+			text = '$ <span color="Lime">'.. table.concat(started,';\n  ') .. '</span>' });
 	end
 end
 
 function autostart.add(app)
 	if type(app) == "table" then
 		for _,ap in pairs(app) do
-			table.insert(entries, ap)
+			table.insert(entries,ap)
 		end
 	else
-		table.insert(entries, app)
+		table.insert(entries,app)
 	end
 end
 
