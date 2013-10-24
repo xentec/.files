@@ -31,7 +31,7 @@ man() {
 	man "$@"
 }
 
-UC=$G						# user's color
+UC=$G				# user's color
 [ $UID -eq "0" ] && UC=$R	# root's color
 
 # Prompt
@@ -51,7 +51,7 @@ alias lg='sudo -iu $1'
 # Defaults
 export EDITOR=nano
 
-# source .bash.d/archnews
+source .bash.d/local
 ##########################
 # Getting back
 cd $PWDIR
