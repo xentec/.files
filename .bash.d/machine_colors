@@ -8,6 +8,7 @@ MACHINE["605ba19d14d340d4bd6f1843a4b1813d"]=$EMY # Thinker
 
 # Server
 MACHINE["6cf56dff5dbd452a9015a094aebc60d6"]=$EMM # Keeper
+MACHINE["8a483f53e0d745f0a54b7f12d246fc63"]=$EMR # Outpost
 MACHINE["cc6cf540a55d4b60a495b5e599cca4ef"]=$EMR # DIA
 
 ###############################
