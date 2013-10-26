@@ -51,7 +51,7 @@ alias lg='sudo -iu $1'
 # Defaults
 export EDITOR=nano
 
-source .bash.d/local
+source .bash.d/local 2&> /dev/null
 ##########################
 # Getting back
 cd $PWDIR
