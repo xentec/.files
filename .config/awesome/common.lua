@@ -57,13 +57,14 @@ function common.list_update(w, buttons, label, data, objects)
             l = wibox.layout.fixed.horizontal()
 
             -- All of this is added in a fixed widget
-            l:fill_space(true)
+            l:fill_space(false)
             l:add(ib)
             l:add(m)
-            l:add(wibox.widget.textbox("::t.".. c.type ..":c.".. (c.class or "-") ..":i.".. (c.instance or "-") ..":p.".. c.pid))
+            --l:add(wibox.widget.textbox("::t.".. c.type ..":c.".. (c.class or "-") ..":i.".. (c.instance or "-") ..":p.".. c.pid))
 
             -- And all of this gets a background
-            bgb:set_widget(l)
+            --bgb:set_widget(l)
+            bgb:set_widget(wibox.layout.margin(l,0,4))
 
             bgb:buttons(common.create_buttons(buttons, c))
 

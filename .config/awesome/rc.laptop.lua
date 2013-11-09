@@ -5,6 +5,7 @@ awful.rules = require("awful.rules")
 require("awful.autofocus")
 -- Widget and layout library
 local wibox = require("wibox")
+wibox.layout.malign = require("layout-align")
 -- Theme handling library
 local beautiful = require("beautiful")
 -- Notification library
@@ -27,25 +28,36 @@ end
 
 -- Handle runtime errors after startup
 do
-		local in_error = false
-		awesome.connect_signal("debug::error", function (err)
-				-- Make sure we don't go into an endless error loop
-				if in_error then return end
-				in_error = true
+	local in_error = false
+	awesome.connect_signal("debug::error", function (err)
+		-- Make sure we don't go into an endless error loop
+		if in_error then return end
+		in_error = true
 
-				naughty.notify({ preset = naughty.config.presets.critical,
-												 title = "Oops, an error happened!",
-												 text = err })
-				in_error = false
-		end)
+		naughty.notify({ preset = naughty.config.presets.warning,
+						 title = "Oops, an error happened!",
+						 text = err })
+		in_error = false
+	end)
 end
 -- }}}
+
+naughty.config.notify_callback = function (args)
+	args.icon_size = 16
+	return args;
+end
+
+naughty.config.presets.warning = {
+		bg = "#ffaa00",
+		fg = "#ffffff",
+		timeout = 10,
+}
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
 beautiful.init("/home/xentec/.config/awesome/theme.lua")
 
-browser = "firefox"
+browser = "chromium"
 -- This is used later as the default terminal and editor to run.
 terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "nano"
@@ -58,7 +70,7 @@ editor_cmd = "gedit "
 -- However, you can use another modifier like Mod1, but it may interact with others.
 modkey = keys.mod;
 
-mainscreen = 1
+monitor = { main = 1 }
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 layouts =
@@ -81,10 +93,10 @@ layouts =
 -- {{{ Tags
 -- Define a tag table which hold all screen tags.
 tags = {}
-tags[1] = awful.tag({"main", "web", "chat", "code", "media", "other"}, 1, layouts[1])
+tags[1] = awful.tag({ "main", "web", "chat", "code", "media", "other" }, 1, layouts[1])
 for s = 2, screen.count() do
-		-- Each screen has its own tag table.
-		tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
+	-- Each screen has its own tag table.
+	tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
 end
 -- }}}
 
@@ -92,6 +104,86 @@ end
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
+autostart.terminal = terminal
+
+-- ########################################
+-- ## Widgets
+-- ########################################
+
+widget = {}
+widget.spacer = {}
+widget.spacer.h = wibox.widget.textbox('<span color="gray"> ┆ </span>')
+widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄</span>')
+
+-- Layout
+widget.layoutbox = {}
+
+-- Clock
+widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
+
+--Battery
+widget.battery = awful.widget.progressbar({ width = 5, height = 50 })
+widget.battery:set_vertical(true)
+widget.battery:set_background_color("#00AAAA")
+widget.battery.warning = {}
+vicious.register(widget.battery, vicious.widgets.bat, function(w, data)
+	local low = 40
+	local critical = 10
+
+--[[	["Full\n"]        = "↯",
+		["Unknown\n"]     = "⌁",
+		["Charging\n"]    = "+",
+		["Discharging\n"] = "-"		]]--
+	if data[2] < critical and w.warning.critical == nil then
+		naughty.notify({ preset = naughty.config.presets.critical,
+						 title = "Battery charge is critical!",
+						 text = data[2] .. " % remaining. Charge me up!" })
+		w.warning.critical = true
+	end
+	w:set_color(data[1] == '↯' and '#00CCCC' or data[2] > low and '#03cc00' or data[2] > critical and '#FF7B00' or '#EE0000')
+	w:set_border_color(data[1] == '+' and '#00CCCC' or data[1] == '-' and data[2] <= critical and '#AA0000' or beautiful.bg_focus)
+	w:set_background_color(data[1] == '⌁' and '#AA0000' or beautiful.bg_minimize)
+	--naughty.notify({title = data[1], text = data[2]})
+	return data[2]
+end, 10, 'BAT0')
+
+-- Network
+widget.network = wibox.widget.textbox()
+vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">${wlp3s0 down_kb} kb/s | ${wlp3s0 up_kb} kb/s</span>', 2)
+
+-- Wifi
+widget.wifi = wibox.widget.textbox()
+vicious.register(widget.wifi, vicious.widgets.wifi, '<span color="DarkCyan">${ssid} ${linp}%</span>', 5, 'wlp3s0')
+
+
+-- Volume
+widget.volume = awful.widget.progressbar({ width = 5 })
+widget.volume:set_background_color(beautiful.bg_minimize)
+widget.volume:set_color(beautiful.bg_focus)
+widget.volume:set_ticks(true)
+widget.volume:set_max_value(100)
+
+local volume = pulse(function(muted, val)
+	if muted then
+		widget.volume:set_color("#AA0000")
+	else
+		widget.volume:set_color(beautiful.bg_focus)
+	end
+	widget.volume:set_value(val)
+	--naughty.notify({title = muted and "Muted" or "Unmuted"})
+end)
+
+-- CPU
+widget.cpu = awful.widget.progressbar({ width = 5 })
+widget.cpu:set_background_color("#876333")
+widget.cpu:set_color("#DF8F26")
+vicious.register(widget.cpu, vicious.widgets.cpu, "$1")
+
+-- Memory
+widget.mem = awful.widget.progressbar({ width = 5 })
+widget.mem:set_background_color("#3A6D8A")
+widget.mem:set_color("#269CDF")
+vicious.register(widget.mem, vicious.widgets.mem, "$1")
 
 -- ########################################
 -- ## Bars
@@ -99,7 +191,7 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 
 bar = {}
 bar.main = {}
-bar.main.wibox = {}
+bar.main = {}
 bar.main.prompt = {}
 bar.main.taglist = {}
 bar.main.taglist.buttons = awful.util.table.join(
@@ -153,159 +245,72 @@ bar.main.layout_buttons = awful.util.table.join(
 								awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
 								awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end))
 
--- ## bar.info
--- Create a wibox for each screen and add it
-bar.info = {}
-bar.info.wibox = {}
-
--- ########################################
--- ## Widgets
--- ########################################
-
-widget = {}
-widget.spacer = {}
-widget.spacer.h = wibox.widget.textbox('<span color="gray"> ┆ </span>')
-widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄</span>')
-
--- Layout
-widget.layoutbox = {}
-
--- Clock
-widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
-
---Battery
-widget.battery = awful.widget.progressbar({ width = 5, height = 60 })
-widget.battery:set_vertical(true)
-widget.battery:set_background_color("#00AAAA")
-widget.battery.warning = {}
-vicious.register(widget.battery, vicious.widgets.bat, function(w, data)
-	local low = 40
-	local critical = 10
-
---[[	["Full\n"]        = "↯",
-		["Unknown\n"]     = "⌁",
-		["Charged\n"]     = "↯",
-		["Charging\n"]    = "+",
-		["Discharging\n"] = "-"		]]--
-	if data[2] < critical and w.warning.critical == nil then
-		naughty.notify({ preset = naughty.config.presets.critical,
-						 title = "Battery charge is critical!",
-						 text = data[2] .. " % remaining. Charge me up!" })
-		w.warning.critical = true
-	end
-	w:set_color(data[1] == '↯' and '#00CCCC' or data[2] > low and '#03cc00' or data[2] > critical and '#FF7B00' or '#EE0000')
-	w:set_border_color(data[1] == '+' and '#00CCCC' or data[1] == '-' and data[2] <= critical and '#AA0000' or beautiful.bg_focus)
-	w:set_background_color(data[1] == '⌁' and '#AA0000' or beautiful.bg_minimize)
-	--naughty.notify({title = data[1], text = data[2]})
-	return data[2]
-end, 10, 'BAT0')
-
--- Network
-widget.network = wibox.widget.textbox()
-vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">${wlp3s0 down_kb} kb/s | ${wlp3s0 up_kb} kb/s</span>', 2)
-
--- Wifi
-widget.wifi = wibox.widget.textbox()
-vicious.register(widget.wifi, vicious.widgets.wifi, '<span color="DarkCyan">${ssid} ${linp}%</span>', 5, 'wlp3s0')
-
-
--- Volume
-widget.volume = awful.widget.progressbar({ width = 5, height = 60 })
-widget.volume:set_background_color(beautiful.bg_minimize)
-widget.volume:set_color(beautiful.bg_focus)
---widget.volume:set_width(20)
---widget.volume:set_height(5)
-widget.volume:set_ticks(true)
---widget.volume:set_border_color("aqua")
-widget.volume:set_max_value(100)
-
-local volume = pulse(function(muted, val)
-	if muted then
-		widget.volume:set_color("#AA0000")
-	else
-		widget.volume:set_color(beautiful.bg_focus)
-	end
-	widget.volume:set_value(val)
-	--naughty.notify({title = muted and "Muted" or "Unmuted"})
-end)
-
--- CPU
-widget.cpu = awful.widget.graph()
-widget.cpu:set_width(10)
-widget.cpu:set_background_color("#494B4F")
-widget.cpu:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#FF5656"}, {0.5, "#88A175"}, {1, "#AECF96" }}})
-vicious.register(widget.cpu, vicious.widgets.cpu, "$1")
 
 -- ########################################
 -- ## Main screen
 -- ########################################
-bar.main.prompt[mainscreen] = awful.widget.prompt()
--- Create an imagebox widget which will contains an icon indicating which layout we're using.
--- We need one layoutbox per screen.
-widget.layoutbox[mainscreen] = awful.widget.layoutbox(mainscreen)
-widget.layoutbox[mainscreen]:buttons(bar.main.layout_buttons)
--- Create a taglist widget
-bar.main.taglist[mainscreen] = awful.widget.taglist(mainscreen, awful.widget.taglist.filter.all, bar.main.taglist.buttons)
+do
+	bar.main.prompt[monitor.main] = awful.widget.prompt()
 
--- Create a tasklist widget
--- function tasklist.new(screen, filter, buttons, style, update_function, base_widget)
-bar.main.tasklist[mainscreen] = awful.widget.tasklist(mainscreen, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update)
+	widget.layoutbox[monitor.main] = awful.widget.layoutbox(monitor.main)
+	widget.layoutbox[monitor.main]:buttons(bar.main.layout_buttons)
 
------------------------------------------------------
--- Create the wibox
-bar.main.wibox[mainscreen] = awful.wibox({ position = "top", screen = mainscreen })
+	bar.main.taglist[monitor.main] = awful.widget.taglist(monitor.main, awful.widget.taglist.filter.all, bar.main.taglist.buttons)
+	local tmp = wibox.layout.fixed.horizontal()
+	tmp:fill_space(true)
+	bar.main.tasklist[monitor.main] = awful.widget.tasklist(monitor.main, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update, tmp)
 
--- Widgets that are aligned to the left
-local left_layout = wibox.layout.fixed.horizontal()
-left_layout:add(bar.main.taglist[mainscreen])
-left_layout:add(widget.spacer.h)
-left_layout:add(bar.main.prompt[mainscreen])
+	local left = wibox.layout.fixed.horizontal()
+	left:add(bar.main.taglist[monitor.main])
+	left:add(widget.spacer.h)
+	left:add(bar.main.prompt[monitor.main])
+	left = wibox.widget.background(wibox.layout.margin(left,0,4), beautiful.bg_normal)
 
--- Widgets that are aligned to the right
-local right_layout = wibox.layout.fixed.horizontal()
-right_layout:add(widget.spacer.h)
-right_layout:add(wibox.widget.systray())
-right_layout:add(widget.spacer.h)
-right_layout:add(widget.wifi)
-right_layout:add(widget.spacer.h)
-right_layout:add(widget.network)
-right_layout:add(widget.spacer.h)
-right_layout:add(widget.clock)
-right_layout:add(widget.spacer.h)
-right_layout:add(widget.layoutbox[mainscreen])
 
--- Now bring it all together (with the tasklist in the middle)
-local layout = wibox.layout.align.horizontal()
-layout:set_left(left_layout)
-layout:set_middle(bar.main.tasklist[mainscreen])
-layout:set_right(right_layout)
+	widget.cpu:set_vertical(true)
+	widget.mem:set_vertical(true)
+	widget.volume:set_vertical(true)
+	local data_bars = wibox.layout.fixed.horizontal()
+	data_bars:add(widget.cpu)
+	data_bars:add(widget.spacer.h)
+	data_bars:add(widget.mem)
+	data_bars:add(widget.spacer.h)
+	data_bars:add(widget.battery)
+	data_bars:add(widget.spacer.h)
+	data_bars:add(widget.volume)
+	data_bars = wibox.layout.margin(data_bars,0,0,2,2)
 
-bar.main.wibox[mainscreen]:set_widget(layout)
------------------------------------------------------
-bar.info.wibox[mainscreen] = awful.wibox({ position = "right", screen = mainscreen })
 
--- Widgets that are aligned to the right
-local v_layout = wibox.layout.fixed.vertical()
-v_layout:fill_space(false)
+	local right = wibox.layout.fixed.horizontal()
+	right:add(wibox.widget.systray())
+	right:add(widget.spacer.h)
+	right:add(widget.network)
+	right:add(widget.spacer.h)
+	right:add(widget.wifi)
+	right:add(widget.spacer.h)
+	right:add(data_bars)	
+	right:add(widget.spacer.h)
+	right:add(widget.clock)
+	right:add(widget.spacer.h)
+	right:add(widget.layoutbox[monitor.main])
+	right = wibox.widget.background(wibox.layout.margin(right,4,4), beautiful.bg_normal)
 
-widget.volume:set_vertical(true)
+	local layout = wibox.layout.malign.horizontal()
+	layout:set_left(left)
+	layout:set_middle(bar.main.tasklist[monitor.main])
+	layout:set_right(right)
 
-v_layout:add(widget.spacer.v)
-v_layout:add(widget.cpu)
-v_layout:add(widget.spacer.v)
-v_layout:add(widget.battery)
-v_layout:add(widget.spacer.v)
-v_layout:add(widget.volume)
+	bar.main[monitor.main] = awful.wibox({ position = "top", screen = monitor.main })
+	bar.main[monitor.main]:set_bg(beautiful.bg_bg)
+	bar.main[monitor.main]:set_widget(layout)
+end
 
---bar.info.wibox[mainscreen]:set_widget(v_layout)
-bar.info.wibox[mainscreen]:set_widget(wibox.layout.margin(v_layout,2,2,2,2))
------------------------------------------------------
 -- ########################################
 -- ## Futher screens
 -- ########################################
 
 for s = 1, screen.count() do
-	if s ~= mainscreen then
+	if s ~= monitor.main then
 		-- Create an imagebox widget which will contains an icon indicating which layout we're using.
 		-- We need one layoutbox per screen.
 		widget.layoutbox[s] = awful.widget.layoutbox(s)
@@ -317,47 +322,31 @@ for s = 1, screen.count() do
 		bar.main.tasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update)
 
 		-- Create the wibox
-		bar.main.wibox[s] = awful.wibox({ position = "top", screen = s })
+		bar.main[s] = awful.wibox({ position = "top", screen = s })
 
 		-- Widgets that are aligned to the left
-		local left_layout = wibox.layout.fixed.horizontal()
-		left_layout:add(bar.main.taglist[s])
-		left_layout:add(widget.spacer.h)
-		left_layout:add(bar.main.prompt[mainscreen])
+		local left = wibox.layout.fixed.horizontal()
+		left:add(bar.main.taglist[s])
+		left:add(widget.spacer.h)
+		left:add(bar.main.prompt[monitor.main])
 
 		-- Widgets that are aligned to the right
-		local right_layout = wibox.layout.fixed.horizontal()
-		right_layout:add(widget.clock)
-		right_layout:add(widget.layoutbox[s])
+		local right = wibox.layout.fixed.horizontal()
+		right:add(widget.clock)
+		right:add(widget.layoutbox[s])
 
 		-- Now bring it all together (with the tasklist in the middle)
 		local layout = wibox.layout.align.horizontal()
-		layout:set_left(left_layout)
+		layout:set_left(left)
 		layout:set_middle(bar.main.tasklist[s])
-		layout:set_right(right_layout)
+		layout:set_right(right)
 
-		bar.main.wibox[s]:set_widget(layout)
+		bar.main[s]:set_widget(layout)
 	end
 end
 -- }}}
 
--- {{{ Mouse bindings
-root.buttons(awful.util.table.join(
-		awful.button({ }, 3, function () end),
-		awful.button({ }, 4, awful.tag.viewnext),
-		awful.button({ }, 5, awful.tag.viewprev)
-))
--- }}}
-
-
-clientbuttons = awful.util.table.join(
-		awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
-		awful.button({ modkey }, 1, awful.mouse.client.move),
-		awful.button({ modkey }, 3, awful.mouse.client.resize))
-
--- Set keys
 root.keys(keys.global)
--- }}}
 
 -- {{{ Rules
 awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
@@ -392,44 +381,6 @@ client.connect_signal("manage", function (c, startup)
 						awful.placement.no_overlap(c)
 						awful.placement.no_offscreen(c)
 				end
-		end
-
-		local titlebars_enabled = false
-		if titlebars_enabled and (c.type == "normal" or c.type == "dialog") then
-				-- Widgets that are aligned to the left
-				local left_layout = wibox.layout.fixed.horizontal()
-				left_layout:add(awful.titlebar.widget.iconwidget(c))
-
-				-- Widgets that are aligned to the right
-				local right_layout = wibox.layout.fixed.horizontal()
-				right_layout:add(awful.titlebar.widget.floatingbutton(c))
-				right_layout:add(awful.titlebar.widget.maximizedbutton(c))
-				right_layout:add(awful.titlebar.widget.stickybutton(c))
-				right_layout:add(awful.titlebar.widget.ontopbutton(c))
-				right_layout:add(awful.titlebar.widget.closebutton(c))
-
-				-- The title goes in the middle
-				local title = awful.titlebar.widget.titlewidget(c)
-				title:buttons(awful.util.table.join(
-								awful.button({ }, 1, function()
-										client.focus = c
-										c:raise()
-										awful.mouse.client.move(c)
-								end),
-								awful.button({ }, 3, function()
-										client.focus = c
-										c:raise()
-										awful.mouse.client.resize(c)
-								end)
-								))
-
-				-- Now bring it all together
-				local layout = wibox.layout.align.horizontal()
-				layout:set_left(left_layout)
-				layout:set_right(right_layout)
-				layout:set_middle(title)
-
-				awful.titlebar(c):set_widget(layout)
 		end
 end)
 

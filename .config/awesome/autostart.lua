@@ -5,7 +5,7 @@ local naughty = require("naughty")
 local entries = {}
 local autostart = {}
 
-autostart.terminal = terminal or "urxvt"
+autostart.terminal = "xterm"
 
 function autostart.launch()
 	local started = {}
