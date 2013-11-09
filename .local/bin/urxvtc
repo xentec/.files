@@ -1,6 +1,6 @@
 #!/bin/sh
-/usr/bin/urxvtc "$@"
-if [ $? -eq 2 ]; then
+pgrep -u $(id -u) urxvtd > /dev/null
+if [ $? -ne 0 ]; then
    urxvtd -q -o -f
-   /usr/bin/urxvtc "$@"
 fi
+/usr/bin/urxvtc "$@"
