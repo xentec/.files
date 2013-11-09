@@ -13,12 +13,17 @@ fi
 
 export PATH=~/.local/bin:$PATH
 
+# Make rxvt nicer
 [[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources
 
 # Youtube...
-VDPAU_NVIDIA_NO_OVERLAY=1
+export VDPAU_NVIDIA_NO_OVERLAY=1
 
 # disable pc speaker
 xset -b
+
+# and fix Steam
+# export STEAM_RUNTIME=0 not yet
+export STEAM_FRAME_FORCE_CLOSE=1
 
 exec awesome
