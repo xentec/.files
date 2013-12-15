@@ -143,25 +143,62 @@ local volume = pulse(function(muted, val)
 	--naughty.notify({text = muted and "Muted" or "Unmuted"})
 end, 5)
 
---[[
 -- CPU
-widget.cpu = awful.widget.graph()
-widget.cpu:set_width(50)
-widget.cpu:set_background_color(beautiful.bg_minimize)
-widget.cpu:set_color({ type = "linear", from = { 0, 0 }, to = { 10,0 }, stops = { {0, "#FF5656"}, {0.5, "#88A175"}, {1, "#AECF96" }}})
-vicious.register(widget.cpu, vicious.widgets.cpu, "$1")
-]]
--- CPU
-widget.cpu = awful.widget.progressbar({ width = 100 })
-widget.cpu:set_background_color("#876333")
-widget.cpu:set_color("#DF8F26")
-vicious.register(widget.cpu, vicious.widgets.cpu, "$1")
+widget.cpu = {}
+for i = 1,8 do
+	widget.cpu[i] = awful.widget.progressbar({ width = 100 })
+	widget.cpu[i]:set_background_color("#876333")
+	widget.cpu[i]:set_color("#DF8F26")
+end
+vicious.register(widget.cpu, vicious.widgets.cpu, function(w, data)
+	for i = 1,#w do
+		w[i]:set_value(data[i+1]/100)
+	end
+
+	return data
+end, 2)
 
 -- Memory
-widget.mem = awful.widget.progressbar({ width = 100 })
-widget.mem:set_background_color("#3A6D8A")
-widget.mem:set_color("#269CDF")
-vicious.register(widget.mem, vicious.widgets.mem, "$1")
+widget.mem = {}
+widget.mem.ram = awful.widget.progressbar({ width = 100 })
+widget.mem.ram:set_background_color("#3A6D8A")
+widget.mem.ram:set_color("#269CDF")
+widget.mem.swap = awful.widget.progressbar({ width = 100 })
+widget.mem.swap:set_background_color("#3A6D8A")
+widget.mem.swap:set_color("#269CDF")
+vicious.register(widget.mem, vicious.widgets.mem, function(w, data)
+	w.ram:set_value(data[1]/100)
+	w.swap:set_value(data[5]/100)
+	return data
+end)
+
+-- GPU
+widget.gpu = {}
+widget.gpu.gl = awful.widget.progressbar({ width = 100 })
+widget.gpu.gl:set_background_color("#4F8A3A")
+widget.gpu.gl:set_color("#3FC51E")
+widget.gpu.vl = awful.widget.progressbar({ width = 100 })
+widget.gpu.vl:set_background_color("#4F8A3A")
+widget.gpu.vl:set_color("#3FC51E")
+widget.gpu.mem = awful.widget.progressbar({ width = 100 })
+widget.gpu.mem:set_background_color("#4F8A3A")
+widget.gpu.mem:set_color("#3FC51E")
+widget.gpu.temp = wibox.widget.textbox();
+--widget.gpu.temp:set_color("#3FC51E")
+vicious.register(widget.gpu, require("gpu-nv"), function(w, data)
+	for k, v in string.gmatch(data[1], "(%w+)=(%w+)") do
+		v = tonumber(v)/100
+		if(k == "graphics") then
+			w.gl:set_value(v)
+		elseif(k == "video") then
+			w.vl:set_value(v)
+		end
+	end
+
+	w.mem:set_value(tonumber(data[2])/tonumber(data[3]))
+	w.temp:set_markup(' <span color="#3FC51E">'..data[4]..' °C</span>')
+	return data
+end, 2, { query = { "[gpu:0]/GPUUtilization", "[gpu:0]/UsedDedicatedGPUMemory", "[gpu:0]/TotalDedicatedGPUMemory", "[gpu:0]/GPUCoreTemp" } })
 
 -- MPD
 widget.mpd = wibox.widget.textbox()
@@ -309,19 +346,43 @@ if screen.count() > 1 then
 	--=======================================================
 
 	do
+		local cpu = wibox.layout.fixed.vertical()
+		for i=1,#widget.cpu do
+			widget.cpu[i]:set_height(16/#widget.cpu)
+			cpu:add(widget.cpu[i])
+		end
+
+		local mem = wibox.layout.fixed.vertical()
+		widget.mem.ram:set_height(12)
+		widget.mem.swap:set_height(4)
+		mem:add(widget.mem.ram)
+		mem:add(widget.mem.swap)
+
+		local gpu = wibox.layout.fixed.vertical()
+		widget.gpu.gl:set_height(6)
+		widget.gpu.vl:set_height(2)
+		widget.gpu.mem:set_height(8)
+		gpu:add(widget.gpu.gl)
+		gpu:add(widget.gpu.vl)
+		gpu:add(widget.gpu.mem)
+
+
 		local left = wibox.layout.fixed.horizontal()
-		left:add(widget.cpu)
+		left:add(cpu)
 		left:add(widget.spacer.h)
-		left:add(widget.mem)
+		left:add(mem)
+		left:add(widget.spacer.h)
+		left:add(gpu)
+		left:add(widget.gpu.temp)
 		left:add(widget.spacer.h)
 		left:add(widget.network)
-		left = wibox.widget.background(wibox.layout.margin(left,4,4,4,4), beautiful.bg_normal)
+		left = wibox.widget.background(wibox.layout.margin(left,4,4,3,3), beautiful.bg_normal)
 
 		local right = wibox.layout.fixed.horizontal()
 		right:add(widget.mpd)
 		right:add(widget.spacer.h)
 		right:add(widget.volume)
-		right = wibox.widget.background(wibox.layout.margin(right,4,4,4,4), beautiful.bg_normal)
+		right = wibox.widget.background(wibox.layout.margin(right,4,4,3,3), beautiful.bg_normal)
 
 		local layout = wibox.layout.align.horizontal()
 		layout:set_left(left)
