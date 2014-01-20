@@ -149,7 +149,7 @@ end, 10, 'BAT0')
 
 -- Network
 widget.network = wibox.widget.textbox()
-vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">${wlp3s0 down_kb} kb/s | ${wlp3s0 up_kb} kb/s</span>', 2)
+vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">↓ ${wlp3s0 down_kb} kb/s ↑ ${wlp3s0 up_kb} kb/s</span>', 2)
 
 -- Wifi
 widget.wifi = wibox.widget.textbox()

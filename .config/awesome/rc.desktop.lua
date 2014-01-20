@@ -124,7 +124,7 @@ widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
 
 -- Network
 widget.network = wibox.widget.textbox()
-vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">${enp5s0 down_kb} kb/s | ${enp5s0 up_kb} kb/s</span>', 1)
+vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">↓ ${enp5s0 down_kb} kb/s ↑ ${enp5s0 up_kb} kb/s</span>', 1)
 
 -- Volume
 widget.volume = awful.widget.progressbar({ width = 100 })
