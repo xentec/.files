@@ -122,13 +122,12 @@ widget.layoutbox = {}
 widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
 
 --Battery
-widget.battery = awful.widget.progressbar({ width = 5, height = 50 })
-widget.battery:set_vertical(true)
+widget.battery = awful.widget.progressbar({ width = 50, height = 5 })
 widget.battery:set_background_color("#00AAAA")
 widget.battery.warning = {}
 vicious.register(widget.battery, vicious.widgets.bat, function(w, data)
 	local low = 40
-	local critical = 10
+	local critical = 15
 
 --[[	["Full\n"]        = "↯",
 		["Unknown\n"]     = "⌁",
@@ -149,7 +148,7 @@ end, 10, 'BAT0')
 
 -- Network
 widget.network = wibox.widget.textbox()
-vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">↓ ${wlp3s0 down_kb} kb/s ↑ ${wlp3s0 up_kb} kb/s</span>', 2)
+vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">${wlp3s0 down_kb} kb/s | ${wlp3s0 up_kb} kb/s</span>', 2)
 
 -- Wifi
 widget.wifi = wibox.widget.textbox()
@@ -157,11 +156,12 @@ vicious.register(widget.wifi, vicious.widgets.wifi, '<span color="DarkCyan">${ss
 
 
 -- Volume
-widget.volume = awful.widget.progressbar({ width = 5 })
+widget.volume = awful.widget.progressbar({ width = 50, height = 4 })
 widget.volume:set_background_color(beautiful.bg_minimize)
 widget.volume:set_color(beautiful.bg_focus)
 widget.volume:set_ticks(true)
 widget.volume:set_max_value(100)
+widget.volume.muted = false;
 
 local volume = pulse(function(muted, val)
 	if muted then
@@ -170,17 +170,20 @@ local volume = pulse(function(muted, val)
 		widget.volume:set_color(beautiful.bg_focus)
 	end
 	widget.volume:set_value(val)
-	--naughty.notify({title = muted and "Muted" or "Unmuted"})
+	if 	widget.volume.muted ~= muted then
+		naughty.notify({text = muted and "Muted" or "Unmuted"})
+	end
+	widget.volume.muted = muted;
 end)
 
 -- CPU
-widget.cpu = awful.widget.progressbar({ width = 5 })
+widget.cpu = awful.widget.progressbar({ width = 50, height = 4 })
 widget.cpu:set_background_color("#876333")
 widget.cpu:set_color("#DF8F26")
 vicious.register(widget.cpu, vicious.widgets.cpu, "$1")
 
 -- Memory
-widget.mem = awful.widget.progressbar({ width = 5 })
+widget.mem = awful.widget.progressbar({ width = 50, height = 4 })
 widget.mem:set_background_color("#3A6D8A")
 widget.mem:set_color("#269CDF")
 vicious.register(widget.mem, vicious.widgets.mem, "$1")
@@ -198,7 +201,9 @@ bar.main.taglist.buttons = awful.util.table.join(
 						awful.button({ update}, 1, awful.tag.viewonly),
 						awful.button({ modkey }, 1, awful.client.movetotag),
 						awful.button({ }, 3, awful.tag.viewtoggle),
-						awful.button({ modkey }, 3, awful.client.toggletag)
+						awful.button({ modkey }, 3, awful.client.toggletag),
+						awful.button({ }, 4, function(t) awful.tag.viewnext(awful.tag.getscreen(t)) end),
+						awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
 					)
 bar.main.tasklist = {}
 bar.main.tasklist.buttons = awful.util.table.join(
@@ -239,8 +244,9 @@ bar.main.tasklist.buttons = awful.util.table.join(
 bar.main.tasklist.update = common.list_update
 bar.main.layout_buttons = awful.util.table.join(
 								awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
-								awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end)
-							)
+								awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
+								awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
+								awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end))
 
 
 -- ########################################
@@ -259,20 +265,21 @@ do
 
 	local left = wibox.layout.fixed.horizontal()
 	left:add(bar.main.taglist[monitor.main])
-	left:add(widget.spacer.h)
 	left:add(bar.main.prompt[monitor.main])
 	left = wibox.widget.background(wibox.layout.margin(left,0,4), beautiful.bg_normal)
 
-	widget.cpu:set_vertical(true)
-	widget.mem:set_vertical(true)
-	widget.volume:set_vertical(true)
-	local data_bars = wibox.layout.fixed.horizontal()
+
+	--widget.cpu:set_vertical(true)
+	--widget.mem:set_vertical(true)
+	--widget.battery:set_vertical(true)
+	--widget.volume:set_vertical(true)
+	local data_bars = wibox.layout.fixed.vertical()
 	data_bars:add(widget.cpu)
-	data_bars:add(widget.spacer.h)
+	--data_bars:add(widget.spacer.h)
 	data_bars:add(widget.mem)
-	data_bars:add(widget.spacer.h)
+	--data_bars:add(widget.spacer.h)
 	data_bars:add(widget.battery)
-	data_bars:add(widget.spacer.h)
+	--data_bars:add(widget.spacer.h)
 	data_bars:add(widget.volume)
 	data_bars = wibox.layout.margin(data_bars,0,0,2,2)
 
@@ -350,8 +357,9 @@ local rules = {
 	{ rule = { class = "Chromium" },					properties = { tag = tags[1][2] } },
 	{ rule = { class = "Firefox" },						properties = { tag = tags[1][2] } },
 	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[1][3] } },
+	{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = tags[1][3] } },
 	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
-	{ rule_any = { class = { "mplayer2", "mplayer", "mpv" }},	properties = { tag = tags[1][5] } },
+	--{ rule_any = { class = { "mplayer2", "mplayer", "mpv" }},	properties = { tag = tags[1][5] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 -- }}}
@@ -389,7 +397,7 @@ autostart.add({
 		"pulseaudio --start",
 		"nitrogen --restore",
 		{"dropboxd","dropbox"},
-		{"irssi", term = true},
+		{"weechat", term = true},
 	})
 autostart.launch()
 -- }}}
