@@ -198,9 +198,7 @@ bar.main.taglist.buttons = awful.util.table.join(
 						awful.button({ update}, 1, awful.tag.viewonly),
 						awful.button({ modkey }, 1, awful.client.movetotag),
 						awful.button({ }, 3, awful.tag.viewtoggle),
-						awful.button({ modkey }, 3, awful.client.toggletag),
-						awful.button({ }, 4, function(t) awful.tag.viewnext(awful.tag.getscreen(t)) end),
-						awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
+						awful.button({ modkey }, 3, awful.client.toggletag)
 					)
 bar.main.tasklist = {}
 bar.main.tasklist.buttons = awful.util.table.join(
@@ -241,9 +239,8 @@ bar.main.tasklist.buttons = awful.util.table.join(
 bar.main.tasklist.update = common.list_update
 bar.main.layout_buttons = awful.util.table.join(
 								awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
-								awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
-								awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
-								awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end))
+								awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end)
+							)
 
 
 -- ########################################
@@ -265,7 +262,6 @@ do
 	left:add(widget.spacer.h)
 	left:add(bar.main.prompt[monitor.main])
 	left = wibox.widget.background(wibox.layout.margin(left,0,4), beautiful.bg_normal)
-
 
 	widget.cpu:set_vertical(true)
 	widget.mem:set_vertical(true)
