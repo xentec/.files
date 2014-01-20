@@ -450,7 +450,7 @@ local rules = {
 	{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = tags[2][1] } },
 	{ rule = { class = "Pidgin" },						properties = { tag = tags[2][1] } },
 	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
-	{ rule_any = { class = { "mplayer", "mplayer2", "mpv" }},	properties = { tag = tags[2][3] } },
+	--{ rule_any = { class = { "mplayer", "mplayer2", "mpv" }},	properties = { tag = tags[2][3] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 -- }}}

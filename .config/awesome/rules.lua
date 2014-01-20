@@ -21,9 +21,6 @@ local rules = {
 		}
 	},
 	-- #######################################
-	{ rule = { class = "Chromium" },	properties = { switchtotag = true } },
-	{ rule = { class = "Firefox" },		properties = { switchtotag = true } },
-
 	{ rule = { class = "CaveStory+" },	properties = { floating = true } },
 	{ rule = { class = "Steam" },		properties = { floating = true } },
 	{ rule = { class = "TTGL" },		properties = { floating = true } },
@@ -33,18 +30,24 @@ local rules = {
 	-- Youtube Fullscreen
 	{ rule = { instance = "exe" },		properties = { floating = true } },
 
+	{ rule_any = { class = { "Chromium", "Firefox" }},	properties = { switchtotag = true } },
 	{ rule_any = { class = { "mplayer", "mplayer2", "mpv" }},
 		properties = {
-			floating = true,
-			switchtotag = true
+			floating = true
 		},
 		callback = function (c)
-			local area = screen[c.screen].geometry
+			local area = screen[c.screen].workarea
 			local geometry = c:geometry()
-			geometry.width = geometry.width >= area.width and (area.width - c.border_width * 2)
-			--geometry.height = geometry.height >= area.height and (area.height - c.border_width * 2)
-			geometry.x = area.x + (area.width - geometry.width) / 2
-			geometry.y = area.y + (area.height - geometry.height) / 2
+			local bw = c.border_width * 2
+			if geometry.width > area.width + bw then
+				geometry.width =  area.width - bw
+			end
+			if geometry.height > area.height + bw then
+				geometry.height =  area.height - bw
+			end
+			geometry.y = area.y + (area.height - geometry.height + bw) / 2
+			geometry.x = area.x + (area.width - geometry.width + bw) / 2
+
 			c:geometry(geometry)
 		end
 	},
