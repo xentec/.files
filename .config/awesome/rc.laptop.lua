@@ -336,6 +336,7 @@ for s = 1, screen.count() do
 		-- Widgets that are aligned to the right
 		local right = wibox.layout.fixed.horizontal()
 		right:add(widget.clock)
+		right:add(widget.spacer.h)
 		right:add(widget.layoutbox[s])
 
 		-- Now bring it all together (with the tasklist in the middle)
