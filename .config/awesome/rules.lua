@@ -23,7 +23,7 @@ local rules = {
 	-- #######################################
 	{ rule = { class = "CaveStory+" },	properties = { floating = true } },
 	{ rule = { class = "Steam" },		properties = { floating = true } },
-	{ rule = { class = "TTGL" },		properties = { floating = true } },
+	{ rule = { instance = "gl" },		properties = { floating = true } },
 
 	{ rule = { class = "pinentry" },	properties = { floating = true } },
 	{ rule = { class = "gimp" },		properties = { floating = true } },
