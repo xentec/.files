@@ -5,7 +5,10 @@
 theme = {}
 
 --theme.font          = "cantarell 9"
-theme.font          = "Bitstream Vera Sans 10"
+
+theme.font_name    = "Bitstream Vera Sans"
+theme.font_size    = 10
+theme.font          = theme.font_name .. " " .. tostring(theme.font_size)
 
 theme.bg_bg         = "#22222200"
 theme.bg_normal     = "#222222AA"

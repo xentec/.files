@@ -14,6 +14,7 @@ local menubar = require("menubar")
 local vicious = require("vicious")
 local keys = require("keys")
 local pulse = require("pulse")
+local mpd = require("mpd")
 local common = require("common")
 local autostart = require("autostart")
 
@@ -201,9 +202,33 @@ vicious.register(widget.gpu, require("gpu-nv"), function(w, data)
 end, 2, { query = { "[gpu:0]/GPUUtilization", "[gpu:0]/UsedDedicatedGPUMemory", "[gpu:0]/TotalDedicatedGPUMemory", "[gpu:0]/GPUCoreTemp" } })
 
 -- MPD
-widget.mpd = wibox.widget.textbox()
-vicious.cache(widget.mpd)
-vicious.register(widget.mpd, vicious.widgets.mpd, '<span color="DarkKhaki">${Artist} :: ${Title}</span>', 5, {host = "keeper"})
+widget.mpd = {}
+widget.mpd.icon = wibox.widget.textbox()
+widget.mpd.icon:set_font('GLYPHICONS')
+widget.mpd.nfo = wibox.widget.textbox()
+widget.mpd.nfo:set_font(theme.font_name .. ' ' .. (theme.font_size - 2))
+widget.mpd.bar = awful.widget.progressbar({ height = 2 })
+widget.mpd.bar:set_background_color("#716D40")
+widget.mpd.bar:set_color("#BDB76B")
+
+--vicious.cache(widget.mpd)
+vicious.register(widget.mpd, mpd, function(w, data)
+	local state = {
+		play = '&#xE174;',
+		pause = '&#xE175;',
+		stop = '&#xE176;'
+	}
+	if state[data['{state}']] then
+		w.icon:set_markup('<span color="#BDB76B">'.. state[data['{state}']] ..'</span>');
+	end
+
+	local nfo = '<span color="#BDB76B">'..data['{Artist}']..' :: '..data['{Title}']..'</span>';
+	w.bar:set_width(nfo:len())
+
+	w.nfo:set_markup(nfo)
+	w.bar:set_value(data['{elapsed}'] / data['{Time}'])
+	return data
+end, 1, {host = "keeper"})
 
 
 -- ########################################
@@ -363,6 +388,13 @@ if screen.count() > 1 then
 		gpu:add(widget.gpu.vl)
 		gpu:add(widget.gpu.mem)
 
+		local mpd = {}
+		mpd.ib = wibox.layout.fixed.vertical()
+		mpd.ib:add(widget.mpd.nfo)
+		mpd.ib:add(widget.mpd.bar)
+		mpd.w = wibox.layout.fixed.horizontal()
+		mpd.w:add(widget.mpd.icon)
+		mpd.w:add(wibox.layout.margin(mpd.ib,4))
 
 		local left = wibox.layout.fixed.horizontal()
 		left:add(cpu)
@@ -376,7 +408,7 @@ if screen.count() > 1 then
 		left = wibox.widget.background(wibox.layout.margin(left,4,4,3,3), beautiful.bg_normal)
 
 		local right = wibox.layout.fixed.horizontal()
-		right:add(widget.mpd)
+		right:add(wibox.layout.constraint(mpd.w,'max', 600))
 		right:add(widget.spacer.h)
 		right:add(widget.volume)
 		right = wibox.widget.background(wibox.layout.margin(right,4,4,3,3), beautiful.bg_normal)
