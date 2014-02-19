@@ -5,3 +5,7 @@
 
 # Sublime Text
 *.sublime-*
+
+# QtCreator
+CMakeLists.txt.user
+build
