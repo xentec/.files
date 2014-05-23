@@ -1,0 +1,18 @@
+ACTION=$1
+shift
+case $ACTION in
+	s|t)
+		tar -I pigz -vcf - $1 | ssh $2 "(cd $SDIR && tar -I pigz -xf -)"
+		;;
+	g|r)
+		SDIR=$(dirname $2)
+		SFILE=$(basename $2)
+		ssh $1 "(cd $SDIR; tar -I pigz -vcf - ./$SFILE)" | tar -I pigz -T $3 -xf -
+		;;
+	*)
+		echo "No action given."
+		echo "sct <s|t> <path> <server> <serverpath>"
+		echo "sct <g|r> <server> <serverpath> <path>"
+
+		;;
+esac
