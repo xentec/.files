@@ -129,16 +129,15 @@ vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">
 
 -- Volume
 widget.volume = awful.widget.progressbar({ width = 100 })
-widget.volume:set_background_color(beautiful.bg_minimize)
-widget.volume:set_color(beautiful.bg_focus)
-widget.volume:set_ticks(true)
+widget.volume:set_background_color("#716D40")
+widget.volume:set_color("#BDB76B")
 widget.volume:set_max_value(100)
 
 local volume = pulse(function(muted, val)
 	if muted then
-		widget.volume:set_color("#AA0000")
+		widget.volume:set_color("#716D40")
 	else
-		widget.volume:set_color(beautiful.bg_focus)
+		widget.volume:set_color("#BDB76B")
 	end
 	widget.volume:set_value(val)
 	--naughty.notify({text = muted and "Muted" or "Unmuted"})
