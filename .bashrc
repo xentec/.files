@@ -3,7 +3,11 @@
 #
 
 # Path
-export PATH=~/.local/bin:$PATH
+USEREXEC=~/.local/bin
+
+if [[ $PATH != *$USEREXEC* ]]; then
+	export PATH=$USEREXEC:$PATH
+fi
 
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
