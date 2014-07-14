@@ -203,19 +203,18 @@ end, 2, { query = { "[gpu:0]/GPUUtilization", "[gpu:0]/UsedDedicatedGPUMemory", 
 -- MPD
 widget.mpd = {}
 widget.mpd.icon = wibox.widget.textbox()
-widget.mpd.icon:set_font('GLYPHICONS')
+widget.mpd.icon:set_font('octicons')
 widget.mpd.nfo = wibox.widget.textbox()
 widget.mpd.nfo:set_font(theme.font_name .. ' ' .. (theme.font_size - 2))
 widget.mpd.bar = awful.widget.progressbar({ height = 2 })
 widget.mpd.bar:set_background_color("#716D40")
 widget.mpd.bar:set_color("#BDB76B")
 
---vicious.cache(widget.mpd)
 vicious.register(widget.mpd, mpd, function(w, data)
 	local state = {
-		play = '&#xE174;',
-		pause = '&#xE175;',
-		stop = '&#xE176;'
+		play = '&#xF0BF;',
+		pause = '&#xF0BB;',
+		stop = '&#xF053;'
 	}
 	if state[data['{state}']] then
 		w.icon:set_markup('<span color="#BDB76B">'.. state[data['{state}']] ..'</span>');
@@ -228,7 +227,7 @@ vicious.register(widget.mpd, mpd, function(w, data)
 	w.bar:set_value(data['{elapsed}'] / data['{Time}'])
 	return data
 end, 1, {host = "keeper"})
-
+vicious.cache(widget.mpd)
 
 -- ########################################
 -- ## Bars
@@ -386,8 +385,8 @@ if screen.count() > 1 then
 		mpd.ib:add(widget.mpd.nfo)
 		mpd.ib:add(widget.mpd.bar)
 		mpd.w = wibox.layout.fixed.horizontal()
-		mpd.w:add(widget.mpd.icon)
-		mpd.w:add(wibox.layout.margin(mpd.ib,4))
+		mpd.w:add(wibox.layout.margin(widget.mpd.icon,4,8))
+		mpd.w:add(mpd.ib)
 
 		local left = wibox.layout.fixed.horizontal()
 		left:add(cpu)
