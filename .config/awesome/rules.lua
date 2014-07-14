@@ -23,7 +23,7 @@ local rules = {
 	-- #######################################
 	{ rule = { class = "CaveStory+" },	properties = { floating = true } },
 	{ rule = { class = "Steam" },		properties = { floating = true } },
-	{ rule = { instance = "gl" },		properties = { floating = true } },
+	{ rule = { instance = "gl" },		properties = { floating = true, border_width = 0 } },
 
 	{ rule = { class = "pinentry" },	properties = { floating = true } },
 	{ rule = { class = "gimp" },		properties = { floating = true } },
@@ -33,7 +33,8 @@ local rules = {
 	{ rule_any = { class = { "Chromium", "Firefox" }},	properties = { switchtotag = true } },
 	{ rule_any = { class = { "mplayer", "mplayer2", "mpv" }},
 		properties = {
-			floating = true
+			floating = true,
+			border_width = 0
 		},
 		callback = function (c)
 			local area = screen[c.screen].workarea
