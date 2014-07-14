@@ -292,6 +292,7 @@ bar.info = {}
 -- ########################################
 
 	-- Main ###################################
+do
 
 	bar.main.prompt[monitor.main] = awful.widget.prompt()
 
@@ -299,12 +300,8 @@ bar.info = {}
 	widget.layoutbox[monitor.main]:buttons(bar.main.layout_buttons)
 
 	bar.main.taglist[monitor.main] = awful.widget.taglist(monitor.main, awful.widget.taglist.filter.all, bar.main.taglist.buttons)
+	bar.main.tasklist[monitor.main] = awful.widget.tasklist(monitor.main, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update)
 
-	local tmp = wibox.layout.fixed.horizontal()
-	tmp:fill_space(true)
-	bar.main.tasklist[monitor.main] = awful.widget.tasklist(monitor.main, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update, tmp)
-
-do
 	local left = wibox.layout.fixed.horizontal()
 	left:add(widget.layoutbox[monitor.main])
 	left:add(widget.spacer.h)
@@ -336,10 +333,7 @@ if screen.count() > 1 then
 		widget.layoutbox[monitor.info]:buttons(bar.main.layout_buttons)
 
 		bar.main.taglist[monitor.info] = awful.widget.taglist(monitor.info, awful.widget.taglist.filter.all, bar.main.taglist.buttons)
-
-		local tmp = wibox.layout.fixed.horizontal()
-		tmp:fill_space(true)
-		bar.main.tasklist[monitor.info] = awful.widget.tasklist(monitor.info, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update, tmp)
+		bar.main.tasklist[monitor.info] = awful.widget.tasklist(monitor.info, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update)
 
 		local left = wibox.layout.fixed.horizontal()
 		left:add(widget.layoutbox[monitor.info])
