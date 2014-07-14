@@ -473,6 +473,7 @@ local rules = {
 	{ rule = { class = "Firefox" },						properties = { tag = tags[1][2] } },
 	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[2][1] } },
 	{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = tags[2][1] } },
+	{ rule = { class = "Skype" },						properties = { tag = tags[2][1] } },
 	{ rule = { class = "Pidgin" },						properties = { tag = tags[2][1] } },
 	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
 	--{ rule_any = { class = { "mplayer", "mplayer2", "mpv" }},	properties = { tag = tags[2][3] } },
@@ -519,7 +520,8 @@ autostart.add({
 		"nitrogen --restore",
 		{"dropboxd","dropbox"},
 		"steam",
-		{"weechat", term = true}
+--		{"weechat", term = true},
+		"skype",
 	})
 autostart.launch()
 -- }}}
