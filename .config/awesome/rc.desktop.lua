@@ -13,10 +13,10 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 local vicious = require("vicious")
 local keys = require("keys")
-local pulse = require("pulse")
-local mpd = require("mpd")
 local common = require("common")
-local autostart = require("autostart")
+local pulse = require("modules.pulse")
+local mpd = require("modules.mpd")
+local autostart = require("modules.autostart")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -185,7 +185,7 @@ widget.gpu.mem:set_background_color("#4F8A3A")
 widget.gpu.mem:set_color("#3FC51E")
 widget.gpu.temp = wibox.widget.textbox();
 --widget.gpu.temp:set_color("#3FC51E")
-vicious.register(widget.gpu, require("gpu-nv"), function(w, data)
+vicious.register(widget.gpu, require("modules.gpu-nv"), function(w, data)
 	for k, v in string.gmatch(data[1], "(%w+)=(%w+)") do
 		v = tonumber(v)/100
 		if(k == "graphics") then
@@ -475,7 +475,16 @@ local rules = {
 	{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = tags[2][1] } },
 	{ rule = { class = "Skype" },						properties = { tag = tags[2][1] } },
 	{ rule = { class = "Pidgin" },						properties = { tag = tags[2][1] } },
-	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
+	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] },
+		callback = function (c)
+			if c.name:find("Chat",1,true) then
+				c.screen = awful.tag.getscreen(tags[2][1])
+            	c:tags({ tags[2][1] })
+            	awful.client.floating.set(c, false)
+			end
+		end
+	},
+
 	--{ rule_any = { class = { "mplayer", "mplayer2", "mpv" }},	properties = { tag = tags[2][3] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)

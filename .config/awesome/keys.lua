@@ -1,7 +1,8 @@
 local awful = require("awful")
 local menubar = require("menubar")
-local pulse = require("pulse")
 local vicious = require("vicious")
+
+local pulse = require("modules.pulse")
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.

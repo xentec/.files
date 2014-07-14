@@ -60,7 +60,7 @@ function common.list_update(w, buttons, label, data, objects)
             l:fill_space(false)
             l:add(ib)
             l:add(m)
-            --l:add(wibox.widget.textbox("::t.".. c.type ..":c.".. (c.class or "-") ..":i.".. (c.instance or "-") ..":p.".. c.pid))
+            --l:add(wibox.widget.textbox("::t.".. c.type ..":c.".. (c.class or "-") ..":i.".. (c.instance or "-") ..":r.".. (c.role or "-")))
 
             -- And all of this gets a background
             --bgb:set_widget(l)
