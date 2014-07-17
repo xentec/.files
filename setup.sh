@@ -35,6 +35,10 @@ git submodule init && git submodule update && echo -e "${G}Done$N" \
 	    || echo -e "${EMG}Failed$N"
 
 
+echo "Building..."
+# cv
+(cd extern/cv && make -q)
+
 echo "Linking..."
 echo -e "  .config"
 # Link all configs
