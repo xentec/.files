@@ -281,11 +281,11 @@ do
 
 
 	local right = wibox.layout.fixed.horizontal()
-	right:add(wibox.widget.systray())
-	right:add(widget.spacer.h)
 	right:add(widget.network)
 	right:add(widget.spacer.h)
 	right:add(widget.wifi)
+	right:add(widget.spacer.h)
+	right:add(wibox.widget.systray())
 	right:add(widget.spacer.h)
 	right:add(data_bars)	
 	right:add(widget.spacer.h)
