@@ -16,17 +16,19 @@ function lnk {
 	ln -Ts $1 $2 &> /dev/null
 	if [ $? != 0 ]; then
 		if [ -L $2 ]; then 
-			echo -e "$EMY!$N"
+			echo -en "$EMY!$N"
 		else
 			mv -T $2 $2.old
-			echo -e "$EMY!! => $G${2}.old$N"
+			echo -en "$EMY!! => $G${2}.old$N"
 			ln -Ts $1 $2
 			if [ $? != 0 ]; then
+				echo
 				echo -e "${EMR}!E: Aborted$N"
 				exit
 			fi
 		fi
 	fi
+	echo
 }
 
 
@@ -37,7 +39,7 @@ git submodule init && git submodule update && echo -e "${G}Done$N" \
 
 echo "Building..."
 # cv
-(cd extern/cv && make -q)
+(cd extern/cv && make)
 
 echo "Linking..."
 echo -e "  .config"
@@ -46,8 +48,10 @@ for CONFIG in .config/*; do
 	lnk $PWD/$CONFIG ~/$CONFIG
 done
 
+
+# Link all fonts
 echo "  .fonts"
-# Link all configs
+mkdir -p ~/.fonts
 for FONT in .fonts/*; do
 	lnk $PWD/$FONT ~/$FONT
 done
@@ -56,7 +60,8 @@ fc-cache
 
 # Link others
 echo "  .local"
-for DIR in .local/*; do
+mkdir -p ~/.local/bin
+for DIR in .local/bin/*; do
 	lnk $PWD/$DIR ~/$DIR
 done
 
