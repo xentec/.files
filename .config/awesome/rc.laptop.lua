@@ -13,9 +13,9 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 local vicious = require("vicious")
 local keys = require("keys")
-local pulse = require("pulse")
+local pulse = require("modules.pulse")
 local common = require("common")
-local autostart = require("autostart")
+local autostart = require("modules.autostart")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -148,7 +148,7 @@ end, 10, 'BAT0')
 
 -- Network
 widget.network = wibox.widget.textbox()
-vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">${wlp3s0 down_kb} kb/s | ${wlp3s0 up_kb} kb/s</span>', 2)
+vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">↓ ${wlp3s0 down_kb} kb/s ↑ ${wlp3s0 up_kb} kb/s</span>', 2)
 
 -- Wifi
 widget.wifi = wibox.widget.textbox()
