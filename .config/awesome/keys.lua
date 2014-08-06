@@ -82,7 +82,14 @@ local globalkeys = awful.util.table.join(
         awful.key({ }, "XF86AudioPlay", function () awful.util.spawn("ncmpcpp toggle"); vicious.force(widget.mpd) end),
         awful.key({ }, "XF86AudioStop", function () awful.util.spawn("ncmpcpp stop"); vicious.force(widget.mpd) end),
         awful.key({ }, "XF86AudioPrev", function () awful.util.spawn("ncmpcpp prev"); vicious.force(widget.mpd) end),
-        awful.key({ }, "XF86AudioNext", function () awful.util.spawn("ncmpcpp next"); vicious.force(widget.mpd) end)
+        awful.key({ }, "XF86AudioNext", function () awful.util.spawn("ncmpcpp next"); vicious.force(widget.mpd) end),
+
+        -- Backlight
+        awful.key({ }, "XF86MonBrightnessUp",   function () awful.util.spawn("xbacklight -inc 10") end),
+        awful.key({ }, "XF86MonBrightnessDown", function () awful.util.spawn("xbacklight -dec 10") end),
+        awful.key({ "Shift" }, "XF86MonBrightnessUp",   function () awful.util.spawn("xbacklight -set 100") end),
+        awful.key({ "Shift" }, "XF86MonBrightnessDown", function () awful.util.spawn("xbacklight -set 10") end)
+
 )
 
 local clientkeys = awful.util.table.join(
