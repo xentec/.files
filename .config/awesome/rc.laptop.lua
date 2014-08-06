@@ -144,7 +144,7 @@ vicious.register(widget.battery, vicious.widgets.bat, function(w, data)
 	w:set_background_color(data[1] == '⌁' and '#AA0000' or beautiful.bg_minimize)
 	--naughty.notify({title = data[1], text = data[2]})
 	return data[2]
-end, 10, 'BAT0')
+end, 2, 'BAT0')
 
 -- Network
 widget.network = wibox.widget.textbox()
