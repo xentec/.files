@@ -119,7 +119,7 @@ widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄</span>')
 widget.layoutbox = {}
 
 -- Clock
-widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
+widget.clock = awful.widget.textclock('%H:%M %a %d.%m.%y')
 
 --Battery
 widget.battery = awful.widget.progressbar({ width = 50, height = 5 })
@@ -133,11 +133,11 @@ vicious.register(widget.battery, vicious.widgets.bat, function(w, data)
 		["Unknown\n"]     = "⌁",
 		["Charging\n"]    = "+",
 		["Discharging\n"] = "-"		]]--
-	if data[2] < critical and w.warning.critical == nil then
+	if data[2] < critical and data[2] % 5 == 0 and w.warning ~= data[2] then
 		naughty.notify({ preset = naughty.config.presets.critical,
 						 title = "Battery charge is critical!",
 						 text = data[2] .. " % remaining. Charge me up!" })
-		w.warning.critical = true
+		w.warning = data[2]
 	end
 	w:set_color(data[1] == '↯' and '#00CCCC' or data[2] > low and '#03cc00' or data[2] > critical and '#FF7B00' or '#EE0000')
 	w:set_border_color(data[1] == '+' and '#00CCCC' or data[1] == '-' and data[2] <= critical and '#AA0000' or beautiful.bg_focus)
@@ -175,10 +175,20 @@ local volume = pulse(function(muted, val)
 end)
 
 -- CPU
-widget.cpu = awful.widget.progressbar({ width = 50, height = 4 })
-widget.cpu:set_background_color("#876333")
-widget.cpu:set_color("#DF8F26")
-vicious.register(widget.cpu, vicious.widgets.cpu, "$1")
+widget.cpu = {}
+widget.cpu.count = 4
+for i = 1,widget.cpu.count do
+	widget.cpu[i] = awful.widget.progressbar({ width = 50/widget.cpu.count })
+	widget.cpu[i]:set_background_color("#876333")
+	widget.cpu[i]:set_color("#DF8F26")
+end
+vicious.register(widget.cpu, vicious.widgets.cpu, function(w, data)
+	for i = 1,w.count do
+		w[i]:set_value(data[i+1]/100)
+	end
+
+	return data
+end, 2)
 
 -- Memory
 widget.mem = awful.widget.progressbar({ width = 50, height = 4 })
@@ -264,13 +274,17 @@ do
 	left:add(bar.main.prompt[monitor.main])
 	left = wibox.widget.background(wibox.layout.margin(left,0,4), beautiful.bg_normal)
 
-
+	local cpu = wibox.layout.fixed.horizontal()
+	for i=1,widget.cpu.count do
+		widget.cpu[i]:set_height(4)
+		cpu:add(widget.cpu[i])
+	end
 	--widget.cpu:set_vertical(true)
 	--widget.mem:set_vertical(true)
 	--widget.battery:set_vertical(true)
 	--widget.volume:set_vertical(true)
 	local data_bars = wibox.layout.fixed.vertical()
-	data_bars:add(widget.cpu)
+	data_bars:add(cpu)
 	--data_bars:add(widget.spacer.h)
 	data_bars:add(widget.mem)
 	--data_bars:add(widget.spacer.h)
