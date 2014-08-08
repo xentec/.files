@@ -408,7 +408,7 @@ autostart.add({
 		"pulseaudio --start",
 		"nitrogen --restore",
 		{"dropboxd","dropbox"},
-		{"weechat", term = true},
+	--	{"weechat", term = true},
 	})
 autostart.launch()
 -- }}}
