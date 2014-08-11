@@ -88,7 +88,12 @@ local globalkeys = awful.util.table.join(
         awful.key({ }, "XF86MonBrightnessUp",   function () awful.util.spawn("xbacklight -inc 10") end),
         awful.key({ }, "XF86MonBrightnessDown", function () awful.util.spawn("xbacklight -dec 10") end),
         awful.key({ "Shift" }, "XF86MonBrightnessUp",   function () awful.util.spawn("xbacklight -set 100") end),
-        awful.key({ "Shift" }, "XF86MonBrightnessDown", function () awful.util.spawn("xbacklight -set 10") end)
+        awful.key({ "Shift" }, "XF86MonBrightnessDown", function () awful.util.spawn("xbacklight -set 10") end),
+
+
+        -- Screen capture
+        awful.key({ modkey,           }, "Print", function () awful.util.spawn("seen")        end),
+        awful.key({ modkey, "Shift"   }, "Print", function () awful.util.spawn("seen video")  end)
 
 )
 

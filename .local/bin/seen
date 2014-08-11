@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# Expects a server to be mounted to your filesystem.
+ssh_server=outpost:/srv/http/web/dump/scr
+url="http://dump.aix0.eu/scr"
+imageEncoding=".png"
+videoEncoding=".webm"
+name=`date "+%Y-%m-%d_%H-%M-%S"`
+pidFile="/tmp/seen_record.pid"
+nameFile="/tmp/seen_name"
+
+function notify {
+    if [ "$DISPLAY" ]; then
+        awesome-notify "$1" "$2" $3 "$4"
+    fi
+}
+
+function clipit {
+    echo -n "$1" | xclip -selection clipboard
+}
+
+
+type=$1
+if [ "$type" != "image"  ]; then
+    if [ "$type" != "video"  ]; then
+        type="image"
+    fi
+fi
+
+function record {
+    ffmpeg -f x11grab -s "${1}x${2}" -i ":0.0+${3},${4}" \
+        -c:v libvpx -quality good -cpu-used 0 -b:v 2M -qmin 0 -qmax 32 -bufsize 1000k -threads 8 -an     \
+        "/tmp/$5"
+    E=$?
+    echo $E > sig
+    if [ $E -gt 0 ] && [ $E -ne 255 ]; then
+        echo -e "\a" && echo -e "\a"
+        rm "$5"
+        rm "$pidFile"
+        rm "$nameFile"
+    fi
+}
+
+
+if [ "$type" == "image" ]; then
+    f=${name}${imageEncoding}
+
+    eval `slop -nkb -b=3 -c=1.0,0.3,0.3`
+    if [ "$(($W+$H))" != "0" ]; then
+        maim -g="${W}x${H}+${X}+${Y}" "/tmp/$f"
+    else
+        exit 0
+    fi
+
+    optipng /tmp/$f
+    notify "seen: $f" "Uploading..." 3 "#7777FF"
+    scp /tmp/$f $ssh_server/$f
+    notify "seen: $f" "Done: ${url}/$f" 5 "#33CC33"
+
+    clipit "${url}/$f"
+    echo "${url}/$f"
+
+    rm /tmp/$f
+else
+    f=${name}${videoEncoding}
+    if [ -f "$pidFile" ]; then
+        pkill -TERM -P `cat "$pidFile"`
+        f=`cat "$nameFile"`
+        echo -e "\a"
+        rm "$pidFile" "$nameFile"
+
+        notify "seen: $f" "Uploading..." 3 "#7777FF"
+        scp /tmp/$f $ssh_server/$f
+        notify "seen: $f" "Done: ${url}/$f" 5 "#33CC33"
+
+        clipit "${url}/$f"
+        echo "${url}/$f"
+
+        rm /tmp/$f
+        exit 0
+    fi
+    eval `slop -nkb -b=3 -c=1.0,0.3,0.3`
+    if [ "$(($W+$H))" != "0" ]; then
+        echo -e "\a"
+        record ${W} ${H} ${X} ${Y} $f &
+        pid=$!
+        echo -n "$pid" > $pidFile
+        echo -n "$f" > $nameFile
+    fi
+fi
+
+
