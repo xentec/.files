@@ -4,6 +4,8 @@ local vicious = require("vicious")
 
 local pulse = require("modules.pulse")
 
+local exec = awful.util.spawn_with_shell
+
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
 -- If you do not like this or do not have such a key,
@@ -79,10 +81,10 @@ local globalkeys = awful.util.table.join(
 		awful.key({ }, "XF86AudioLowerVolume",  pulse.decrease),
 
         -- Media
-        awful.key({ }, "XF86AudioPlay", function () awful.util.spawn("ncmpcpp toggle"); vicious.force(widget.mpd) end),
-        awful.key({ }, "XF86AudioStop", function () awful.util.spawn("ncmpcpp stop"); vicious.force(widget.mpd) end),
-        awful.key({ }, "XF86AudioPrev", function () awful.util.spawn("ncmpcpp prev"); vicious.force(widget.mpd) end),
-        awful.key({ }, "XF86AudioNext", function () awful.util.spawn("ncmpcpp next"); vicious.force(widget.mpd) end),
+        awful.key({ }, "XF86AudioPlay", function () exec("mpc -h keeper toggle"); vicious.force(widget.mpd) end),
+        awful.key({ }, "XF86AudioStop", function () exec("mpc -h keeper stop"); vicious.force(widget.mpd) end),
+        awful.key({ }, "XF86AudioPrev", function () exec("mpc -h keeper prev"); vicious.force(widget.mpd) end),
+        awful.key({ }, "XF86AudioNext", function () exec("mpc -h keeper next"); vicious.force(widget.mpd) end),
 
         -- Backlight
         awful.key({ }, "XF86MonBrightnessUp",   function () awful.util.spawn("xbacklight -inc 10") end),
