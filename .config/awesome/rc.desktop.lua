@@ -145,18 +145,21 @@ end, 5)
 
 -- CPU
 widget.cpu = {}
-for i = 1,8 do
+widget.cpu.count = 8
+for i = 1,widget.cpu.count do
 	widget.cpu[i] = awful.widget.progressbar({ width = 100 })
 	widget.cpu[i]:set_background_color("#876333")
 	widget.cpu[i]:set_color("#DF8F26")
 end
 vicious.register(widget.cpu, vicious.widgets.cpu, function(w, data)
-	for i = 1,#w do
+	for i = 1,w.count do
 		w[i]:set_value(data[i+1]/100)
 	end
 
 	return data
 end, 2)
+widget.cpu.temp = wibox.widget.textbox();
+vicious.register(widget.cpu.temp, vicious.widgets.thermal, ' <span color="#876333">$1 °C</span>', 4, {'it87.552', 'core'})
 
 -- Memory
 widget.mem = {}
@@ -196,7 +199,7 @@ vicious.register(widget.gpu, require("modules.gpu-nv"), function(w, data)
 	end
 
 	w.mem:set_value(tonumber(data[2])/tonumber(data[3]))
-	w.temp:set_markup(' <span color="#3FC51E">'..data[4]..' °C</span>')
+	w.temp:set_markup(' <span color="#4F8A3A">'..data[4]..' °C</span>')
 	return data
 end, 2, { query = { "[gpu:0]/GPUUtilization", "[gpu:0]/UsedDedicatedGPUMemory", "[gpu:0]/TotalDedicatedGPUMemory", "[gpu:0]/GPUCoreTemp" } })
 
@@ -226,7 +229,7 @@ vicious.register(widget.mpd, mpd, function(w, data)
 	w.nfo:set_markup(nfo)
 	w.bar:set_value(data['{elapsed}'] / data['{Time}'])
 	return data
-end, 1, {host = "keeper"})
+end, 2, {host = "keeper"})
 vicious.cache(widget.mpd)
 
 -- ########################################
@@ -361,8 +364,8 @@ if screen.count() > 1 then
 
 	do
 		local cpu = wibox.layout.fixed.vertical()
-		for i=1,#widget.cpu do
-			widget.cpu[i]:set_height(16/#widget.cpu)
+		for i=1,widget.cpu.count do
+			widget.cpu[i]:set_height(16/widget.cpu.count)
 			cpu:add(widget.cpu[i])
 		end
 
@@ -390,6 +393,7 @@ if screen.count() > 1 then
 
 		local left = wibox.layout.fixed.horizontal()
 		left:add(cpu)
+		left:add(widget.cpu.temp)
 		left:add(widget.spacer.h)
 		left:add(mem)
 		left:add(widget.spacer.h)
@@ -467,6 +471,7 @@ local rules = {
 	{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = tags[2][1] } },
 	{ rule = { class = "Skype" },						properties = { tag = tags[2][1] } },
 	{ rule = { class = "Pidgin" },						properties = { tag = tags[2][1] } },
+	{ rule = { class = "utox" },						properties = { tag = tags[2][1] } },
 	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] },
 		callback = function (c)
 			if c.name:find("Chat",1,true) then
@@ -523,6 +528,7 @@ autostart.add({
 		"steam",
 --		{"weechat", term = true},
 		"skype",
+		"utox",
 	})
 autostart.launch()
 -- }}}
