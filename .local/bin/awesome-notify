@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo -e \
+	"local n = require('naughty'); \n\
+	n.notify({ \n\
+		preset = n.config.presets.warning, \n\
+		title = '$1', \n\
+		text = '$2', \n\
+		timeout = $3, \n\
+		bg = '$4', \n\
+		fg = '$5', \n\
+	});" \
+| awesome-client

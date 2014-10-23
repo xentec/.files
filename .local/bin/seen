@@ -45,9 +45,9 @@ function record {
 if [ "$type" == "image" ]; then
     f=${name}${imageEncoding}
 
-    eval `slop -nkb -b=3 -c=1.0,0.3,0.3`
+    eval `slop -b 3 -c 1.0,0.3,0.3`
     if [ "$(($W+$H))" != "0" ]; then
-        maim -g="${W}x${H}+${X}+${Y}" "/tmp/$f"
+        maim -g "${W}x${H}+${X}+${Y}" "/tmp/$f"
     else
         exit 0
     fi
@@ -79,7 +79,7 @@ else
         rm /tmp/$f
         exit 0
     fi
-    eval `slop -nkb -b=3 -c=1.0,0.3,0.3`
+    eval `slop  -b 3 -c 1.0,0.3,1.0`
     if [ "$(($W+$H))" != "0" ]; then
         echo -e "\a"
         record ${W} ${H} ${X} ${Y} $f &
