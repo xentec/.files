@@ -1,0 +1,1 @@
+wodim -v -pad speed=1 dev=/dev/sr0 -dao -swab $@
