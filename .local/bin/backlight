@@ -1,0 +1,16 @@
+set -b
+
+if [[ -z "$1" ]]; then
+	exit
+fi
+
+case $1 in
+	"max")
+		cat /sys/class/backlight/intel_backlight/max_brightness > /sys/class/backlight/intel_backlight/brightness
+		;;
+	*)
+		echo $1 > /sys/class/backlight/intel_backlight/brightness
+		;;
+esac
+
+echo "Backlight brightness set to $(cat /sys/class/backlight/intel_backlight/brightness)"
