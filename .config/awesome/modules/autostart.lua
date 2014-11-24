@@ -1,6 +1,7 @@
 -- Autostart
 local awful = require("awful")
 local naughty = require("naughty")
+local io = { popen = io.popen }
 
 local entries = {}
 local autostart = {}
@@ -14,7 +15,7 @@ function autostart.launch()
 		local proc = app[2] or exec:match("([^%s.]+)%s*")
 
 		--print(exec .. " -> ".. (exec:match("([^%s.]+)%s*") or 'nil'))
-		--print('EXECTING: bash -c "pgrep '.. proc .. ' | tail -n 1"')
+		--print('EXECUTING: bash -c "pgrep '.. proc .. ' | tail -n 1"')
 
 		local pid = tonumber(awful.util.pread('bash -c "pgrep '.. proc .. ' | tail -n 1"'))
 
@@ -28,7 +29,7 @@ function autostart.launch()
 	end
 	if #started > 0 then
 		naughty.notify({ timeout = 5,
-			text = '$ <span color="Lime">'.. table.concat(started,';\n  ') .. '</span>' });
+			text = '$ <span color="Lime">'.. table.concat(started,';\n   ') .. '</span>' });
 	end
 end
 
@@ -40,6 +41,13 @@ function autostart.add(app)
 	else
 		table.insert(entries,app)
 	end
+end
+
+function autostart.addDex()
+	local f = io.popen("dex -a -e Awesome -d")
+	for line in f:lines() do
+		table.insert(entries, line:match("[^:]+: (.+)"))
+    end
 end
 
 return autostart

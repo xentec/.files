@@ -522,13 +522,15 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 
 -- {{{ Autostart
 autostart.add({
-		"pulseaudio",
+--		"pulseaudio",
 		"nitrogen --restore",
-		{"dropboxd","dropbox"},
+--		{"dropboxd","dropbox"},
 		"steam",
 --		{"weechat", term = true},
 		"skype",
 		"utox",
 	})
-autostart.launch()
+
+autostart.addDex()
+autostart.launch(true)
 -- }}}
