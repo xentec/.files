@@ -17,6 +17,7 @@ local common = require("common")
 local pulse = require("modules.pulse")
 local mpd = require("modules.mpd")
 local autostart = require("modules.autostart")
+local wallpaper = require("modules.wallpaper")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -523,7 +524,7 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 -- {{{ Autostart
 autostart.add({
 --		"pulseaudio",
-		"nitrogen --restore",
+--		"nitrogen --restore",
 --		{"dropboxd","dropbox"},
 		"steam",
 --		{"weechat", term = true},
@@ -534,3 +535,7 @@ autostart.add({
 autostart.addDex()
 autostart.launch(true)
 -- }}}
+
+
+wallpaper.add('~/lold/wg')
+wallpaper.init()
