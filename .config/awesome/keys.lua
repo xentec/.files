@@ -3,6 +3,7 @@ local menubar = require("menubar")
 local vicious = require("vicious")
 
 local pulse = require("modules.pulse")
+local wallpaper = require("modules.wallpaper")
 
 local exec = awful.util.spawn_with_shell
 
@@ -95,7 +96,10 @@ local globalkeys = awful.util.table.join(
 
         -- Screen capture
         awful.key({ modkey,           }, "Print", function () awful.util.spawn("seen")        end),
-        awful.key({ modkey, "Shift"   }, "Print", function () awful.util.spawn("seen video")  end)
+        awful.key({ modkey, "Shift"   }, "Print", function () awful.util.spawn("seen video")  end),
+
+        awful.key({ modkey, "Control"   },"Right", wallpaper.next)
+        
 
 )
 
