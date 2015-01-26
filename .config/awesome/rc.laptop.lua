@@ -125,26 +125,33 @@ widget.clock = awful.widget.textclock('%H:%M %a %d.%m.%y')
 widget.battery = awful.widget.progressbar({ width = 50, height = 5 })
 widget.battery:set_background_color("#00AAAA")
 widget.battery.warning = {}
-vicious.register(widget.battery, vicious.widgets.bat, function(w, data)
+widget.battery.func = function(w, data)
 	local low = 40
 	local critical = 15
 
---[[	["Full\n"]        = "↯",
-		["Unknown\n"]     = "⌁",
-		["Charging\n"]    = "+",
-		["Discharging\n"] = "-"		]]--
 	if data[2] < critical and data[2] % 5 == 0 and w.warning ~= data[2] then
 		naughty.notify({ preset = naughty.config.presets.critical,
 						 title = "Battery charge is critical!",
 						 text = data[2] .. " % remaining. Charge me up!" })
 		w.warning = data[2]
 	end
-	w:set_color(data[1] == '↯' and '#00CCCC' or data[2] > low and '#03cc00' or data[2] > critical and '#FF7B00' or '#EE0000')
-	w:set_border_color(data[1] == '+' and '#00CCCC' or data[1] == '-' and data[2] <= critical and '#AA0000' or beautiful.bg_focus)
+
+--[[	["Full\n"]        = "↯",
+		["Unknown\n"]     = "⌁",
+		["Charging\n"]    = "+",
+		["Discharging\n"] = "-"		]]--
+	w:set_color(data[1] == '↯' and '#00CCCC' or 
+				data[2] > low and '#03cc00' or 
+				data[2] > critical and '#FF7B00' or 
+				'#EE0000')
+	w:set_border_color(data[1] == '+' and '#00CCCC' or 
+					   data[1] == '-' and data[2] <= critical and '#AA0000' or 
+					   beautiful.bg_focus)
 	w:set_background_color(data[1] == '⌁' and '#AA0000' or beautiful.bg_minimize)
 	--naughty.notify({title = data[1], text = data[2]})
 	return data[2]
-end, 2, 'BAT0')
+end
+vicious.register(widget.battery, vicious.widgets.bat, widget.battery.func, 2, 'BAT0')
 
 -- Network
 widget.network = wibox.widget.textbox()
@@ -182,13 +189,14 @@ for i = 1,widget.cpu.count do
 	widget.cpu[i]:set_background_color("#876333")
 	widget.cpu[i]:set_color("#DF8F26")
 end
-vicious.register(widget.cpu, vicious.widgets.cpu, function(w, data)
+widget.cpu.func = function(w, data)
 	for i = 1,w.count do
 		w[i]:set_value(data[i+1]/100)
 	end
 
 	return data
-end, 2)
+end
+vicious.register(widget.cpu, vicious.widgets.cpu, widget.cpu.func, 2)
 
 -- Memory
 widget.mem = awful.widget.progressbar({ width = 50, height = 4 })

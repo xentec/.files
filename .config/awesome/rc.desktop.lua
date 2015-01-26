@@ -114,6 +114,10 @@ autostart.terminal = terminal
 -- ########################################
 
 widget = {}
+
+widget.def = {}
+widget.def.barLen = 100
+
 widget.spacer = {}
 widget.spacer.h = wibox.widget.textbox('<span color="gray"> ┆ </span>')
 widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄</span>')
@@ -148,48 +152,50 @@ end, 5)
 widget.cpu = {}
 widget.cpu.count = 8
 for i = 1,widget.cpu.count do
-	widget.cpu[i] = awful.widget.progressbar({ width = 100 })
+	widget.cpu[i] = awful.widget.progressbar({ width = widget.def.barLen })
 	widget.cpu[i]:set_background_color("#876333")
 	widget.cpu[i]:set_color("#DF8F26")
 end
-vicious.register(widget.cpu, vicious.widgets.cpu, function(w, data)
+widget.cpu.temp = wibox.widget.textbox();
+widget.cpu.func = function(w, data)
 	for i = 1,w.count do
 		w[i]:set_value(data[i+1]/100)
 	end
 
 	return data
-end, 2)
-widget.cpu.temp = wibox.widget.textbox();
+end
+vicious.register(widget.cpu, vicious.widgets.cpu, widget.cpu.func, 2)
 vicious.register(widget.cpu.temp, vicious.widgets.thermal, ' <span color="#876333">$1 °C</span>', 4, {'it87.552', 'core'})
 
 -- Memory
 widget.mem = {}
-widget.mem.ram = awful.widget.progressbar({ width = 100 })
+widget.mem.ram = awful.widget.progressbar({ width = widget.def.barLen })
 widget.mem.ram:set_background_color("#3A6D8A")
 widget.mem.ram:set_color("#269CDF")
-widget.mem.swap = awful.widget.progressbar({ width = 100 })
+widget.mem.swap = awful.widget.progressbar({ width = widget.def.barLen })
 widget.mem.swap:set_background_color("#3A6D8A")
 widget.mem.swap:set_color("#269CDF")
-vicious.register(widget.mem, vicious.widgets.mem, function(w, data)
+widget.mem.func = function(w, data)
 	w.ram:set_value(data[1]/100)
 	w.swap:set_value(data[5]/100)
 	return data
-end)
+end
+vicious.register(widget.mem, vicious.widgets.mem, widget.mem.func)
 
 -- GPU
 widget.gpu = {}
-widget.gpu.gl = awful.widget.progressbar({ width = 100 })
+widget.gpu.gl = awful.widget.progressbar({ width = widget.def.barLen })
 widget.gpu.gl:set_background_color("#4F8A3A")
 widget.gpu.gl:set_color("#3FC51E")
-widget.gpu.vl = awful.widget.progressbar({ width = 100 })
+widget.gpu.vl = awful.widget.progressbar({ width = widget.def.barLen })
 widget.gpu.vl:set_background_color("#4F8A3A")
 widget.gpu.vl:set_color("#3FC51E")
-widget.gpu.mem = awful.widget.progressbar({ width = 100 })
+widget.gpu.mem = awful.widget.progressbar({ width = widget.def.barLen })
 widget.gpu.mem:set_background_color("#4F8A3A")
 widget.gpu.mem:set_color("#3FC51E")
 widget.gpu.temp = wibox.widget.textbox();
 --widget.gpu.temp:set_color("#3FC51E")
-vicious.register(widget.gpu, require("modules.gpu-nv"), function(w, data)
+widget.gpu.func = function(w, data)
 	for k, v in string.gmatch(data[1], "(%w+)=(%w+)") do
 		v = tonumber(v)/100
 		if(k == "graphics") then
@@ -202,7 +208,12 @@ vicious.register(widget.gpu, require("modules.gpu-nv"), function(w, data)
 	w.mem:set_value(tonumber(data[2])/tonumber(data[3]))
 	w.temp:set_markup(' <span color="#4F8A3A">'..data[4]..' °C</span>')
 	return data
-end, 2, { query = { "[gpu:0]/GPUUtilization", "[gpu:0]/UsedDedicatedGPUMemory", "[gpu:0]/TotalDedicatedGPUMemory", "[gpu:0]/GPUCoreTemp" } })
+end
+vicious.register(widget.gpu, 
+	require("modules.gpu-nv"), 
+	widget.gpu.func, 2, 
+	{ query = { "[gpu:0]/GPUUtilization", "[gpu:0]/UsedDedicatedGPUMemory", "[gpu:0]/TotalDedicatedGPUMemory", "[gpu:0]/GPUCoreTemp" } }
+)
 
 -- MPD
 widget.mpd = {}
@@ -213,8 +224,7 @@ widget.mpd.nfo:set_font(theme.font_name .. ' ' .. (theme.font_size - 2))
 widget.mpd.bar = awful.widget.progressbar({ height = 2 })
 widget.mpd.bar:set_background_color("#716D40")
 widget.mpd.bar:set_color("#BDB76B")
-
-vicious.register(widget.mpd, mpd, function(w, data)
+widget.mpd.func = function(w, data)
 	local state = {
 		play = '&#xF0BF;',
 		pause = '&#xF0BB;',
@@ -230,7 +240,8 @@ vicious.register(widget.mpd, mpd, function(w, data)
 	w.nfo:set_markup(nfo)
 	w.bar:set_value(data['{elapsed}'] / data['{Time}'])
 	return data
-end, 2, {host = "keeper"})
+end
+vicious.register(widget.mpd, require("modules.mpd"), widget.mpd.func, 2, {host = "keeper"})
 vicious.cache(widget.mpd)
 
 -- ########################################
