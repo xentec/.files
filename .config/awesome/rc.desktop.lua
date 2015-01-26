@@ -127,10 +127,21 @@ widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
 
 -- Network
 widget.network = wibox.widget.textbox()
-vicious.register(widget.network, vicious.widgets.net, '<span color="DodgerBlue">↓ ${enp5s0 down_kb} kb/s ↑ ${enp5s0 up_kb} kb/s</span>', 1)
+widget.network.func = function (w, data)
+	local ret = {}
+	if data['{en carrier}'] == 1 then
+		ret = { col = "DodgerBlue", d = data['{en down_sb}'], ds = data['{en down_suf}'], u = data['{en up_sb}'], us = data['{en up_suf}'] }
+--	elseif data['{wl carrier}'] == 1 then
+--		ret = { col = "DodgerBlue", d = data['{wl down_sb}'], ds = data['{wl down_suf}'], u = data['{wl up_sb}'], us = data['{wl up_suf}'] }
+	else
+		return '<span color="#8c8c8c"> Disconnected </span>'
+	end
+	return string.format('<span color="%s">↓ %5.1f %s ↑ %5.1f %s</span>', ret.col, ret.d, ret.ds, ret.u, ret.us)
+end
+vicious.register(widget.network, mods.net, widget.network.func, 1)
 
 -- Volume
-widget.volume = awful.widget.progressbar({ width = 100 })
+widget.volume = awful.widget.progressbar({ width = widget.def.barLen })
 widget.volume:set_background_color("#716D40")
 widget.volume:set_color("#BDB76B")
 widget.volume:set_max_value(100)
