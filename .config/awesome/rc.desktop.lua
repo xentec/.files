@@ -63,6 +63,7 @@ browser = "chromium"
 terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "nano"
 editor_cmd = terminal .. " -e " .. editor
+mods.mpd.host = "keeper.local"
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -249,8 +250,8 @@ widget.mpd.func = function(w, data)
 	w.bar:set_value(data['{elapsed}'] / data['{Time}'])
 	return data
 end
-vicious.register(widget.mpd, mods.mpd, widget.mpd.func, 2, {host = "keeper"})
-vicious.cache(widget.mpd)
+vicious.register(widget.mpd, mods.mpd, widget.mpd.func, 2)
+vicious.cache(mods.mpd )
 
 -- ########################################
 -- ## Bars

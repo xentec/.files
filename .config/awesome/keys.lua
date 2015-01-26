@@ -4,6 +4,7 @@ local vicious = require("vicious")
 
 local pulse = require("modules.pulse")
 local wallpaper = require("modules.wallpaper")
+local mpd = require("modules.mpd")
 
 local exec = awful.util.spawn_with_shell
 
@@ -82,10 +83,11 @@ local globalkeys = awful.util.table.join(
 		awful.key({ }, "XF86AudioLowerVolume",  pulse.decrease),
 
         -- Media
-        awful.key({ }, "XF86AudioPlay", function () exec("mpc -h keeper toggle"); vicious.force(widget.mpd) end),
-        awful.key({ }, "XF86AudioStop", function () exec("mpc -h keeper stop"); vicious.force(widget.mpd) end),
-        awful.key({ }, "XF86AudioPrev", function () exec("mpc -h keeper prev"); vicious.force(widget.mpd) end),
-        awful.key({ }, "XF86AudioNext", function () exec("mpc -h keeper next"); vicious.force(widget.mpd) end),
+        awful.key({ }, "XF86AudioPlay", function () exec("mpc -h ".. mpd.host .." toggle"); vicious.force({widget.mpd}) end),
+        awful.key({ }, "XF86AudioStop", function () exec("mpc -h ".. mpd.host .." stop"); vicious.force({widget.mpd}) end),
+        awful.key({ }, "XF86AudioPrev", function () exec("mpc -h ".. mpd.host .." prev"); vicious.force({widget.mpd}) end),
+        awful.key({ }, "XF86AudioNext", function () exec("mpc -h ".. mpd.host .." next"); vicious.force({widget.mpd}) end),
+        awful.key({ modkey, "Control"}, "m", function () mpd.async = not mpd.async;  end),
 
         -- Backlight
         awful.key({ }, "XF86MonBrightnessUp",   function () awful.util.spawn("xbacklight -inc 10") end),
@@ -98,7 +100,7 @@ local globalkeys = awful.util.table.join(
         awful.key({ modkey,           }, "Print", function () awful.util.spawn("seen")        end),
         awful.key({ modkey, "Shift"   }, "Print", function () awful.util.spawn("seen video")  end),
 
-        awful.key({ modkey, "Control"   },"Right", wallpaper.next)
+        awful.key({ modkey, "Control" }, "Right", wallpaper.next)
         
 
 )

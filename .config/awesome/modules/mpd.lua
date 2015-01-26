@@ -9,6 +9,8 @@ local io = { popen = io.popen }
 local setmetatable = setmetatable
 local string = { gmatch = string.gmatch }
 local helpers = require("vicious.helpers")
+local awful = require("awful")
+--local naughty = require("naughty")
 -- }}}
 
 
@@ -16,6 +18,13 @@ local helpers = require("vicious.helpers")
 -- vicious.widgets.mpd
 local mpd = {}
 
+mpd.host = "127.0.0.1"
+mpd.port = "6600"
+mpd.passowrd = "\"\""
+
+mpd.cache = awful.util.getdir("cache").."/mpd"
+
+mpd.async = false
 
 -- {{{ MPD widget type
 local function worker(format, warg)
@@ -33,15 +42,21 @@ local function worker(format, warg)
 
     -- Fallback to MPD defaults
     local pass = warg and (warg.password or warg[1]) or "\"\""
-    local host = warg and (warg.host or warg[2]) or "127.0.0.1"
-    local port = warg and (warg.port or warg[3]) or "6600"
+    local host = warg and (warg.host or warg[2]) or mpd.host
+    local port = warg and (warg.port or warg[3]) or mpd.port
 
     -- Construct MPD client options
     local mpdh = "telnet://"..host..":"..port
     local echo = "echo 'password "..pass.."\nstatus\ncurrentsong\nclose'"
 
     -- Get data from MPD server
-    local f = io.popen(echo.." | curl --connect-timeout 1 -fsm 3 "..mpdh)
+    local f
+    if mpd.async == true then
+        f = io.popen("cat "..mpd.cache)    
+        awful.util.spawn_with_shell(echo.." | curl --connect-timeout 1 -fsm 3 "..mpdh.." > "..mpd.cache)
+    else
+        f = io.popen(echo.." | curl --connect-timeout 1 -fsm 3 "..mpdh)
+    end
 
     for line in f:lines() do
         for k, v in string.gmatch(line, "([%w]+):[%s](.*)$") do
