@@ -46,14 +46,14 @@ $EMB\t$N :: \
 $EMG\w $G(\$(ls -1 | wc -l | sed 's: ::g')+.\$(ls -A1 | grep '^\.' | wc -l | sed 's: ::g') files, \$(LC_ALL=C ls -lah | grep -m 1 total | sed 's/total //')b)$N \n \
 \$(RET=\$?; [[ \$RET != 0 ]] && echo '$R'\$RET'$N ' )$EMY»$N "
 
+# Defaults
+export EDITOR=nano
+
 # Aliases
 alias ls='ls -F --color=auto'
 alias ll='ls -l'
-alias snano='sudo nano'
+alias sedit="sudo $EDITOR"
 alias lg='sudo -iu $1'
-
-# Defaults
-export EDITOR=nano
 
 source .bash.d/local 2&> /dev/null
 ##########################
