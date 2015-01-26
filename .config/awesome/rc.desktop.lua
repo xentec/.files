@@ -14,10 +14,9 @@ local menubar = require("menubar")
 local vicious = require("vicious")
 local keys = require("keys")
 local common = require("common")
-local pulse = require("modules.pulse")
-local mpd = require("modules.mpd")
-local autostart = require("modules.autostart")
-local wallpaper = require("modules.wallpaper")
+
+local mods = require("modules")
+
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -103,11 +102,9 @@ for s = 3, screen.count() do
 end
 -- }}}
 
--- {{{ Menu
--- Menubar configuration
-menubar.utils.terminal = terminal -- Set the terminal for applications that require it
--- }}}
-autostart.terminal = terminal
+-- Set the terminal for applications that require it
+menubar.utils.terminal = terminal
+mods.autostart.terminal = terminal
 
 -- ########################################
 -- ## Widgets
@@ -138,7 +135,7 @@ widget.volume:set_background_color("#716D40")
 widget.volume:set_color("#BDB76B")
 widget.volume:set_max_value(100)
 
-local volume = pulse(function(muted, val)
+local volume = mods.pulse(function(muted, val)
 	if muted then
 		widget.volume:set_color("#716D40")
 	else
@@ -210,7 +207,7 @@ widget.gpu.func = function(w, data)
 	return data
 end
 vicious.register(widget.gpu, 
-	require("modules.gpu-nv"), 
+	mods.gpu, 
 	widget.gpu.func, 2, 
 	{ query = { "[gpu:0]/GPUUtilization", "[gpu:0]/UsedDedicatedGPUMemory", "[gpu:0]/TotalDedicatedGPUMemory", "[gpu:0]/GPUCoreTemp" } }
 )
@@ -241,7 +238,7 @@ widget.mpd.func = function(w, data)
 	w.bar:set_value(data['{elapsed}'] / data['{Time}'])
 	return data
 end
-vicious.register(widget.mpd, require("modules.mpd"), widget.mpd.func, 2, {host = "keeper"})
+vicious.register(widget.mpd, mods.mpd, widget.mpd.func, 2, {host = "keeper"})
 vicious.cache(widget.mpd)
 
 -- ########################################
@@ -307,7 +304,6 @@ bar.info = {}
 
 	-- Main ###################################
 do
-
 	bar.main.prompt[monitor.main] = awful.widget.prompt()
 
 	widget.layoutbox[monitor.main] = awful.widget.layoutbox(monitor.main)
@@ -532,8 +528,8 @@ client.connect_signal("focus", function(c) c.border_color = beautiful.border_foc
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 
--- {{{ Autostart
-autostart.add({
+-- Autostart
+mods.autostart.add({
 --		"pulseaudio",
 --		"nitrogen --restore",
 --		{"dropboxd","dropbox"},
@@ -543,10 +539,9 @@ autostart.add({
 		"utox",
 	})
 
-autostart.addDex()
-autostart.launch(true)
--- }}}
+mods.autostart.addDex()
+mods.autostart.launch(true)
+--
 
-
-wallpaper.add('~/lold/wg')
-wallpaper.init()
+mods.wallpaper.add('~/lold/wg')
+mods.wallpaper.init()

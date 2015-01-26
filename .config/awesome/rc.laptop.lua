@@ -13,9 +13,9 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 local vicious = require("vicious")
 local keys = require("keys")
-local pulse = require("modules.pulse")
 local common = require("common")
-local autostart = require("modules.autostart")
+
+local mods = require("modules")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -100,11 +100,9 @@ for s = 2, screen.count() do
 end
 -- }}}
 
--- {{{ Menu
--- Menubar configuration
-menubar.utils.terminal = terminal -- Set the terminal for applications that require it
--- }}}
-autostart.terminal = terminal
+-- Set the terminal for applications that require it
+menubar.utils.terminal = terminal 
+mods.autostart.terminal = terminal
 
 -- ########################################
 -- ## Widgets
@@ -168,7 +166,7 @@ widget.volume:set_background_color("#716D40")
 widget.volume:set_color("#BDB76B")
 widget.volume:set_max_value(100)
 
-local volume = pulse(function(muted, val)
+local volume = mods.pulse(function(muted, val)
 	if muted then
 		widget.volume:set_color("#716D40")
 	else
