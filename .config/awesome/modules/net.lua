@@ -23,9 +23,9 @@ local net = {}
 local nets = {}
 -- Variable definitions
 
-local suffixes = { " ", "K", "M", "G", "T", "P", "E" }
+local units = { " ", "K", "M", "G", "T", "P", "E" }
 
-local function uformat(array, key, value, unit)
+local function uformat(array, key, value)
 
     array["{"..key.."_b}"] = string.format("%.1f", value)
 
@@ -35,9 +35,8 @@ local function uformat(array, key, value, unit)
         i = i + 1
     end
 
-    array["{"..key.."_suf}"] = suffixes[i]
+    array["{"..key.."_suf}"] = units[i]
     array["{"..key.."_sb}"] = value
-
 
     return array
 end
@@ -57,8 +56,8 @@ local function worker(format)
             local send = tonumber(string.match(line,
              "([%d]+)%s+%d+%s+%d+%s+%d+%s+%d+%s+%d+%s+%d+%s+%d$"))
 
-            uformat(args, name .. " rx", recv, unit)
-            uformat(args, name .. " tx", send, unit)
+            uformat(args, name .. " rx", recv)
+            uformat(args, name .. " tx", send)
 
             -- Operational state and carrier detection
             local sysnet = helpers.pathtotable("/sys/class/net/" .. name)
@@ -68,8 +67,8 @@ local function worker(format)
             if nets[name] == nil then
                 -- Default values on the first run
                 nets[name] = {}
-                uformat(args, name .. " down", 0, unit)
-                uformat(args, name .. " up",   0, unit)
+                uformat(args, name .. " down", 0)
+                uformat(args, name .. " up",   0)
             else -- Net stats are absolute, substract our last reading
                 local interval = now - nets[name].time
                 if interval <= 0 then interval = 1 end
@@ -77,8 +76,8 @@ local function worker(format)
                 local down = (recv - nets[name][1]) / interval
                 local up   = (send - nets[name][2]) / interval
 
-                uformat(args, name .. " down", down, unit)
-                uformat(args, name .. " up",   up,   unit)
+                uformat(args, name .. " down", down)
+                uformat(args, name .. " up",   up)
             end
 
             nets[name].time = now
