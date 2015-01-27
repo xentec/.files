@@ -53,6 +53,7 @@ export EDITOR=nano
 alias ls='ls -F --color=auto'
 alias ll='ls -l'
 alias sedit="sudo $EDITOR"
+alias sread="sudo less"
 alias lg='sudo -iu $1'
 
 source .bash.d/local 2&> /dev/null
