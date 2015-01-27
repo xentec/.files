@@ -59,11 +59,24 @@ naughty.config.presets.warning = {
 beautiful.init("/home/xentec/.config/awesome/theme.lua")
 
 browser = "chromium"
--- This is used later as the default terminal and editor to run.
 terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "nano"
 editor_cmd = terminal .. " -e " .. editor
 mods.mpd.host = "keeper.local"
+
+mods.wallpaper.add('~/lold/wg')
+
+-- Autostart
+mods.autostart.add({
+--		{"dropboxd","dropbox"},
+		"steam",
+--		{"weechat", term = true},
+		"skype",
+		"utox",
+		"compton",
+	})
+
+mods.autostart.addXDG()
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -540,20 +553,5 @@ client.connect_signal("focus", function(c) c.border_color = beautiful.border_foc
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 
--- Autostart
-mods.autostart.add({
---		"pulseaudio",
---		"nitrogen --restore",
---		{"dropboxd","dropbox"},
-		"steam",
---		{"weechat", term = true},
-		"skype",
-		"utox",
-	})
-
-mods.autostart.addDex()
-mods.autostart.launch(true)
---
-
-mods.wallpaper.add('~/lold/wg')
 mods.wallpaper.init()
+mods.autostart.launch()

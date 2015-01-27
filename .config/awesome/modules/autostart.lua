@@ -10,14 +10,13 @@ autostart.terminal = "xterm"
 
 function autostart.launch()
 	local started = {}
-	for _,app in pairs(entries) do
-		local exec = app[1] or app
+	for exec,app in pairs(entries) do
 		local proc = app[2] or exec:match("([^%s.]+)%s*")
 
-		--print(exec .. " -> ".. (exec:match("([^%s.]+)%s*") or 'nil'))
-		--print('EXECUTING: bash -c "pgrep '.. proc .. ' | tail -n 1"')
+--		naughty.notify({ timeout = 0,
+--			text = (type(app) == "table" and "T:"..app[1] or "S:"..tostring(app)).." > "..(type(proc) == "table" and "T:"..proc[1] or "S:"..tostring(proc))});
 
-		local pid = tonumber(awful.util.pread('bash -c "pgrep '.. proc .. ' | tail -n 1"'))
+		local pid = tonumber(awful.util.pread('bash -c "pgrep -f '.. proc .. ' | tail -n 1"'))
 
 		if not pid then
 			if app.term ~= nil and app.term == true then
@@ -36,17 +35,21 @@ end
 function autostart.add(app)
 	if type(app) == "table" then
 		for _,ap in pairs(app) do
-			table.insert(entries,ap)
+			entries[ap[1] or ap] = ap
 		end
 	else
-		table.insert(entries,app)
+		entries[app] = app
 	end
 end
 
-function autostart.addDex()
-	local f = io.popen("dex -a -e Awesome -d")
+function autostart.addXDG()
+	local f = io.popen("dex -d -a -e Awesome")
+	local exec
 	for line in f:lines() do
-		table.insert(entries, line:match("[^:]+: (.+)"))
+		exec = line:match("[^:]+: (.+)")
+		if entries[exec] == nil then
+			entries[exec] = exec
+		end
     end
 end
 
