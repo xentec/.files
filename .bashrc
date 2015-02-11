@@ -47,14 +47,16 @@ $EMG\w $G(\$(ls -1 | wc -l | sed 's: ::g')+.\$(ls -A1 | grep '^\.' | wc -l | sed
 \$(RET=\$?; [[ \$RET != 0 ]] && echo '$R'\$RET'$N ' )$EMY»$N "
 
 # Defaults
-export EDITOR=nano
+export EDITOR=vim
+export MPD_HOST=keeper
 
 # Aliases
 alias ls='ls -F --color=auto'
 alias ll='ls -l'
-alias sedit="sudo $EDITOR"
-alias sread="sudo less"
 alias lg='sudo -iu $1'
+alias sedit="sudo -E $EDITOR"
+alias sread="sudo -E less"
+
 
 source .bash.d/local 2&> /dev/null
 ##########################

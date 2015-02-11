@@ -43,11 +43,11 @@ echo "Building..."
 
 echo "Linking..."
 echo -e "  .config"
+
 # Link all configs
 for CONFIG in .config/*; do
 	lnk $PWD/$CONFIG ~/$CONFIG
 done
-
 
 # Link all fonts
 echo "  .fonts"
@@ -69,6 +69,9 @@ done
 echo "  bash"
 lnk $PWD/.bashrc ~/.bashrc
 lnk $PWD/.bash.d ~/.bash.d
+# vim
+echo "  vim"
+lnk $PWD/.vimrc ~/.vimrc
 # X
 echo "  X"
 lnk $PWD/.xinitrc ~/.xinitrc
