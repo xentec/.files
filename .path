@@ -1,0 +1,5 @@
+# Path
+USEREXEC=~/.local/bin
+if [[ $PATH != *$USEREXEC* ]]; then
+	export PATH=$USEREXEC:$PATH
+fi

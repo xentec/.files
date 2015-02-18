@@ -2,19 +2,15 @@
 # ~/.bashrc
 #
 
-# Path
-USEREXEC=~/.local/bin
-
-if [[ $PATH != *$USEREXEC* ]]; then
-	export PATH=$USEREXEC:$PATH
-fi
-
-# If not running interactively, don't do anything
-[[ $- != *i* ]] && return
-
 # simplifying including
 PWDIR=$(pwd)
 cd $(dirname $(readlink -fn ${BASH_SOURCE[0]}))
+
+source .path
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && cd $PWDIR && return
+
 
 # Colors
 ##########################

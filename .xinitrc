@@ -11,12 +11,15 @@ if [ -d /etc/X11/xinit/xinitrc.d ]; then
   unset f
 fi
 
-# Path
-USEREXEC=~/.local/bin
+# simplifying including
+PWDIR=$(pwd)
+cd $(dirname $(readlink -fn ${BASH_SOURCE[0]}))
 
-if [[ $PATH != *$USEREXEC* ]]; then
-        export PATH=$USEREXEC:$PATH
-fi
+source .path
+
+# Getting back
+cd $PWDIR
+
 
 # Make rxvt nicer
 [[ -f ~/.Xresources ]] && xrdb -merge ~/.Xresources
@@ -33,5 +36,3 @@ export STEAM_FRAME_FORCE_CLOSE=1
 
 # Java unuglyfier
 export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel'
-
-exec awesome
