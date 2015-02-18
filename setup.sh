@@ -76,7 +76,7 @@ lnk $PWD/.vimrc ~/.vimrc
 echo "  X"
 lnk $PWD/.xinitrc ~/.xinitrc
 lnk $PWD/.Xresources ~/.Xresources
-
+lnk $PWD/.Xres ~/.Xres
 
 echo -e "${EMG}Done!$N"
 cd $OLDPWD
