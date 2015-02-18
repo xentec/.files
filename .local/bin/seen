@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Expects a server to be mounted to your filesystem.
-ssh_server=outpost:/srv/http/web/dump/scr
+ssh_server=bastion:/srv/http/web/dump/scr
 url="http://dump.aix0.eu/scr"
 imageEncoding=".png"
 videoEncoding=".webm"
@@ -19,13 +19,20 @@ function clipit {
     echo -n "$1" | xclip -selection clipboard
 }
 
+function upload {
+    FILE=$1
 
-type=$1
-if [ "$type" != "image"  ]; then
-    if [ "$type" != "video"  ]; then
-        type="image"
+    notify "seen: $FILE" "Uploading..." 3 "#7777FF"
+
+    WHY=$(scp /tmp/$FILE $ssh_server/$FILE 2>&1)
+    if [ $? -ne 0 ]; then
+        WHY=$(tr '\r\n' '#' <<< $WHY | cut -f1 -d q'#')
+        notify "seen: $FILE" "Failed: $WHY" 5 "#CC3333"
+        exit
     fi
-fi
+
+    notify "seen: $FILE" "Done: ${url}/$FILE" 5 "#33CC33"
+}
 
 function record {
     ffmpeg -f x11grab -s "${1}x${2}" -i ":0.0+${3},${4}" \
@@ -41,6 +48,12 @@ function record {
     fi
 }
 
+type=$1
+if [ "$type" != "image"  ]; then
+    if [ "$type" != "video"  ]; then
+        type="image"
+    fi
+fi
 
 if [ "$type" == "image" ]; then
     f=${name}${imageEncoding}
@@ -52,11 +65,10 @@ if [ "$type" == "image" ]; then
         exit 0
     fi
 
+    notify "seen: $f" "Optimizing..." 3 "#EEAA00"
     optipng /tmp/$f
-    notify "seen: $f" "Uploading..." 3 "#7777FF"
-    scp /tmp/$f $ssh_server/$f
-    notify "seen: $f" "Done: ${url}/$f" 5 "#33CC33"
 
+    upload $f
     clipit "${url}/$f"
     echo "${url}/$f"
 
@@ -69,10 +81,7 @@ else
         echo -e "\a"
         rm "$pidFile" "$nameFile"
 
-        notify "seen: $f" "Uploading..." 3 "#7777FF"
-        scp /tmp/$f $ssh_server/$f
-        notify "seen: $f" "Done: ${url}/$f" 5 "#33CC33"
-
+	upload $f
         clipit "${url}/$f"
         echo "${url}/$f"
 

@@ -1,13 +1,19 @@
-#!/bin/bash
+#!/bin/env bash
+#
+# awesome-notify <title> <message> <timeout> <bgcolor> <fgcolor>
+#
 
-echo -e \
-	"local n = require('naughty'); \n\
-	n.notify({ \n\
-		preset = n.config.presets.warning, \n\
-		title = '$1', \n\
-		text = '$2', \n\
-		timeout = $3, \n\
-		bg = '$4', \n\
-		fg = '$5', \n\
-	});" \
-| awesome-client
+read -r -d '' CALL <<EOF
+local n = require('naughty');
+        n.notify({
+                preset = n.config.presets.warning,
+                title = "$1",
+                text = "$2",
+                timeout = ${3:-1},
+                bg = '$4',
+                fg = '$5',
+        });
+EOF
+#echo -e "$CALL"
+echo $CALL | tr -d '\n' | awesome-client
+
