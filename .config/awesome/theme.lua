@@ -28,6 +28,7 @@ theme.border_focus  = "#535d6c"
 theme.border_marked = "#91231c"
 
 theme.taglist_bg_occupied = "#444444"
+theme.tooltip_opacity = 1
 
 -- There are other variable sets
 -- overriding the default one when

@@ -58,10 +58,20 @@ naughty.config.presets.warning = {
 beautiful.init("/home/xentec/.config/awesome/theme.lua")
 
 browser = "chromium"
--- This is used later as the default terminal and editor to run.
 terminal = "urxvtc"
 editor = os.getenv("EDITOR") or "nano"
-editor_cmd = "gedit "
+editor_cmd = terminal .. " -e " .. editor
+
+
+mods.wallpaper.add('~/lold/wg')
+
+-- Autostart
+mods.autostart.add({
+--		{"dropboxd","dropbox"},
+--		{"weechat", term = true},
+	})
+
+mods.autostart.addXDG()
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -73,27 +83,30 @@ modkey = keys.mod;
 monitor = { main = 1 }
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
+local layout = awful.layout.suit
 layouts =
 {
-		awful.layout.suit.tile,
-		awful.layout.suit.tile.left,
-		awful.layout.suit.tile.bottom,
-		awful.layout.suit.tile.top,
-		awful.layout.suit.fair,
-		awful.layout.suit.fair.horizontal,
-		awful.layout.suit.spiral,
-		awful.layout.suit.spiral.dwindle,
-		awful.layout.suit.max,
-		awful.layout.suit.max.fullscreen,
-		awful.layout.suit.magnifier,
-		awful.layout.suit.floating
+		layout.tile,
+		layout.tile.left,
+		layout.tile.bottom,
+		layout.tile.top,
+		layout.fair,
+		layout.fair.horizontal,
+		layout.spiral,
+		layout.spiral.dwindle,
+		layout.max,
+		layout.max.fullscreen,
+		layout.magnifier,
+		layout.floating
 }
 -- }}}
 
 -- {{{ Tags
 -- Define a tag table which hold all screen tags.
-tags = {}
-tags[1] = awful.tag({ "main", "web", "chat", "code", "media", "other" }, 1, layouts[1])
+tags = {
+	names = { "main", "web", "chat", "code", "media", "other" }
+}
+tags[1] = awful.tag(tags.names, 1, layouts[1])
 for s = 2, screen.count() do
 	-- Each screen has its own tag table.
 	tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
@@ -119,38 +132,6 @@ widget.layoutbox = {}
 -- Clock
 widget.clock = awful.widget.textclock('%H:%M %a %d.%m.%y')
 
---Battery
-widget.battery = awful.widget.progressbar({ width = 50, height = 5 })
-widget.battery:set_background_color("#00AAAA")
-widget.battery.warning = {}
-widget.battery.func = function(w, data)
-	local low = 40
-	local critical = 15
-
-	if data[2] < critical and data[2] % 5 == 0 and w.warning ~= data[2] then
-		naughty.notify({ preset = naughty.config.presets.critical,
-						 title = "Battery charge is critical!",
-						 text = data[2] .. " % remaining. Charge me up!" })
-		w.warning = data[2]
-	end
-
---[[	["Full\n"]        = "↯",
-		["Unknown\n"]     = "⌁",
-		["Charging\n"]    = "+",
-		["Discharging\n"] = "-"		]]--
-	w:set_color(data[1] == '↯' and '#00CCCC' or 
-				data[2] > low and '#03cc00' or 
-				data[2] > critical and '#FF7B00' or 
-				'#EE0000')
-	w:set_border_color(data[1] == '+' and '#00CCCC' or 
-					   data[1] == '-' and data[2] <= critical and '#AA0000' or 
-					   beautiful.bg_focus)
-	w:set_background_color(data[1] == '⌁' and '#AA0000' or beautiful.bg_minimize)
-	--naughty.notify({title = data[1], text = data[2]})
-	return data[2]
-end
-vicious.register(widget.battery, vicious.widgets.bat, widget.battery.func, 2, 'BAT0')
-
 -- Network
 widget.network = wibox.widget.textbox()
 widget.network.func = function (w, data)
@@ -166,29 +147,30 @@ widget.network.func = function (w, data)
 end
 vicious.register(widget.network, mods.net, widget.network.func, 2)
 
--- Wifi
-widget.wifi = wibox.widget.textbox()
-vicious.register(widget.wifi, vicious.widgets.wifi, '<span color="DarkCyan">${ssid} ${linp}%</span>', 5, 'wlp3s0')
-
-
 -- Volume
-widget.volume = awful.widget.progressbar({ width = 50, height = 4 })
-widget.volume:set_background_color("#716D40")
-widget.volume:set_color("#BDB76B")
-widget.volume:set_max_value(100)
-
-local volume = mods.pulse(function(muted, val)
+widget.volume = {} --awful.widget.progressbar({ width = 50 })
+widget.volume.icon = wibox.widget.textbox()
+--widget.volume.icon:set_font(theme.font_name .. ' ' .. (theme.font_size + 2))
+widget.volume.data = wibox.widget.textbox()
+widget.volume.func = function(muted, val)
+	local data_color = "#BDB76B"
+	local icon = "&#xf0ba;"
 	if muted then
-		widget.volume:set_color("#716D40")
-	else
-		widget.volume:set_color("#BDB76B")
+		icon = "&#xf080;"
+		data_color = "#716D40"
 	end
-	widget.volume:set_value(val)
-	if 	widget.volume.muted ~= muted then
-		naughty.notify({text = muted and "Muted" or "Unmuted"})
+	widget.volume.icon:set_markup(string.format('<span color="#BDB76B">%s</span>', icon))
+	widget.volume.data:set_markup(string.format('<span color="%s"> %3.0f</span>', data_color, val))
+	
+	if widget.volume.muted ~= muted then
+		naughty.notify({
+			title = "Sound", 
+			text = muted and "Muted" or "Unmuted"
+		})
 	end
 	widget.volume.muted = muted;
-end)
+end
+local volume = mods.pulse(widget.volume.func, 5)
 
 -- CPU
 widget.cpu = {}
@@ -205,13 +187,83 @@ widget.cpu.func = function(w, data)
 
 	return data
 end
-vicious.register(widget.cpu, vicious.widgets.cpu, widget.cpu.func, 2)
+--vicious.register(widget.cpu, vicious.widgets.cpu, widget.cpu.func, 2)
 
 -- Memory
-widget.mem = awful.widget.progressbar({ width = 50, height = 4 })
+widget.mem = awful.widget.progressbar({ width = 50 })
 widget.mem:set_background_color("#3A6D8A")
 widget.mem:set_color("#269CDF")
-vicious.register(widget.mem, vicious.widgets.mem, "$1")
+--vicious.register(widget.mem, vicious.widgets.mem, "$1")
+
+-- Wifi
+widget.wifi = {}
+widget.wifi.icon = wibox.widget.textbox('<span color="DarkCyan">&#xf034;</span>')
+--widget.wifi.icon:set_font(theme.font_name .. ' ' .. (theme.font_size + 2))
+widget.wifi.data =  wibox.widget.textbox()
+widget.wifi.tip = awful.tooltip({
+	objects = { widget.wifi.icon, widget.wifi.data },
+	timer_function = function()
+		return string.format('<span color="DarkCyan">%s</span>', widget.wifi.tipdata)
+	end,
+})
+widget.wifi.func = function(w, data)
+	local s = data['{ssid}'].."\n"
+--	s = s.."Channel: "..data['{chan}'].."\n"
+	s = s.."Bit rate: "..data['{rate}'].." MB/s"
+	widget.wifi.tipdata = s
+
+	return string.format('<span color="DarkCyan"> %3.0f</span>', data['{linp}'])
+end
+vicious.register(widget.wifi.data, vicious.widgets.wifi, widget.wifi.func, 2, 'wl')
+
+-- Battery 
+widget.battery = {} 
+widget.battery.icon = wibox.widget.textbox('&#xE001;')
+widget.battery.icon:set_font('flaticon '..theme.font_size)
+widget.battery.data = wibox.widget.textbox()
+widget.battery.warning = 0
+--[[widget.battery.tip = awful.tooltip({
+	objects = { widget.battery.icon },
+	timer_function = function()
+		--return '<span color="DarkCyan"> '..widget.battery.data..' </span>'
+	end,
+})]]
+widget.battery.func = function(w, data)
+	local low = 40
+	local critical = 15
+
+--[[	["Full\n"]        = "↯",
+		["Unknown\n"]     = "⌁",
+		["Charging\n"]    = "+",
+		["Discharging\n"] = "−"		]]--
+	if data[1] == '−' and data[2] <= critical and w.warning ~= data[2] and (w.warning == 0 or data[2] % 5 == 0) then
+		naughty.notify({ preset = naughty.config.presets.critical,
+						 title = " Battery",
+						 text = string.format("%3.0f %% remaining. Charge me up!", data[2]) })
+		w.warning = data[2]
+	end
+
+	local icon =	'&#xE002;'
+--[[	local icon = 	(data[1] == '+' or data[1] == '↯') and '&#xE001;'  or 
+					data[2] > 80 and '&#xE006;' or 
+					data[2] > 60 and '&#xE004;' or
+					data[2] > 40 and '&#xE002;' or
+					data[2] > 20 and '&#xE005;' or 
+					data[2] > 5  and '&#xE003;' or 
+									 '&#xE007;'
+]]
+
+	local color = 	data[1] == '↯' and '#00CCCC' or 
+					data[1] == '+' and '#00CCCC' or
+					data[2] > low and '#03cc00' or 
+					data[2] > critical and '#FBE72A' or 
+										'#FB6B24'
+	--naughty.notify({title = data[1], text = data[2]})
+	w.icon:set_markup(string.format('<span color="%s">%s</span>', color, icon))
+	w.data:set_markup(string.format('<span color="%s">%3.0f</span>', color, data[2]))
+	return
+end
+vicious.register(widget.battery, vicious.widgets.bat, widget.battery.func, 2, 'BAT0')
 
 -- ########################################
 -- ## Bars
@@ -288,6 +340,7 @@ do
 
 	local left = wibox.layout.fixed.horizontal()
 	left:add(bar.main.taglist[monitor.main])
+	left:add(wibox.widget.systray())
 	left:add(bar.main.prompt[monitor.main])
 	left = wibox.widget.background(wibox.layout.margin(left,0,4), beautiful.bg_normal)
 
@@ -296,29 +349,19 @@ do
 		widget.cpu[i]:set_height(4)
 		cpu:add(widget.cpu[i])
 	end
-	--widget.cpu:set_vertical(true)
-	--widget.mem:set_vertical(true)
-	--widget.battery:set_vertical(true)
-	--widget.volume:set_vertical(true)
-	local data_bars = wibox.layout.fixed.vertical()
-	data_bars:add(cpu)
-	--data_bars:add(widget.spacer.h)
-	data_bars:add(widget.mem)
-	--data_bars:add(widget.spacer.h)
-	data_bars:add(widget.battery)
-	--data_bars:add(widget.spacer.h)
-	data_bars:add(widget.volume)
-	data_bars = wibox.layout.margin(data_bars,0,0,2,2)
-
 
 	local right = wibox.layout.fixed.horizontal()
 	right:add(widget.network)
 	right:add(widget.spacer.h)
-	right:add(widget.wifi)
+	right:add(widget.wifi.icon)
+	right:add(widget.wifi.data)
 	right:add(widget.spacer.h)
-	right:add(wibox.widget.systray())
+
+	right:add(widget.volume.icon)
+	right:add(widget.volume.data)
 	right:add(widget.spacer.h)
-	right:add(data_bars)	
+	right:add(widget.battery.icon)
+	right:add(widget.battery.data)
 	right:add(widget.spacer.h)
 	right:add(widget.clock)
 	right:add(widget.spacer.h)
@@ -387,7 +430,7 @@ local rules = {
 	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[1][3] } },
 	{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = tags[1][3] } },
 	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
-	--{ rule_any = { class = { "mplayer2", "mplayer", "mpv" }},	properties = { tag = tags[1][5] } },
+	{ rule_any = { class = { "mplayer2", "mplayer", "mpv" }},	properties = { tag = tags[1][5] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 -- }}}
@@ -406,7 +449,7 @@ client.connect_signal("manage", function (c, startup)
 		if not startup then
 				-- Set the windows at the slave,
 				-- i.e. put it at the end of others instead of setting it master.
-				-- awful.client.setslave(c)
+				awful.client.setslave(c)
 
 				-- Put windows in a smart way, only if they does not set an initial position.
 				if not c.size_hints.user_position and not c.size_hints.program_position then
@@ -420,14 +463,5 @@ client.connect_signal("focus", function(c) c.border_color = beautiful.border_foc
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 
--- {{{ Autostart
-autostart.add({
---		"pulseaudio --start",
-		"nitrogen --restore",
---		{"dropboxd","dropbox"},
-	--	{"weechat", term = true},
-	})
-autostart.addDex()
-autostart.launch()
--- }}}
-
+mods.wallpaper.init()
+mods.autostart.launch()

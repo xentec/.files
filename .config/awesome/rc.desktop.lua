@@ -88,20 +88,21 @@ modkey = keys.mod;
 monitor = { main = 1, info = 2 }
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
+local layout = awful.layout.suit
 layouts =
 {
-	awful.layout.suit.tile,
-	awful.layout.suit.tile.left,
-	awful.layout.suit.tile.bottom,
-	awful.layout.suit.tile.top,
-	awful.layout.suit.fair,
-	awful.layout.suit.fair.horizontal,
-	awful.layout.suit.spiral,
-	awful.layout.suit.spiral.dwindle,
-	awful.layout.suit.max,
-	awful.layout.suit.max.fullscreen,
-	awful.layout.suit.magnifier,
-	awful.layout.suit.floating
+		layout.tile,
+		layout.tile.left,
+		layout.tile.bottom,
+		layout.tile.top,
+		layout.fair,
+		layout.fair.horizontal,
+		layout.spiral,
+		layout.spiral.dwindle,
+		layout.max,
+		layout.max.fullscreen,
+		layout.magnifier,
+		layout.floating
 }
 -- }}}
 
@@ -137,7 +138,7 @@ widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄</span>')
 widget.layoutbox = {}
 
 -- Clock
-widget.clock = awful.widget.textclock('%H:%M %d.%m.%y')
+widget.clock = awful.widget.textclock('%H:%M %a %d.%m.%y')
 
 -- Network
 widget.network = wibox.widget.textbox()
@@ -159,8 +160,7 @@ widget.volume = awful.widget.progressbar({ width = widget.def.barLen })
 widget.volume:set_background_color("#716D40")
 widget.volume:set_color("#BDB76B")
 widget.volume:set_max_value(100)
-
-local volume = mods.pulse(function(muted, val)
+widget.volume.func = function(muted, val)
 	if muted then
 		widget.volume:set_color("#716D40")
 	else
@@ -168,7 +168,8 @@ local volume = mods.pulse(function(muted, val)
 	end
 	widget.volume:set_value(val)
 	--naughty.notify({text = muted and "Muted" or "Unmuted"})
-end, 5)
+end
+local volume = mods.pulse(widget.volume.func, 5)
 
 -- CPU
 widget.cpu = {}
