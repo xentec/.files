@@ -15,7 +15,7 @@ fi
 PWDIR=$(pwd)
 cd $(dirname $(readlink -fn ${BASH_SOURCE[0]}))
 
-source .path
+. $PWD/.path
 
 # Getting back
 cd $PWDIR
