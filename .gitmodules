@@ -4,3 +4,6 @@
 [submodule "extern/cv"]
 	path = extern/cv
 	url = https://github.com/Xfennec/cv
+[submodule "extern/whatmp3"]
+	path = extern/whatmp3
+	url = https://github.com/RecursiveForest/whatmp3
