@@ -13,12 +13,12 @@ function autostart.launch()
 	for exec,app in pairs(entries) do
 		local proc = app[2] or exec:match("([^%s.]+)%s*")
 
---		naughty.notify({ timeout = 0,
---			text = (type(app) == "table" and "T:"..app[1] or "S:"..tostring(app)).." > "..(type(proc) == "table" and "T:"..proc[1] or "S:"..tostring(proc))});
+		--naughty.notify({ timeout = 0,
+			--text = (type(app) == "table" and "T:"..app[1] or "S:"..tostring(app)).." > "..(type(proc) == "table" and "T:"..proc[1] or "S:"..tostring(proc))});
 
-		local pid = tonumber(awful.util.pread('bash -c "pgrep -f '.. proc .. ' | tail -n 1"'))
+		local count = tonumber(awful.util.pread('pgrep -cf '.. proc))
 
-		if not pid then
+		if count == 0 then
 			if app.term ~= nil and app.term == true then
 				exec = autostart.terminal .. ' -name ' .. exec .. ' -e '.. exec
 			end
