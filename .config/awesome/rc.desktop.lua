@@ -248,29 +248,41 @@ widget.mpd.bar:set_color("#BDB76B")
 widget.mpd.func = function()
 	local d = mpd_now;
 	local w = my.widget.mpd;
+
+	local nfo = ""
+	local time = 0
 	local state = {
 		play = '&#xF0BF;',
 		pause = '&#xF0BB;',
 		stop = '&#xF053;'
 	}
+
 	if state[d.state] then
 		w.icon:set_markup(color('#BDB76B', state[d.state]));
+
+		if d.title ~= "N/A" then
+			nfo = d.title
+		elseif d.state == "play" then
+			nfo = d.file
+		end
+		if d.artist ~= "N/A" then
+			nfo = d.artist..' - '..nfo
+		end
+				
+		if tonumber(d.elapsed) ~= nil and d.time ~= nil then
+			time = tonumber(d.elapsed)/d.time
+		end
+	else
+		w.icon:set_markup(color('#716D40', state.stop));
 	end
 
-	local nfo = color('#BDB76B', d.artist..' - '..d.title);
 	w.bar:set_width(nfo:len())
-
-	local time = 0
-	if tonumber(d.elapsed) ~= nil and d.time ~= nil then
-		time = tonumber(d.elapsed)/d.time
-	end
-
-	w.nfo:set_markup(nfo)
+	w.nfo:set_markup(color('#BDB76B', nfo))
 	w.bar:set_value(time)
 end
 widget.mpd.worker = lain.widgets.mpd({
 	timeout = 1,
-	host = mpd_host,
+	host = my.mpd_host,
 	settings = widget.mpd.func,
 })
 
