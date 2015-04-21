@@ -1,26 +1,28 @@
--- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
 awful.rules = require("awful.rules")
+
 require("awful.autofocus")
--- Widget and layout library
 local wibox = require("wibox")
-wibox.layout.malign = require("layout-align")
--- Theme handling library
 local beautiful = require("beautiful")
--- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
+
+local lain = require("lain")
 local vicious = require("vicious")
+
 local keys = require("keys")
 local common = require("common")
-
 local mods = require("modules")
 
+-- Override
+wibox.layout.malign = require("override.layout-align")
 
--- {{{ Error handling
--- Check if awesome encountered an error during startup and fell back to
--- another config (This code will only ever execute for the fallback config)
+-- Short cuts
+local markup = lain.util.markup
+local color = markup.fg.color
+
+-- Error handling
 if awesome.startup_errors then
 	naughty.notify({ preset = naughty.config.presets.critical,
 					 title = "Oops, there were errors during startup!",
@@ -41,7 +43,7 @@ do
 		in_error = false
 	end)
 end
--- }}}
+
 
 naughty.config.notify_callback = function (args)
 	args.icon_size = 16
@@ -54,85 +56,81 @@ naughty.config.presets.warning = {
 		timeout = 10,
 }
 
--- {{{ Variable definitions
--- Themes define colours, icons, and wallpapers
-beautiful.init("/home/xentec/.config/awesome/theme.lua")
+-- Variable definitions
+my = 
+{
+	theme = "/home/xentec/.config/awesome/theme.lua",
 
-browser = "chromium"
-terminal = "urxvtc"
-editor = os.getenv("EDITOR") or "nano"
-editor_cmd = terminal .. " -e " .. editor
-mods.mpd.host = "keeper.local"
+	browser = "chromium",
+	terminal = "urxvtc",
+	editor = os.getenv("EDITOR") or "vim",
 
-mods.wallpaper.add('~/lold/wg')
-
--- Autostart
-mods.autostart.add({
+	wallpapers = "~/lold/wg",
+	autostart = {
 --		{"dropboxd","dropbox"},
 		"steam",
 --		{"weechat", term = true},
 		"skype",
 		"utox",
 		"compton",
-	})
+	},
+
+	mpd_host = "keeper",
+}
+
+my.editor_cmd = my.terminal .. " -e " .. my.editor
+
+-- Set the terminal for applications that require it
+menubar.utils.terminal = my.terminal
+mods.autostart.terminal = my.terminal
+
+beautiful.init(my.theme)
+mods.wallpaper.add(my.wallpapers)
+mods.autostart.add(my.autostart)
 
 mods.autostart.addXDG()
 
--- Default modkey.
--- Usually, Mod4 is the key with a logo between Control and Alt.
--- If you do not like this or do not have such a key,
--- I suggest you to remap Mod4 to another key using xmodmap or other tools.
--- However, you can use another modifier like Mod1, but it may interact with others.
-modkey = keys.mod;
-
-monitor = { main = 1, info = 2 }
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 local layout = awful.layout.suit
 layouts =
 {
-		layout.tile,
-		layout.tile.left,
-		layout.tile.bottom,
-		layout.tile.top,
-		layout.fair,
-		layout.fair.horizontal,
-		layout.spiral,
-		layout.spiral.dwindle,
-		layout.max,
-		layout.max.fullscreen,
-		layout.magnifier,
-		layout.floating
+	layout.tile,
+	layout.fair,
+	layout.fair.horizontal,
+	layout.spiral,
+	layout.max,
+	layout.magnifier,
+	layout.floating
 }
--- }}}
 
--- {{{ Tags
--- Define a tag table which hold all screen tags.
-tags = {}
-tags[1] = awful.tag({ "main", "web", "code", "script", "media", "gaming", "other" }, 1, layouts[1])
-tags[2] = awful.tag({ "chat", "web", "media", "vm"}, 2, layouts[1])
+monitor = { main = 1, info = 2 }
+
+
+-- Tags
+local tags = {}
+tags[monitor.main] = awful.tag({ "main", "web", "code", "script", "media", "gaming", "other" }, 1, layouts[1])
+tags[monitor.info] = awful.tag({ "chat", "web", "media", "vm"}, 2, layouts[1])
 for s = 3, screen.count() do
 	-- Each screen has its own tag table.
 	tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
 end
--- }}}
 
--- Set the terminal for applications that require it
-menubar.utils.terminal = terminal
-mods.autostart.terminal = terminal
+my.tags = tags;
+
 
 -- ########################################
 -- ## Widgets
 -- ########################################
 
-widget = {}
+local widget = {}
 
 widget.def = {}
 widget.def.barLen = 100
 
 widget.spacer = {}
-widget.spacer.h = wibox.widget.textbox('<span color="gray"> ┆ </span>')
-widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄</span>')
+widget.spacer.h = wibox.widget.textbox(color('gray', ' ┆ '))
+widget.spacer.v = wibox.widget.textbox(color('gray', ' ┄'))
 
 -- Layout
 widget.layoutbox = {}
@@ -146,12 +144,12 @@ widget.network.func = function (w, data)
 	local ret = {}
 	if data['{en carrier}'] == 1 then
 		ret = { col = "DodgerBlue", d = data['{en down_sb}'], ds = data['{en down_suf}'], u = data['{en up_sb}'], us = data['{en up_suf}'] }
---	elseif data['{wl carrier}'] == 1 then
---		ret = { col = "DodgerBlue", d = data['{wl down_sb}'], ds = data['{wl down_suf}'], u = data['{wl up_sb}'], us = data['{wl up_suf}'] }
+	elseif data['{wl carrier}'] == 1 then
+		ret = { col = "DodgerBlue", d = data['{wl down_sb}'], ds = data['{wl down_suf}'], u = data['{wl up_sb}'], us = data['{wl up_suf}'] }
 	else
-		return '<span color="#8c8c8c"> Disconnected </span>'
+		return color("#8c8c8c", markup.monospace(' DC '))
 	end
-	return string.format('<span color="%s">↓ %5.1f %s ↑ %5.1f %s</span>', ret.col, ret.d, ret.ds, ret.u, ret.us)
+	return color(ret.col, markup.monospace(string.format('↓ %5.1f %s ↑ %5.1f %s', ret.d, ret.ds, ret.u, ret.us)))
 end
 vicious.register(widget.network, mods.net, widget.network.func, 1)
 
@@ -188,7 +186,7 @@ widget.cpu.func = function(w, data)
 	return data
 end
 vicious.register(widget.cpu, vicious.widgets.cpu, widget.cpu.func, 2)
-vicious.register(widget.cpu.temp, vicious.widgets.thermal, ' <span color="#876333">$1 °C</span>', 4, {'it87.552', 'core'})
+vicious.register(widget.cpu.temp, vicious.widgets.thermal, markup.monospace(' $1°C'), 4, {'it87.552', 'core'})
 
 -- Memory
 widget.mem = {}
@@ -229,7 +227,7 @@ widget.gpu.func = function(w, data)
 	end
 
 	w.mem:set_value(tonumber(data[2])/tonumber(data[3]))
-	w.temp:set_markup(' <span color="#4F8A3A">'..data[4]..' °C</span>')
+	w.temp:set_markup(color('#4F8A3A', markup.monospace(' '..data[4]..'°C')))
 	return data
 end
 vicious.register(widget.gpu, 
@@ -247,39 +245,50 @@ widget.mpd.nfo:set_font(theme.font_name .. ' ' .. (theme.font_size - 2))
 widget.mpd.bar = awful.widget.progressbar({ height = 2 })
 widget.mpd.bar:set_background_color("#716D40")
 widget.mpd.bar:set_color("#BDB76B")
-widget.mpd.func = function(w, data)
+widget.mpd.func = function()
+	local d = mpd_now;
+	local w = my.widget.mpd;
 	local state = {
 		play = '&#xF0BF;',
 		pause = '&#xF0BB;',
 		stop = '&#xF053;'
 	}
-	if state[data['{state}']] then
-		w.icon:set_markup('<span color="#BDB76B">'.. state[data['{state}']] ..'</span>');
+	if state[d.state] then
+		w.icon:set_markup(color('#BDB76B', state[d.state]));
 	end
 
-	local nfo = '<span color="#BDB76B">'..data['{Artist}']..' :: '..data['{Title}']..'</span>';
+	local nfo = color('#BDB76B', d.artist..' - '..d.title);
 	w.bar:set_width(nfo:len())
 
+	local time = 0
+	if tonumber(d.elapsed) ~= nil and d.time ~= nil then
+		time = tonumber(d.elapsed)/d.time
+	end
+
 	w.nfo:set_markup(nfo)
-	w.bar:set_value(data['{elapsed}'] / data['{Time}'])
-	return data
+	w.bar:set_value(time)
 end
-vicious.register(widget.mpd, mods.mpd, widget.mpd.func, 2)
-vicious.cache(mods.mpd )
+widget.mpd.worker = lain.widgets.mpd({
+	timeout = 1,
+	host = mpd_host,
+	settings = widget.mpd.func,
+})
+
+my.widget = widget
 
 -- ########################################
 -- ## Bars
 -- ########################################
 
-bar = {}
+local bar = {}
 bar.main = {}
 bar.main.prompt = {}
 bar.main.taglist = {}
 bar.main.taglist.buttons = awful.util.table.join(
-						awful.button({ update}, 1, awful.tag.viewonly),
-						awful.button({ modkey }, 1, awful.client.movetotag),
+						awful.button({ }, 1, awful.tag.viewonly),
+						awful.button({ keys.mod }, 1, awful.client.movetotag),
 						awful.button({ }, 3, awful.tag.viewtoggle),
-						awful.button({ modkey }, 3, awful.client.toggletag)
+						awful.button({ keys.mod }, 3, awful.client.toggletag)
 					)
 bar.main.tasklist = {}
 bar.main.tasklist.buttons = awful.util.table.join(
@@ -323,6 +332,8 @@ bar.main.layout_buttons = awful.util.table.join(
 							)
 
 bar.info = {}
+
+my.bar = bar
 
 -- ########################################
 -- ## Main screens

@@ -1,25 +1,30 @@
--- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
 awful.rules = require("awful.rules")
+
 require("awful.autofocus")
--- Widget and layout library
 local wibox = require("wibox")
-wibox.layout.malign = require("layout-align")
--- Theme handling library
 local beautiful = require("beautiful")
--- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
+
+local lain = require("lain")
 local vicious = require("vicious")
+
 local keys = require("keys")
 local common = require("common")
-
 local mods = require("modules")
 
+-- Override
+wibox.layout.malign = require("override.layout-align")
+
+-- Short cuts
+
+local markup = lain.util.markup
+local color = markup.fg.color
+
+
 -- {{{ Error handling
--- Check if awesome encountered an error during startup and fell back to
--- another config (This code will only ever execute for the fallback config)
 if awesome.startup_errors then
 		naughty.notify({ preset = naughty.config.presets.critical,
 										 title = "Oops, there were errors during startup!",
@@ -53,32 +58,35 @@ naughty.config.presets.warning = {
 		timeout = 10,
 }
 
--- {{{ Variable definitions
--- Themes define colours, icons, and wallpapers
-beautiful.init("/home/xentec/.config/awesome/theme.lua")
+-- Variable definitions
+my = 
+{
+	theme = "/home/xentec/.config/awesome/theme.lua",
 
-browser = "chromium"
-terminal = "urxvtc"
-editor = os.getenv("EDITOR") or "nano"
-editor_cmd = terminal .. " -e " .. editor
+	browser = "chromium",
+	terminal = "urxvtc",
+	editor = os.getenv("EDITOR") or "vim",
 
-
-mods.wallpaper.add('~/lold/wg')
-
--- Autostart
-mods.autostart.add({
+	wallpapers = "~/lold/wg",
+	autostart = {
 --		{"dropboxd","dropbox"},
 --		{"weechat", term = true},
-	})
+	},
+
+	mpd_host = "keeper",
+}
+
+my.editor_cmd = my.terminal .. " -e " .. my.editor
+
+-- Set the terminal for applications that require it
+menubar.utils.terminal = my.terminal
+mods.autostart.terminal = my.terminal
+
+beautiful.init(my.theme)
+mods.wallpaper.add(my.wallpapers)
+mods.autostart.add(my.autostart)
 
 mods.autostart.addXDG()
-
--- Default modkey.
--- Usually, Mod4 is the key with a logo between Control and Alt.
--- If you do not like this or do not have such a key,
--- I suggest you to remap Mod4 to another key using xmodmap or other tools.
--- However, you can use another modifier like Mod1, but it may interact with others.
-modkey = keys.mod;
 
 monitor = { main = 1 }
 
@@ -87,23 +95,16 @@ local layout = awful.layout.suit
 layouts =
 {
 		layout.tile,
-		layout.tile.left,
-		layout.tile.bottom,
-		layout.tile.top,
 		layout.fair,
 		layout.fair.horizontal,
 		layout.spiral,
-		layout.spiral.dwindle,
 		layout.max,
-		layout.max.fullscreen,
 		layout.magnifier,
 		layout.floating
 }
--- }}}
 
--- {{{ Tags
--- Define a tag table which hold all screen tags.
-tags = {
+-- Tags
+local tags = {
 	names = { "main", "web", "chat", "code", "media", "other" }
 }
 tags[1] = awful.tag(tags.names, 1, layouts[1])
@@ -111,20 +112,18 @@ for s = 2, screen.count() do
 	-- Each screen has its own tag table.
 	tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
 end
--- }}}
 
--- Set the terminal for applications that require it
-menubar.utils.terminal = terminal 
-mods.autostart.terminal = terminal
+my.tags = tags
 
 -- ########################################
 -- ## Widgets
 -- ########################################
 
 widget = {}
+
 widget.spacer = {}
-widget.spacer.h = wibox.widget.textbox('<span color="gray"> ┆ </span>')
-widget.spacer.v = wibox.widget.textbox('<span color="gray"> ┄</span>')
+widget.spacer.h = wibox.widget.textbox(color('gray', ' ┆ '))
+widget.spacer.v = wibox.widget.textbox(color('gray', ' ┄'))
 
 -- Layout
 widget.layoutbox = {}
@@ -141,9 +140,9 @@ widget.network.func = function (w, data)
 	elseif data['{wl carrier}'] == 1 then
 		ret = { col = "DodgerBlue", d = data['{wl down_sb}'], ds = data['{wl down_suf}'], u = data['{wl up_sb}'], us = data['{wl up_suf}'] }
 	else
-		return '<span color="#8c8c8c"> Disconnected </span>'
+		return color("#8c8c8c", ' DC ')
 	end
-	return string.format('<span color="%s">↓ %5.1f %s ↑ %5.1f %s</span>', ret.col, ret.d, ret.ds, ret.u, ret.us)
+	return color(ret.col, markup.monospace(string.format('↓ %5.1f %s ↑ %5.1f %s', ret.d, ret.ds, ret.u, ret.us)))
 end
 vicious.register(widget.network, mods.net, widget.network.func, 2)
 
@@ -153,14 +152,14 @@ widget.volume.icon = wibox.widget.textbox()
 --widget.volume.icon:set_font(theme.font_name .. ' ' .. (theme.font_size + 2))
 widget.volume.data = wibox.widget.textbox()
 widget.volume.func = function(muted, val)
-	local data_color = "#BDB76B"
+	local col = "#BDB76B"
 	local icon = "&#xf0ba;"
 	if muted then
+		col = "#948D60"
 		icon = "&#xf080;"
-		data_color = "#716D40"
 	end
-	widget.volume.icon:set_markup(string.format('<span color="#BDB76B">%s</span>', icon))
-	widget.volume.data:set_markup(string.format('<span color="%s"> %3.0f</span>', data_color, val))
+	widget.volume.icon:set_markup(color(col, string.format('%s', icon)))
+	widget.volume.data:set_markup(color(col, string.format('%3.0f', val)))
 	
 	if widget.volume.muted ~= muted then
 		naughty.notify({
@@ -180,9 +179,9 @@ for i = 1,widget.cpu.count do
 	widget.cpu[i]:set_background_color("#876333")
 	widget.cpu[i]:set_color("#DF8F26")
 end
-widget.cpu.func = function(w, data)
+widget.cpu.func = function()
 	for i = 1,w.count do
-		w[i]:set_value(data[i+1]/100)
+		cpu[i]:set_value(data[i+1]/100)
 	end
 
 	return data
@@ -197,13 +196,13 @@ widget.mem:set_color("#269CDF")
 
 -- Wifi
 widget.wifi = {}
-widget.wifi.icon = wibox.widget.textbox('<span color="DarkCyan">&#xf034;</span>')
+widget.wifi.icon = wibox.widget.textbox(color('DarkCyan', '&#xf034;'))
 --widget.wifi.icon:set_font(theme.font_name .. ' ' .. (theme.font_size + 2))
 widget.wifi.data =  wibox.widget.textbox()
 widget.wifi.tip = awful.tooltip({
 	objects = { widget.wifi.icon, widget.wifi.data },
 	timer_function = function()
-		return string.format('<span color="DarkCyan">%s</span>', widget.wifi.tipdata)
+		return color('DarkCyan', string.format('%s', widget.wifi.tipdata))
 	end,
 })
 widget.wifi.func = function(w, data)
@@ -212,7 +211,11 @@ widget.wifi.func = function(w, data)
 	s = s.."Bit rate: "..data['{rate}'].." MB/s"
 	widget.wifi.tipdata = s
 
-	return string.format('<span color="DarkCyan"> %3.0f</span>', data['{linp}'])
+	if data['{linp}'] > 0 then
+		return color('DarkCyan', markup.monospace(string.format(' %3.0f', data['{linp}'])))
+	else
+		return ""
+	end
 end
 vicious.register(widget.wifi.data, vicious.widgets.wifi, widget.wifi.func, 2, 'wl')
 
@@ -225,48 +228,53 @@ widget.battery.warning = 0
 --[[widget.battery.tip = awful.tooltip({
 	objects = { widget.battery.icon },
 	timer_function = function()
-		--return '<span color="DarkCyan"> '..widget.battery.data..' </span>'
+		--return color('DarkCyan', ' '..widget.battery.data..' ')
 	end,
 })]]
-widget.battery.func = function(w, data)
-	local low = 40
-	local critical = 15
+widget.battery.func = function(w, d)
+	--local w = widget.battery
+	--local d = bat_now
 
---[[	["Full\n"]        = "↯",
-		["Unknown\n"]     = "⌁",
-		["Charging\n"]    = "+",
-		["Discharging\n"] = "−"		]]--
-	if data[1] == '−' and data[2] <= critical and w.warning ~= data[2] and (w.warning == 0 or data[2] % 5 == 0) then
+	local critical = 10
+	local low = 30
+	if d[1] == '−' and d[2] <= critical and w.warning ~= d[2] and (w.warning == 0 or d[2] % 5 == 0) then
 		naughty.notify({ preset = naughty.config.presets.critical,
 						 title = " Battery",
-						 text = string.format("%3.0f %% remaining. Charge me up!", data[2]) })
-		w.warning = data[2]
+						 text = string.format("%3.0f %% remaining. Charge me up!", d[2]) })
+		w.warning = d[2]
 	end
 
-	local icon =	'&#xE002;'
---[[	local icon = 	(data[1] == '+' or data[1] == '↯') and '&#xE001;'  or 
-					data[2] > 80 and '&#xE006;' or 
-					data[2] > 60 and '&#xE004;' or
-					data[2] > 40 and '&#xE002;' or
-					data[2] > 20 and '&#xE005;' or 
-					data[2] > 5  and '&#xE003;' or 
+	local icon = 	(d[1] == '+' or d[1] == '↯') and '&#xE001;'  or 
+					d[2] > 80 and '&#xE006;' or 
+					d[2] > 60 and '&#xE004;' or
+					d[2] > 40 and '&#xE002;' or
+					d[2] > 20 and '&#xE005;' or 
+					d[2] > 5  and '&#xE003;' or 
 									 '&#xE007;'
-]]
 
-	local color = 	data[1] == '↯' and '#00CCCC' or 
-					data[1] == '+' and '#00CCCC' or
-					data[2] > low and '#03cc00' or 
-					data[2] > critical and '#FBE72A' or 
+
+	local col = 	d[1] == '↯' and '#00CCCC' or 
+					d[1] == '+' and '#00CCCC' or
+					d[2] > low and '#03cc00' or 
+					d[2] > critical and '#FBE72A' or 
 										'#FB6B24'
-	--naughty.notify({title = data[1], text = data[2]})
-	w.icon:set_markup(string.format('<span color="%s">%s</span>', color, icon))
-	w.data:set_markup(string.format('<span color="%s">%3.0f</span>', color, data[2]))
+	--naughty.notify({title = d[1], text = d[2]})
+	w.icon:set_markup(color(col, string.format('%s', icon)))
+	w.data:set_markup(color(col, string.format('%3.0f', d[2])))
 	return
 end
+--widget.battery.worker = lain.widgets.bat({ timeout = 5, notify = "off", settings = widget.battery.func })
 vicious.register(widget.battery, vicious.widgets.bat, widget.battery.func, 2, 'BAT0')
 
+my.widget = widget
+
 -- ########################################
--- ## Bars
+-- ▄▄▄▄▄                      
+-- █    █  ▄▄▄    ▄ ▄▄   ▄▄▄  
+-- █▄▄▄▄▀ ▀   █   █▀  ▀ █   ▀ 
+-- █    █ ▄▀▀▀█   █      ▀▀▀▄ 
+-- █▄▄▄▄▀ ▀▄▄▀█   █     ▀▄▄▄▀ 
+--                            
 -- ########################################
 
 bar = {}
@@ -275,7 +283,7 @@ bar.main = {}
 bar.main.prompt = {}
 bar.main.taglist = {}
 bar.main.taglist.buttons = awful.util.table.join(
-						awful.button({ update}, 1, awful.tag.viewonly),
+						awful.button({ }, 1, awful.tag.viewonly),
 						awful.button({ modkey }, 1, awful.client.movetotag),
 						awful.button({ }, 3, awful.tag.viewtoggle),
 						awful.button({ modkey }, 3, awful.client.toggletag),
@@ -325,6 +333,7 @@ bar.main.layout_buttons = awful.util.table.join(
 								awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
 								awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end))
 
+my.bar = bar
 
 -- ########################################
 -- ## Main screen
@@ -356,12 +365,11 @@ do
 	right:add(widget.wifi.icon)
 	right:add(widget.wifi.data)
 	right:add(widget.spacer.h)
-
-	right:add(widget.volume.icon)
-	right:add(widget.volume.data)
-	right:add(widget.spacer.h)
 	right:add(widget.battery.icon)
 	right:add(widget.battery.data)
+	right:add(widget.spacer.h)
+	right:add(widget.volume.icon)
+	right:add(widget.volume.data)
 	right:add(widget.spacer.h)
 	right:add(widget.clock)
 	right:add(widget.spacer.h)
@@ -461,7 +469,6 @@ end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
--- }}}
 
 mods.wallpaper.init()
 mods.autostart.launch()

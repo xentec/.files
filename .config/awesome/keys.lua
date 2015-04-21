@@ -4,16 +4,16 @@ local vicious = require("vicious")
 
 local pulse = require("modules.pulse")
 local wallpaper = require("modules.wallpaper")
-local mpd = require("modules.mpd")
 
 local exec = awful.util.spawn_with_shell
+local spawn = awful.util.spawn
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
 -- If you do not like this or do not have such a key,
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 -- However, you can use another modifier like Mod1, but it may interact with others.
-local modkey = "Mod4"
+modkey = "Mod4"
 
 -- {{{ Key bindings
 local globalkeys = awful.util.table.join(
@@ -48,10 +48,9 @@ local globalkeys = awful.util.table.join(
 				end),
 
 		-- Standard program
-		awful.key({ modkey,           }, "Return", function () awful.util.spawn(terminal) end),
+		awful.key({ modkey,           }, "Return", function () spawn(terminal) end),
 		awful.key({ modkey, "Control" }, "r", awful.util.restart),
 		awful.key({ modkey, "Shift"   }, "q", awesome.quit),
-		awful.key({ modkey,	          }, "q", function() awful.util.spawn(browser) end),
 
 		awful.key({ modkey,           }, "l",     function () awful.tag.incmwfact( 0.05)    end),
 		awful.key({ modkey,           }, "h",     function () awful.tag.incmwfact(-0.05)    end),
@@ -82,27 +81,27 @@ local globalkeys = awful.util.table.join(
 		awful.key({ }, "XF86AudioRaiseVolume",  pulse.increase),
 		awful.key({ }, "XF86AudioLowerVolume",  pulse.decrease),
 
-        -- Media
-        awful.key({ }, "XF86AudioPlay", function () exec("mpc -h ".. mpd.host .." toggle"); vicious.force({widget.mpd}) end),
-        awful.key({ }, "XF86AudioStop", function () exec("mpc -h ".. mpd.host .." stop"); vicious.force({widget.mpd}) end),
-        awful.key({ }, "XF86AudioPrev", function () exec("mpc -h ".. mpd.host .." prev"); vicious.force({widget.mpd}) end),
-        awful.key({ }, "XF86AudioNext", function () exec("mpc -h ".. mpd.host .." next"); vicious.force({widget.mpd}) end),
-        awful.key({ modkey, "Control"}, "m", function () mpd.async = not mpd.async;  end),
+		-- Media
+		awful.key({ }, "XF86AudioPlay", function () exec("mpc -h ".. mpd_host .." toggle"); my.widget.mpd.worker.update() end),
+		awful.key({ }, "XF86AudioStop", function () exec("mpc -h ".. mpd_host .." stop"); my.widget.mpd.worker.update() end),
+		awful.key({ }, "XF86AudioPrev", function () exec("mpc -h ".. mpd_host .." prev"); my.widget.mpd.worker.update() end),
+		awful.key({ }, "XF86AudioNext", function () exec("mpc -h ".. mpd_host .." next"); my.widget.mpd.worker.update() end),
 
-        -- Backlight
-        awful.key({ }, "XF86MonBrightnessUp",   function () awful.util.spawn("xbacklight -inc 10") end),
-        awful.key({ }, "XF86MonBrightnessDown", function () awful.util.spawn("xbacklight -dec 10") end),
-        awful.key({ "Shift" }, "XF86MonBrightnessUp",   function () awful.util.spawn("xbacklight -set 100") end),
-        awful.key({ "Shift" }, "XF86MonBrightnessDown", function () awful.util.spawn("xbacklight -set 10") end),
+		-- Backlight
+		awful.key({ }, "XF86MonBrightnessUp",   function () spawn("xbacklight -inc 10") end),
+		awful.key({ }, "XF86MonBrightnessDown", function () spawn("xbacklight -dec 10") end),
+		awful.key({ "Shift" }, "XF86MonBrightnessUp",   function () spawn("xbacklight -set 100") end),
+		awful.key({ "Shift" }, "XF86MonBrightnessDown", function () spawn("xbacklight -set 10") end),
 
 
-        -- Screen capture
-        awful.key({ modkey,           }, "Print", function () awful.util.spawn("seen")        end),
-        awful.key({ modkey, "Shift"   }, "Print", function () awful.util.spawn("seen video")  end),
+		-- Screen capture
+		awful.key({ modkey,           }, "Print", function () spawn("seen")        end),
+		awful.key({ modkey, "Shift"   }, "Print", function () spawn("seen video")  end),
 
-        awful.key({ modkey, "Control" }, "Right", wallpaper.next)
-        
+		awful.key({ modkey, "Control" }, "Right", wallpaper.next),
 
+		-- launch short cut
+		awful.key({ modkey,	          }, "q", function() spawn(my.browser) end)
 )
 
 local clientkeys = awful.util.table.join(
