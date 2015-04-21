@@ -186,7 +186,7 @@ widget.cpu.func = function(w, data)
 	return data
 end
 vicious.register(widget.cpu, vicious.widgets.cpu, widget.cpu.func, 2)
-vicious.register(widget.cpu.temp, vicious.widgets.thermal, markup.monospace(' $1°C'), 4, {'it87.552', 'core'})
+vicious.register(widget.cpu.temp, vicious.widgets.thermal, color("#876333", markup.monospace(' $1°C')), 4, {'it87.552', 'core'})
 
 -- Memory
 widget.mem = {}
