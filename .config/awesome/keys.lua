@@ -48,7 +48,6 @@ local globalkeys = awful.util.table.join(
 				end),
 
 		-- Standard program
-		awful.key({ modkey,           }, "Return", function () spawn(terminal) end),
 		awful.key({ modkey, "Control" }, "r", awful.util.restart),
 		awful.key({ modkey, "Shift"   }, "q", awesome.quit),
 
@@ -64,8 +63,7 @@ local globalkeys = awful.util.table.join(
 		awful.key({ modkey, "Control" }, "n", awful.client.restore),
 
 		-- Prompt
-		awful.key({ modkey },            "r",     function () bar.main.prompt[mouse.screen]:run() end),
-
+		awful.key({ modkey }, "r", function () bar.main.prompt[mouse.screen]:run() end),
 		awful.key({ modkey }, "x",
 							function ()
 									awful.prompt.run({ prompt = "Run Lua code: " },
@@ -101,7 +99,8 @@ local globalkeys = awful.util.table.join(
 		awful.key({ modkey, "Control" }, "Right", wallpaper.next),
 
 		-- launch short cut
-		awful.key({ modkey,	          }, "q", function() spawn(my.browser) end)
+		awful.key({ modkey,	          }, "q",      function() spawn(my.browser) end),
+		awful.key({ modkey,           }, "Return", function () spawn(my.terminal) end)
 )
 
 local clientkeys = awful.util.table.join(
