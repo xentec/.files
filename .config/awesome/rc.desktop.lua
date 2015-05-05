@@ -92,16 +92,17 @@ mods.autostart.addXDG()
 
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
-local layout = awful.layout.suit
+local awm = awful.layout.suit
+local ln = lain.layout
 layouts =
 {
-	layout.tile,
-	layout.fair,
-	layout.fair.horizontal,
-	layout.spiral,
-	layout.max,
-	layout.magnifier,
-	layout.floating
+	ln.uselesstile,
+	awm.tile,
+	awm.fair,
+	awm.fair.horizontal,
+	ln.uselessfair,
+	ln.centerwork,
+	awm.floating
 }
 
 monitor = { main = 1, info = 2 }
@@ -110,7 +111,7 @@ monitor = { main = 1, info = 2 }
 -- Tags
 local tags = {}
 tags[monitor.main] = awful.tag({ "main", "web", "code", "script", "media", "gaming", "other" }, 1, layouts[1])
-tags[monitor.info] = awful.tag({ "chat", "web", "media", "vm"}, 2, layouts[1])
+tags[monitor.info] = awful.tag({ "chat", "media", "vm" }, 2, layouts[1])
 for s = 3, screen.count() do
 	-- Each screen has its own tag table.
 	tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
@@ -120,7 +121,14 @@ my.tags = tags;
 
 
 -- ########################################
--- ## Widgets
+--                                                  
+-- ▄     ▄   ▀        █                  ▄          
+-- █  █  █ ▄▄▄     ▄▄▄█   ▄▄▄▄   ▄▄▄   ▄▄█▄▄   ▄▄▄  
+-- ▀ █▀█ █   █    █▀ ▀█  █▀ ▀█  █▀  █    █    █   ▀ 
+--  ██ ██▀   █    █   █  █   █  █▀▀▀▀    █     ▀▀▀▄ 
+--  █   █  ▄▄█▄▄  ▀█▄██  ▀█▄▀█  ▀█▄▄▀    ▀▄▄  ▀▄▄▄▀ 
+--                        ▄  █                      
+--                         ▀▀                       
 -- ########################################
 
 local widget = {}
@@ -288,8 +296,14 @@ widget.mpd.worker = lain.widgets.mpd({
 
 my.widget = widget
 
+
 -- ########################################
--- ## Bars
+-- ▄▄▄▄▄                      
+-- █    █  ▄▄▄    ▄ ▄▄   ▄▄▄  
+-- █▄▄▄▄▀ ▀   █   █▀  ▀ █   ▀ 
+-- █    █ ▄▀▀▀█   █      ▀▀▀▄ 
+-- █▄▄▄▄▀ ▀▄▄▀█   █     ▀▄▄▄▀ 
+--                            
 -- ########################################
 
 local bar = {}
@@ -480,7 +494,7 @@ end
 -- ## Futher screens
 -- ########################################
 
-for s = 1, screen.count() do
+for s = 3, screen.count() do
 	if not awful.util.table.hasitem(monitor, s) then
 		-- Create an imagebox widget which will contains an icon indicating which layout we're using.
 		-- We need one layoutbox per screen.
@@ -513,13 +527,21 @@ for s = 1, screen.count() do
 		bar.main[s]:set_widget(layout)
 	end
 end
--- }}}
+
+
+-- ########################################
+-- ▄    ▄   ▀                 
+-- ██  ██ ▄▄▄     ▄▄▄    ▄▄▄  
+-- █ ██ █   █    █   ▀  █▀  ▀ 
+-- █ ▀▀ █   █     ▀▀▀▄  █     
+-- █    █ ▄▄█▄▄  ▀▄▄▄▀  ▀█▄▄▀  
+-- 
+-- ########################################
 
 -- Set keys
 root.keys(keys.global);
--- }}}
 
--- {{{ Rules
+-- Rules
 awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
 local rules = {
 	{ rule = { class = "Chromium" },					properties = { tag = tags[1][2] } },
@@ -542,9 +564,8 @@ local rules = {
 	--{ rule_any = { class = { "mplayer", "mplayer2", "mpv" }},	properties = { tag = tags[2][3] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
--- }}}
 
--- {{{ Signals
+-- Signals
 -- Signal function to execute when a new client appears.
 client.connect_signal("manage", function (c, startup)
 	-- Enable sloppy focus
@@ -575,7 +596,7 @@ end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
--- }}}
+
 
 mods.wallpaper.init()
 mods.autostart.launch()

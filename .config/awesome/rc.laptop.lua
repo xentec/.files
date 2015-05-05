@@ -91,16 +91,17 @@ mods.autostart.addXDG()
 monitor = { main = 1 }
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
-local layout = awful.layout.suit
+local awm = awful.layout.suit
+local ln = lain.layout
 layouts =
 {
-		layout.tile,
-		layout.fair,
-		layout.fair.horizontal,
-		layout.spiral,
-		layout.max,
-		layout.magnifier,
-		layout.floating
+	ln.uselesstile,
+	awm.tile,
+	awm.fair,
+	awm.fair.horizontal,
+	ln.uselessfair,
+	ln.centerwork,
+	awm.floating
 }
 
 -- Tags
@@ -116,7 +117,14 @@ end
 my.tags = tags
 
 -- ########################################
--- ## Widgets
+--                                                  
+-- ▄     ▄   ▀        █                  ▄          
+-- █  █  █ ▄▄▄     ▄▄▄█   ▄▄▄▄   ▄▄▄   ▄▄█▄▄   ▄▄▄  
+-- ▀ █▀█ █   █    █▀ ▀█  █▀ ▀█  █▀  █    █    █   ▀ 
+--  ██ ██▀   █    █   █  █   █  █▀▀▀▀    █     ▀▀▀▄ 
+--  █   █  ▄▄█▄▄  ▀█▄██  ▀█▄▀█  ▀█▄▄▀    ▀▄▄  ▀▄▄▄▀ 
+--                        ▄  █                      
+--                         ▀▀                       
 -- ########################################
 
 widget = {}
@@ -426,11 +434,20 @@ for s = 1, screen.count() do
 		bar.main[s]:set_widget(layout)
 	end
 end
--- }}}
+
+
+-- ########################################
+-- ▄    ▄   ▀                 
+-- ██  ██ ▄▄▄     ▄▄▄    ▄▄▄  
+-- █ ██ █   █    █   ▀  █▀  ▀ 
+-- █ ▀▀ █   █     ▀▀▀▄  █     
+-- █    █ ▄▄█▄▄  ▀▄▄▄▀  ▀█▄▄▀  
+-- 
+-- ########################################
 
 root.keys(keys.global)
 
--- {{{ Rules
+-- Rules
 awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
 local rules = {
 	{ rule = { class = "Chromium" },					properties = { tag = tags[1][2] } },
@@ -441,9 +458,9 @@ local rules = {
 	{ rule_any = { class = { "mplayer2", "mplayer", "mpv" }},	properties = { tag = tags[1][5] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
--- }}}
 
--- {{{ Signals
+
+-- Signals
 -- Signal function to execute when a new client appears.
 client.connect_signal("manage", function (c, startup)
 		-- Enable sloppy focus
