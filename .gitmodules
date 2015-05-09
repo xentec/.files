@@ -7,3 +7,6 @@
 [submodule "extern/whatmp3"]
 	path = extern/whatmp3
 	url = https://github.com/RecursiveForest/whatmp3
+[submodule "extern/dinu"]
+	path = extern/dinu
+	url = https://github.com/weltensturm/dinu

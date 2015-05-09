@@ -40,6 +40,8 @@ git submodule init && git submodule update && echo -e "${G}Done$N" \
 echo "Building..."
 # cv
 (cd extern/cv && make)
+# dinu
+(cd extern/dinu && dub build --build=release)
 
 echo "Linking..."
 echo -e "  .config"
