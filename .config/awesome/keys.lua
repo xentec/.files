@@ -73,6 +73,7 @@ local globalkeys = awful.util.table.join(
 							end),
 		-- Menubar
 		awful.key({ modkey }, "p", function() menubar.show() end),
+		awful.key({ modkey }, "d", function() exec("dinu") end),
 
 		-- Volume
 		awful.key({ }, "XF86AudioMute",     	pulse.togglemute),
