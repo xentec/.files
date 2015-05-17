@@ -277,8 +277,8 @@ widget.mpd.func = function()
 			nfo = d.artist..' - '..nfo
 		end
 				
-		if tonumber(d.elapsed) ~= nil and d.time ~= nil then
-			time = tonumber(d.elapsed)/d.time
+		if tonumber(d.elapsed) ~= nil and tonumber(d.time) ~= nil then
+			time = tonumber(d.elapsed)/tonumber(d.time)
 		end
 	else
 		w.icon:set_markup(color('#716D40', state.stop));
