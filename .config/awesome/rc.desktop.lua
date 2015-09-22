@@ -135,6 +135,7 @@ my.tags = tags;
 -- ########################################
 
 local widget = {}
+my.widget = widget
 
 widget.def = {}
 widget.def.barLen = 100
@@ -207,12 +208,11 @@ widget.mem.ram:set_color("#269CDF")
 widget.mem.swap = awful.widget.progressbar({ width = widget.def.barLen })
 widget.mem.swap:set_background_color("#3A6D8A")
 widget.mem.swap:set_color("#269CDF")
-widget.mem.func = function(w, data)
-	w.ram:set_value(data[1]/100)
-	w.swap:set_value(data[5]/100)
-	return data
+widget.mem.func = function()
+	my.widget.mem.ram:set_value(mem_now.used/mem_now.total)
+	my.widget.mem.swap:set_value(mem_now.swapused/(mem_now.swap or 1))
 end
-vicious.register(widget.mem, vicious.widgets.mem, widget.mem.func)
+widget.mem.worker = lain.widgets.mem({ settings = widget.mem.func })
 
 -- GPU
 widget.gpu = {}
@@ -297,9 +297,6 @@ widget.mpd.worker = lain.widgets.mpd({
 	music_dir = my.mpd.music_dir,
 	settings = widget.mpd.func,
 })
-
-my.widget = widget
-
 
 -- ########################################
 -- ▄▄▄▄▄                      
