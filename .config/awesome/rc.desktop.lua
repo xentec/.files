@@ -274,7 +274,7 @@ widget.mpd.func = function()
 		if d.title ~= "N/A" then
 			nfo = d.title
 		elseif d.state == "play" then
-			nfo = d.file
+			nfo = d.name or d.file
 		end
 		if d.artist ~= "N/A" then
 			nfo = d.artist..' - '..nfo
