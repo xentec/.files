@@ -152,6 +152,9 @@ widget.layoutbox = {}
 -- Clock
 widget.clock = awful.widget.textclock('%H:%M %a %d.%m.%y')
 
+-- Calendar
+lain.widgets.calendar:attach(widget.clock, { font = beautiful.font_mono, cal = "/usr/bin/cal -3" })
+
 -- Network
 widget.network = wibox.widget.textbox()
 widget.network.func = function(w, data)

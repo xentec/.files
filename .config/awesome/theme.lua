@@ -9,7 +9,7 @@ theme = {}
 theme.font_name 	= "Bitstream Vera Sans"
 theme.font_size		= 10
 theme.font 			= theme.font_name .. " " .. tostring(theme.font_size)
-theme.widget_font	= "Source Code Pro " .. tostring(theme.font_size)
+theme.font_mono		= "Source Code Pro" 
 
 theme.bg_bg         = "#22222200"
 theme.bg_normal     = "#222222AA"
