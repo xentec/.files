@@ -46,7 +46,7 @@ end
 
 
 naughty.config.notify_callback = function (args)
-	args.icon_size = 16
+--	args.icon_size = 16
 	return args;
 end
 
@@ -75,7 +75,10 @@ my =
 		"compton",
 	},
 
-	mpd_host = "keeper",
+	mpd = {
+		host = "keeper",
+		music_dir = "/mnt/fridge/music",
+	}
 }
 
 my.editor_cmd = my.terminal .. " -e " .. my.editor
@@ -289,8 +292,9 @@ widget.mpd.func = function()
 	w.bar:set_value(time)
 end
 widget.mpd.worker = lain.widgets.mpd({
-	timeout = 1,
-	host = my.mpd_host,
+	timeout = 2,
+	host = my.mpd.host,
+	music_dir = my.mpd.music_dir,
 	settings = widget.mpd.func,
 })
 
