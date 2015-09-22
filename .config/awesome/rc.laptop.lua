@@ -33,7 +33,7 @@ end
 -- Handle runtime errors after startup
 do
 	local in_error = false
-	awesome.connect_signal("debug::error", function (err)
+	awesome.connect_signal("debug::error", function(err)
 		-- Make sure we don't go into an endless error loop
 		if in_error then return end
 		in_error = true
@@ -46,15 +46,16 @@ do
 end
 -- }}}
 
-naughty.config.notify_callback = function (args)
+naughty.config.notify_callback = function(args)
 	args.icon_size = 16
 	return args;
 end
 
-naughty.config.presets.warning = {
-		bg = "#ffaa00",
-		fg = "#ffffff",
-		timeout = 10,
+naughty.config.presets.warning = 
+{
+	bg = "#ffaa00",
+	fg = "#ffffff",
+	timeout = 10,
 }
 
 -- Variable definitions
@@ -104,10 +105,10 @@ layouts =
 }
 
 -- Tags
-local tags = {
-	names = { "main", "web", "chat", "code", "media", "other" }
-}
-tags[1] = awful.tag(tags.names, 1, layouts[1])
+my.tags = {}
+local tags = my.tags
+
+tags[1] = awful.tag({ "main", "web", "chat", "code", "media", "other" }, 1, layouts[1])
 for s = 2, screen.count() do
 	-- Each screen has its own tag table.
 	tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
@@ -140,7 +141,7 @@ widget.clock = awful.widget.textclock('%H:%M %a %d.%m.%y')
 
 -- Network
 widget.network = wibox.widget.textbox()
-widget.network.func = function (w, data)
+widget.network.func = function(w, data)
 	local ret = {}
 	if data['{en carrier}'] == 1 then
 		ret = { col = "DodgerBlue", d = data['{en down_sb}'], ds = data['{en down_suf}'], u = data['{en up_sb}'], us = data['{en up_suf}'] }
@@ -273,7 +274,6 @@ end
 --widget.battery.worker = lain.widgets.bat({ timeout = 5, notify = "off", settings = widget.battery.func })
 vicious.register(widget.battery, vicious.widgets.bat, widget.battery.func, 2, 'BAT0')
 
-my.widget = widget
 
 -- ########################################
 -- ▄▄▄▄▄                      
@@ -284,7 +284,9 @@ my.widget = widget
 --                            
 -- ########################################
 
-bar = {}
+my.bar = {}
+local bar = my.bar
+
 bar.main = {}
 bar.main = {}
 bar.main.prompt = {}
@@ -298,49 +300,51 @@ bar.main.taglist.buttons = awful.util.table.join(
 						awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
 					)
 bar.main.tasklist = {}
-bar.main.tasklist.buttons = awful.util.table.join(
-						awful.button({ }, 1, function (c)
-							if c == client.focus then
-								c.minimized = true
-							else
-								-- Without this, the following
-								-- :isvisible() makes no sense
-								c.minimized = false
-								if not c:isvisible() then
-									awful.tag.viewonly(c:tags()[1])
-								end
-								-- This will also un-minimize
-								-- the client, if needed
-								client.focus = c
-								c:raise()
-							end
-						end),
-						 awful.button({ }, 3, function ()
-							if instance then
-								instance:hide()
-								instance = nil
-							else
-								instance = awful.menu.clients({ width=250 })
-							end
-						end),
-						awful.button({ }, 4, function ()
-							awful.client.focus.byidx(1)
-							if client.focus then client.focus:raise() end
-						end),
-						awful.button({ }, 5, function ()
-							awful.client.focus.byidx(-1)
-							if client.focus then client.focus:raise() end
-						end)
-					)
+bar.main.tasklist.buttons = 
+	awful.util.table.join(
+		awful.button({ }, 1, function(c)
+			if c == client.focus then
+				c.minimized = true
+			else
+				-- Without this, the following
+				-- :isvisible() makes no sense
+				c.minimized = false
+				if not c:isvisible() then
+					awful.tag.viewonly(c:tags()[1])
+				end
+				-- This will also un-minimize
+				-- the client, if needed
+				client.focus = c
+				c:raise()
+			end
+		end),
+		 awful.button({ }, 3, function()
+			if instance then
+				instance:hide()
+				instance = nil
+			else
+				instance = awful.menu.clients({ width=250 })
+			end
+		end),
+		awful.button({ }, 4, function()
+			awful.client.focus.byidx(1)
+			if client.focus then client.focus:raise() end
+		end),
+		awful.button({ }, 5, function()
+			awful.client.focus.byidx(-1)
+			if client.focus then client.focus:raise() end
+		end)
+	)
 
 bar.main.tasklist.update = common.list_update
-bar.main.layout_buttons = awful.util.table.join(
-								awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
-								awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
-								awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
-								awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end))
+bar.main.layout_buttons = 
+	awful.util.table.join(
+		awful.button({ }, 1, function() awful.layout.inc(layouts, 1) end),
+		awful.button({ }, 3, function() awful.layout.inc(layouts, -1) end),
+		awful.button({ }, 4, function() awful.layout.inc(layouts, 1) end),
+		awful.button({ }, 5, function() awful.layout.inc(layouts, -1) end)
+	)
 
-my.bar = bar
 
 -- ########################################
 -- ## Main screen
@@ -461,25 +465,26 @@ awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 
 -- Signals
 -- Signal function to execute when a new client appears.
-client.connect_signal("manage", function (c, startup)
+client.connect_signal("manage", function(c, startup)
 		-- Enable sloppy focus
-		c:connect_signal("mouse::enter", function(c)
+		c:connect_signal("mouse::enter", 
+			function(c)
 				if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
 						and awful.client.focus.filter(c) then
 						client.focus = c
 				end
-		end)
+			end)
 
 		if not startup then
-				-- Set the windows at the slave,
-				-- i.e. put it at the end of others instead of setting it master.
-				awful.client.setslave(c)
+			-- Set the windows at the slave,
+			-- i.e. put it at the end of others instead of setting it master.
+			awful.client.setslave(c)
 
-				-- Put windows in a smart way, only if they does not set an initial position.
-				if not c.size_hints.user_position and not c.size_hints.program_position then
-						awful.placement.no_overlap(c)
-						awful.placement.no_offscreen(c)
-				end
+			-- Put windows in a smart way, only if they does not set an initial position.
+			if not c.size_hints.user_position and not c.size_hints.program_position then
+					awful.placement.no_overlap(c)
+					awful.placement.no_offscreen(c)
+			end
 		end
 end)
 

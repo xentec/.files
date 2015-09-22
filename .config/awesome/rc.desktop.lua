@@ -32,28 +32,30 @@ end
 -- Handle runtime errors after startup
 do
 	local in_error = false
-	awesome.connect_signal("debug::error", function (err)
-		-- Make sure we don't go into an endless error loop
-		if in_error then return end
-		in_error = true
+	awesome.connect_signal("debug::error", 
+		function(err)
+			-- Make sure we don't go into an endless error loop
+			if in_error then return end
+			in_error = true
 
-		naughty.notify({ preset = naughty.config.presets.warning,
-						 title = "Oops, an error happened!",
-						 text = err })
-		in_error = false
-	end)
+			naughty.notify({ preset = naughty.config.presets.warning,
+							 title = "Oops, an error happened!",
+							 text = err })
+			in_error = false
+		end)
 end
 
 
-naughty.config.notify_callback = function (args)
+naughty.config.notify_callback = function(args)
 --	args.icon_size = 16
 	return args;
 end
 
-naughty.config.presets.warning = {
-		bg = "#ffaa00",
-		fg = "#ffffff",
-		timeout = 10,
+naughty.config.presets.warning = 
+{
+	bg = "#ffaa00",
+	fg = "#ffffff",
+	timeout = 10,
 }
 
 -- Variable definitions
@@ -112,15 +114,15 @@ monitor = { main = 1, info = 2 }
 
 
 -- Tags
-local tags = {}
+my.tags = {}
+local tags = my.tags
+
 tags[monitor.main] = awful.tag({ "main", "web", "code", "script", "media", "gaming", "other" }, 1, layouts[1])
 tags[monitor.info] = awful.tag({ "chat", "media", "vm" }, 2, layouts[1])
 for s = 3, screen.count() do
 	-- Each screen has its own tag table.
 	tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
 end
-
-my.tags = tags;
 
 
 -- ########################################
@@ -134,8 +136,8 @@ my.tags = tags;
 --                         ▀▀                       
 -- ########################################
 
-local widget = {}
-my.widget = widget
+my.widget = {}
+local widget = my.widget
 
 widget.def = {}
 widget.def.barLen = 100
@@ -152,7 +154,7 @@ widget.clock = awful.widget.textclock('%H:%M %a %d.%m.%y')
 
 -- Network
 widget.network = wibox.widget.textbox()
-widget.network.func = function (w, data)
+widget.network.func = function(w, data)
 	local ret = {}
 	if data['{en carrier}'] == 1 then
 		ret = { col = "DodgerBlue", d = data['{en down_sb}'], ds = data['{en down_suf}'], u = data['{en up_sb}'], us = data['{en up_suf}'] }
@@ -226,7 +228,6 @@ widget.gpu.mem = awful.widget.progressbar({ width = widget.def.barLen })
 widget.gpu.mem:set_background_color("#4F8A3A")
 widget.gpu.mem:set_color("#3FC51E")
 widget.gpu.temp = wibox.widget.textbox();
---widget.gpu.temp:set_color("#3FC51E")
 widget.gpu.func = function(w, data)
 	for k, v in string.gmatch(data[1], "(%w+)=(%w+)") do
 		v = tonumber(v)/100
@@ -307,60 +308,63 @@ widget.mpd.worker = lain.widgets.mpd({
 --                            
 -- ########################################
 
-local bar = {}
+my.bar = {}
+local bar = my.bar
+
 bar.main = {}
 bar.main.prompt = {}
 bar.main.taglist = {}
-bar.main.taglist.buttons = awful.util.table.join(
-						awful.button({ }, 1, awful.tag.viewonly),
-						awful.button({ keys.mod }, 1, awful.client.movetotag),
-						awful.button({ }, 3, awful.tag.viewtoggle),
-						awful.button({ keys.mod }, 3, awful.client.toggletag)
-					)
+bar.main.taglist.buttons = 
+	awful.util.table.join(
+		awful.button({ }, 1, awful.tag.viewonly),
+		awful.button({ keys.mod }, 1, awful.client.movetotag),
+		awful.button({ }, 3, awful.tag.viewtoggle),
+		awful.button({ keys.mod }, 3, awful.client.toggletag)
+	)
 bar.main.tasklist = {}
-bar.main.tasklist.buttons = awful.util.table.join(
-						awful.button({ }, 1, function (c)
-							if c == client.focus then
-								c.minimized = true
-							else
-								-- Without this, the following
-								-- :isvisible() makes no sense
-								c.minimized = false
-								if not c:isvisible() then
-									awful.tag.viewonly(c:tags()[1])
-								end
-								-- This will also un-minimize
-								-- the client, if needed
-								client.focus = c
-								c:raise()
-							end
-						end),
-						 awful.button({ }, 3, function ()
-							if instance then
-								instance:hide()
-								instance = nil
-							else
-								instance = awful.menu.clients({ width=250 })
-							end
-						end),
-						awful.button({ }, 4, function ()
-							awful.client.focus.byidx(1)
-							if client.focus then client.focus:raise() end
-						end),
-						awful.button({ }, 5, function ()
-							awful.client.focus.byidx(-1)
-							if client.focus then client.focus:raise() end
-						end)
-					)
+bar.main.tasklist.buttons = 
+	awful.util.table.join(
+		awful.button({ }, 1, function(c)
+			if c == client.focus then
+				c.minimized = true
+			else
+				-- Without this, the following
+				-- :isvisible() makes no sense
+				c.minimized = false
+				if not c:isvisible() then
+					awful.tag.viewonly(c:tags()[1])
+				end
+				-- This will also un-minimize
+				-- the client, if needed
+				client.focus = c
+				c:raise()
+			end
+		end),
+		 awful.button({ }, 3, function()
+			if instance then
+				instance:hide()
+				instance = nil
+			else
+				instance = awful.menu.clients({ width=250 })
+			end
+		end),
+		awful.button({ }, 4, function()
+			awful.client.focus.byidx(1)
+			if client.focus then client.focus:raise() end
+		end),
+		awful.button({ }, 5, function()
+			awful.client.focus.byidx(-1)
+			if client.focus then client.focus:raise() end
+		end)
+	)
 bar.main.tasklist.update = common.list_update
-bar.main.layout_buttons = awful.util.table.join(
-								awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
-								awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end)
-							)
+bar.main.layout_buttons = 
+	awful.util.table.join(
+		awful.button({ }, 1, function() awful.layout.inc(layouts, 1) end),
+		awful.button({ }, 3, function() awful.layout.inc(layouts, -1) end)
+	)
 
 bar.info = {}
-
-my.bar = bar
 
 -- ########################################
 -- ## Main screens
@@ -415,7 +419,6 @@ if screen.count() > 1 then
 		left:add(bar.main.taglist[monitor.info])
 		left:add(widget.spacer.h)
 		left:add(bar.main.prompt[monitor.main])
-		--left:add(bar.main.tasklist[monitor.info])
 		left = wibox.widget.background(wibox.layout.margin(left,0,4), beautiful.bg_normal)
 
 		local right = wibox.layout.fixed.horizontal()
@@ -442,15 +445,15 @@ if screen.count() > 1 then
 		end
 
 		local mem = wibox.layout.fixed.vertical()
-		widget.mem.ram:set_height(12)
-		widget.mem.swap:set_height(4)
+		widget.mem.ram:set_height(8)
+		widget.mem.swap:set_height(8)
 		mem:add(widget.mem.ram)
 		mem:add(widget.mem.swap)
 
 		local gpu = wibox.layout.fixed.vertical()
 		widget.gpu.gl:set_height(6)
-		widget.gpu.vl:set_height(2)
-		widget.gpu.mem:set_height(8)
+		widget.gpu.vl:set_height(4)
+		widget.gpu.mem:set_height(6)
 		gpu:add(widget.gpu.gl)
 		gpu:add(widget.gpu.vl)
 		gpu:add(widget.gpu.mem)
@@ -553,7 +556,7 @@ local rules = {
 	{ rule = { class = "Pidgin" },						properties = { tag = tags[2][1] } },
 	{ rule = { class = "utox" },						properties = { tag = tags[2][1] } },
 	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] },
-		callback = function (c)
+		callback = function(c)
 			if c.name:find("Chat",1,true) then
 				c.screen = awful.tag.getscreen(tags[2][1])
             	c:tags({ tags[2][1] })
@@ -568,25 +571,26 @@ awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 
 -- Signals
 -- Signal function to execute when a new client appears.
-client.connect_signal("manage", function (c, startup)
+client.connect_signal("manage", function(c, startup)
 	-- Enable sloppy focus
-	c:connect_signal("mouse::enter", function(c)
-		if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
-			and awful.client.focus.filter(c) then
-			client.focus = c
-		end
-	end)
+	c:connect_signal("mouse::enter", 
+		function(c)
+			if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
+				and awful.client.focus.filter(c) then
+				client.focus = c
+			end
+		end)
 
 	if not startup then
 		-- Set the windows at the slave,
 		-- i.e. put it at the end of others instead of setting it master.
 		-- awful.client.setslave(c)
+		local g = c:geometry()
+		--require("gears.debug").dump(g)
+		if(g.width < 800 or g.height < 600) then
+		--	awful.client.floating.set(c, true);
+		end
 
-			local g = c:geometry()
-			--require("gears.debug").dump(g)
-			if(g.width < 800 or g.height < 600) then
-			--	awful.client.floating.set(c, true);
-			end
 		-- Put windows in a smart way, only if they does not set an initial position.
 		if not c.size_hints.user_position and not c.size_hints.program_position then
 			awful.placement.no_overlap(c)
@@ -597,7 +601,6 @@ end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
-
 
 mods.wallpaper.init()
 mods.autostart.launch()

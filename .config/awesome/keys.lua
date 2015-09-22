@@ -22,15 +22,15 @@ local globalkeys = awful.util.table.join(
 		awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
 
 		awful.key({ modkey,           }, "j",
-				function ()
-						awful.client.focus.byidx( 1)
-						if client.focus then client.focus:raise() end
-				end),
+			function ()
+					awful.client.focus.byidx( 1)
+					if client.focus then client.focus:raise() end
+			end),
 		awful.key({ modkey,           }, "k",
-				function ()
-						awful.client.focus.byidx(-1)
-						if client.focus then client.focus:raise() end
-				end),
+			function ()
+					awful.client.focus.byidx(-1)
+					if client.focus then client.focus:raise() end
+			end),
 		awful.key({ modkey,           }, "w", function () end),
 
 		-- Layout manipulation
@@ -40,12 +40,12 @@ local globalkeys = awful.util.table.join(
 		awful.key({ modkey, "Control" }, "k", function () awful.screen.focus_relative(-1) end),
 		awful.key({ modkey,           }, "u", awful.client.urgent.jumpto),
 		awful.key({ modkey,           }, "Tab",
-				function ()
-						awful.client.focus.history.previous()
-						if client.focus then
-								client.focus:raise()
-						end
-				end),
+			function ()
+					awful.client.focus.history.previous()
+					if client.focus then
+							client.focus:raise()
+					end
+			end),
 
 		-- Standard program
 		awful.key({ modkey, "Control" }, "r", awful.util.restart),
@@ -65,12 +65,13 @@ local globalkeys = awful.util.table.join(
 		-- Prompt
 		awful.key({ modkey }, "r", function () bar.main.prompt[mouse.screen]:run() end),
 		awful.key({ modkey }, "x",
-							function ()
-									awful.prompt.run({ prompt = "Run Lua code: " },
-									bar.main.prompt[mouse.screen].widget,
-									awful.util.eval, nil,
-									awful.util.getdir("cache") .. "/history_eval")
-							end),
+			function ()
+					awful.prompt.run({ prompt = "Run Lua code: " },
+					bar.main.prompt[mouse.screen].widget,
+					awful.util.eval, nil,
+					awful.util.getdir("cache") .. "/history_eval")
+			end),
+
 		-- Menubar
 		awful.key({ modkey }, "p", function() menubar.show() end),
 		awful.key({ modkey }, "d", function() exec("dinu") end),
@@ -85,6 +86,7 @@ local globalkeys = awful.util.table.join(
 		awful.key({ }, "XF86AudioStop", function () exec("mpc -h ".. my.mpd.host .." stop"); my.widget.mpd.worker.update() end),
 		awful.key({ }, "XF86AudioPrev", function () exec("mpc -h ".. my.mpd.host .." prev"); my.widget.mpd.worker.update() end),
 		awful.key({ }, "XF86AudioNext", function () exec("mpc -h ".. my.mpd.host .." next"); my.widget.mpd.worker.update() end),
+
 		-- Backlight
 		awful.key({ }, "XF86MonBrightnessUp",   function () spawn("xbacklight -inc 10") end),
 		awful.key({ }, "XF86MonBrightnessDown", function () spawn("xbacklight -dec 10") end),
@@ -112,16 +114,16 @@ local clientkeys = awful.util.table.join(
 		awful.key({ modkey,           }, "o",      awful.client.movetoscreen                        ),
 		awful.key({ modkey,           }, "t",      function (c) c.ontop = not c.ontop            end),
 		awful.key({ modkey,           }, "n",
-				function (c)
-						-- The client currently has the input focus, so it cannot be
-						-- minimized, since minimized clients can't have the focus.
-						c.minimized = true
-				end),
+			function (c)
+					-- The client currently has the input focus, so it cannot be
+					-- minimized, since minimized clients can't have the focus.
+					c.minimized = true
+			end),
 		awful.key({ modkey,           }, "m",
-				function (c)
-						c.maximized_horizontal = not c.maximized_horizontal
-						c.maximized_vertical   = not c.maximized_vertical
-				end)
+			function (c)
+					c.maximized_horizontal = not c.maximized_horizontal
+					c.maximized_vertical   = not c.maximized_vertical
+			end)
 )
 
 -- Compute the maximum number of digit we need, limited to 9
@@ -135,33 +137,33 @@ end
 -- Be careful: we use keycodes to make it works on any keyboard layout.
 -- This should map on the top row of your keyboard, usually 1 to 9.
 for i = 1, 9 do
-		globalkeys = awful.util.table.join(globalkeys,
-				awful.key({ modkey }, "#" .. i + 9,
-									function ()
-												local screen = mouse.screen
-												if tags[screen][i] then
-														awful.tag.viewonly(tags[screen][i])
-												end
-									end),
-				awful.key({ modkey, "Control" }, "#" .. i + 9,
-									function ()
-											local screen = mouse.screen
-											if tags[screen][i] then
-													awful.tag.viewtoggle(tags[screen][i])
-											end
-									end),
-				awful.key({ modkey, "Shift" }, "#" .. i + 9,
-									function ()
-											if client.focus and tags[client.focus.screen][i] then
-													awful.client.movetotag(tags[client.focus.screen][i])
-											end
-									end),
-				awful.key({ modkey, "Control", "Shift" }, "#" .. i + 9,
-									function ()
-											if client.focus and tags[client.focus.screen][i] then
-													awful.client.toggletag(tags[client.focus.screen][i])
-											end
-									end))
+	globalkeys = awful.util.table.join(globalkeys,
+		awful.key({ modkey }, "#" .. i + 9,
+				function()
+					local screen = mouse.screen
+					if my.tags[screen][i] then
+							awful.tag.viewonly(my.tags[screen][i])
+					end
+				end),
+		awful.key({ modkey, "Control" }, "#" .. i + 9,
+				function()
+					local screen = mouse.screen
+					if my.tags[screen][i] then
+							awful.tag.viewtoggle(my.tags[screen][i])
+					end
+				end),
+		awful.key({ modkey, "Shift" }, "#" .. i + 9,
+				function()
+					if client.focus and my.tags[client.focus.screen][i] then
+							awful.client.movetotag(my.tags[client.focus.screen][i])
+					end
+				end),
+		awful.key({ modkey, "Control", "Shift" }, "#" .. i + 9,
+				function()
+					if client.focus and my.tags[client.focus.screen][i] then
+							awful.client.toggletag(my.tags[client.focus.screen][i])
+					end
+				end))
 end
 
 return {
