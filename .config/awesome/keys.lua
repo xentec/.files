@@ -86,6 +86,10 @@ local globalkeys = awful.util.table.join(
 		awful.key({ }, "XF86AudioStop", function () exec("mpc -h ".. my.mpd.host .." stop"); my.widget.mpd.worker.update() end),
 		awful.key({ }, "XF86AudioPrev", function () exec("mpc -h ".. my.mpd.host .." prev"); my.widget.mpd.worker.update() end),
 		awful.key({ }, "XF86AudioNext", function () exec("mpc -h ".. my.mpd.host .." next"); my.widget.mpd.worker.update() end),
+		awful.key({ "Shift" }, "XF86AudioPrev", function () exec("mpc -h ".. my.mpd.host .." seek -5"); my.widget.mpd.worker.update() end),
+		awful.key({ "Shift" }, "XF86AudioNext", function () exec("mpc -h ".. my.mpd.host .." seek +5"); my.widget.mpd.worker.update() end),
+		awful.key({ "Shift" }, "XF86AudioLowerVolume", function () exec("mpc -h ".. my.mpd.host .." seek -1"); my.widget.mpd.worker.update() end),
+		awful.key({ "Shift" }, "XF86AudioRaiseVolume", function () exec("mpc -h ".. my.mpd.host .." seek +1"); my.widget.mpd.worker.update() end),
 
 		-- Backlight
 		awful.key({ }, "XF86MonBrightnessUp",   function () spawn("xbacklight -inc 10") end),
