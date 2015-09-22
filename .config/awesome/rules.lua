@@ -52,6 +52,19 @@ local rules = {
 			c:geometry(geometry)
 		end
 	},
+	{ rule = { instance = "gl" },
+		properties = { floating = true, border_width = 0 },
+		callback = function(c)
+			local area = screen[c.screen].workarea
+			local geometry = c:geometry()
+
+			geometry.y = area.y
+			geometry.x = area.x + (area.width - geometry.width)
+
+			c:geometry(geometry)
+		end
+	},
+
 }
 return rules
 -- }}}
