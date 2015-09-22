@@ -144,18 +144,32 @@ lain.widgets.calendar:attach(widget.clock, { font = beautiful.font_mono, cal = "
 
 -- Network
 widget.network = wibox.widget.textbox()
-widget.network.func = function(w, data)
-	local ret = {}
-	if data['{en carrier}'] == 1 then
-		ret = { col = "DodgerBlue", d = data['{en down_sb}'], ds = data['{en down_suf}'], u = data['{en up_sb}'], us = data['{en up_suf}'] }
-	elseif data['{wl carrier}'] == 1 then
-		ret = { col = "DodgerBlue", d = data['{wl down_sb}'], ds = data['{wl down_suf}'], u = data['{wl up_sb}'], us = data['{wl up_suf}'] }
-	else
-		return color("#8c8c8c", ' DC ')
+widget.network.func = 
+	function()
+		local function humanBytes(bytes)
+			local unit = {"K", "M", "G", "T", "P", "E"}
+			local i = 1
+			bytes = tonumber(bytes)
+			while bytes > 1024 do
+				bytes = bytes / 1024
+				i = i+1
+			end
+			return bytes, unit[i]
+		end
+
+		local w = my.widget.network
+
+		if net_now.carrier == "1" 
+		then
+			local down, down_suf = humanBytes(net_now.received);
+			local up, up_suf = humanBytes(net_now.sent);
+
+			w:set_markup(color("DodgerBlue", markup.monospace(string.format('↓ %5.1f %s ↑ %5.1f %s', down, down_suf, up, up_suf))))
+		else
+			w:set_markup(color("#8c8c8c", markup.monospace(' DC ')))
+		end
 	end
-	return color(ret.col, markup.monospace(string.format('↓ %5.1f %s ↑ %5.1f %s', ret.d, ret.ds, ret.u, ret.us)))
-end
-vicious.register(widget.network, mods.net, widget.network.func, 2)
+widget.network.worker = lain.widgets.net({ settings = widget.network.func })
 
 -- Volume
 widget.volume = {} --awful.widget.progressbar({ width = 50 })
