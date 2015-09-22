@@ -16,10 +16,9 @@ local common = require("common")
 local mods = require("modules")
 
 -- Override
-wibox.layout.malign = require("override.layout-align")
+-- nothing here (yet)
 
 -- Short cuts
-
 local markup = lain.util.markup
 local color = markup.fg.color
 
@@ -384,7 +383,7 @@ do
 	right:add(widget.layoutbox[monitor.main])
 	right = wibox.widget.background(wibox.layout.margin(right,4,4), beautiful.bg_normal)
 
-	local layout = wibox.layout.malign.horizontal()
+	local layout = wibox.layout.align.horizontal()
 	layout:set_left(left)
 	layout:set_middle(bar.main.tasklist[monitor.main])
 	layout:set_right(right)
