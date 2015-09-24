@@ -245,8 +245,10 @@ widget.gpu.mem = awful.widget.progressbar({ width = widget.def.barLen })
 widget.gpu.mem:set_background_color("#4F8A3A")
 widget.gpu.mem:set_color("#3FC51E")
 widget.gpu.temp = wibox.widget.textbox();
-widget.gpu.func = function(w, data)
-	for k, v in string.gmatch(data[1], "(%w+)=(%w+)") do
+widget.gpu.func = function()
+	local w = my.widget.gpu
+
+	for k, v in string.gmatch(gpu_now[1], "(%w+)=(%w+)") do
 		v = tonumber(v)/100
 		if(k == "graphics") then
 			w.gl:set_value(v)
@@ -255,15 +257,14 @@ widget.gpu.func = function(w, data)
 		end
 	end
 
-	w.mem:set_value(tonumber(data[2])/tonumber(data[3]))
-	w.temp:set_markup(color('#4F8A3A', markup.monospace(' '..data[4]..'°C')))
-	return data
+	w.mem:set_value(tonumber(gpu_now[2])/tonumber(gpu_now[3]))
+	w.temp:set_markup(color('#4F8A3A', markup.monospace(' '..gpu_now[4]..'°C')))
 end
-vicious.register(widget.gpu, 
-	mods.gpu, 
-	widget.gpu.func, 2, 
-	{ query = { "[gpu:0]/GPUUtilization", "[gpu:0]/UsedDedicatedGPUMemory", "[gpu:0]/TotalDedicatedGPUMemory", "[gpu:0]/GPUCoreTemp" } }
-)
+mods.gpu({
+	query = { "[gpu:0]/GPUUtilization", "[gpu:0]/UsedDedicatedGPUMemory", "[gpu:0]/TotalDedicatedGPUMemory", "[gpu:0]/GPUCoreTemp" },
+	settings = widget.gpu.func
+})
+
 
 -- MPD
 widget.mpd = {}
