@@ -248,17 +248,10 @@ widget.gpu.temp = wibox.widget.textbox();
 widget.gpu.func = function()
 	local w = my.widget.gpu
 
-	for k, v in string.gmatch(gpu_now[1], "(%w+)=(%w+)") do
-		v = tonumber(v)/100
-		if(k == "graphics") then
-			w.gl:set_value(v)
-		elseif(k == "video") then
-			w.vl:set_value(v)
-		end
-	end
-
-	w.mem:set_value(tonumber(gpu_now[2])/tonumber(gpu_now[3]))
-	w.temp:set_markup(color('#4F8A3A', markup.monospace(' '..gpu_now[4]..'°C')))
+	w.gl:set_value(gpu_now.usage.graphics/100)
+	w.vl:set_value(gpu_now.usage.video/100)
+	w.mem:set_value(gpu_now.mem.used/gpu_now.mem.total)
+	w.temp:set_markup(color('#4F8A3A', markup.monospace(' '..gpu_now.temp..'°C')))
 end
 mods.gpu({
 	query = { "[gpu:0]/GPUUtilization", "[gpu:0]/UsedDedicatedGPUMemory", "[gpu:0]/TotalDedicatedGPUMemory", "[gpu:0]/GPUCoreTemp" },
