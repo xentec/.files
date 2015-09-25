@@ -117,12 +117,22 @@ monitor = { main = 1, info = 2 }
 -- Tags
 my.tags = {}
 local tags = my.tags
-
-tags[monitor.main] = awful.tag({ "main", "web", "code", "script", "media", "gaming", "other" }, 1, layouts[1])
-tags[monitor.info] = awful.tag({ "chat", "media", "vm" }, 2, layouts[1])
-for s = 3, screen.count() do
-	-- Each screen has its own tag table.
-	tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
+tags.config = {
+	{ 
+		names = { "main", "web", "code", "script", "media", "gaming", "other" },
+		layout = layouts[1]
+	},
+	{
+		names = { "chat", "media", "vm" }, 
+		layout = layouts[6]
+	}
+}
+for s = 1, screen.count() do
+	if tags.config[s] then
+		tags[s] = awful.tag(tags.config[s].names, s, tags.config[s].layout)
+	else
+		tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
+	end
 end
 
 
@@ -557,29 +567,46 @@ end
 -- Set keys
 root.keys(keys.global);
 
--- Rules
+-- Rules per monitor
+local rules =
+{
+	{
+		{ rule = { class = "Chromium" },					properties = { tag = 2 } },
+		{ rule = { class = "Firefox" },						properties = { tag = 2 } },
+		{ rule = { class = "Steam" },						properties = { tag = 6 },
+			callback = function(c)
+				if c.name:find("Chat",1,true) then
+					c.screen = awful.tag.getscreen(tags[2][1])
+					c:tags({ tags[2][1] })
+					awful.client.floating.set(c, false)
+				end
+			end
+		},
+	},
+	{
+		{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = 1 } },
+		{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = 1 } },
+		{ rule = { class = "Skype" },						properties = { tag = 1 } },
+		{ rule = { class = "Pidgin" },						properties = { tag = 1 } },
+		{ rule = { class = "utox" },						properties = { tag = 1 } },
+	}
+}
 awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
-local rules = {
-	{ rule = { class = "Chromium" },					properties = { tag = tags[1][2] } },
-	{ rule = { class = "Firefox" },						properties = { tag = tags[1][2] } },
-	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[2][1] } },
-	{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = tags[2][1] } },
-	{ rule = { class = "Skype" },						properties = { tag = tags[2][1] } },
-	{ rule = { class = "Pidgin" },						properties = { tag = tags[2][1] } },
-	{ rule = { class = "utox" },						properties = { tag = tags[2][1] } },
-	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] },
-		callback = function(c)
-			if c.name:find("Chat",1,true) then
-				c.screen = awful.tag.getscreen(tags[2][1])
-            	c:tags({ tags[2][1] })
-            	awful.client.floating.set(c, false)
+for s = 1, screen.count()
+do
+	if rules[s] ~= nil
+	then
+		for _,rule in pairs(rules[s])
+		do
+			if rule.properties and rule.properties.tag
+			then
+				rule.properties.tag = tags[s][rule.properties.tag]
 			end
 		end
-	},
+		awful.rules.rules = awful.util.table.join(awful.rules.rules, rules[s])
+	end
+end
 
-	--{ rule_any = { class = { "mplayer", "mplayer2", "mpv" }},	properties = { tag = tags[2][3] } },
-}
-awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 
 -- Signals
 -- Signal function to execute when a new client appears.
