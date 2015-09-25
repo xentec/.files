@@ -104,8 +104,9 @@ layouts =
 	ln.uselesstile,
 	awm.tile,
 	awm.fair,
-	awm.fair.horizontal,
 	ln.uselessfair,
+	awm.fair.horizontal,
+	ln.uselessfair.horizontal,
 	ln.centerwork,
 	awm.floating
 }
