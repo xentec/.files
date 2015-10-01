@@ -3,45 +3,58 @@ local os = os
 
 local util = require("awful.util")
 
-local pulse = { mt = {} }
+local pulse = { mt = {}, mute = {} }
 
-local function ponymix(arg, updateval, updatemute)
-	return util.pread("ponymix "..arg)
+local function call(arg)
+	return util.pread("pulseaudio-ctl "..arg);
 end
 
 function pulse.new(update_func, step)
 	if type(update_func) ~= "function" then return nil end
 	pulse.step = step or 1
 	pulse.update = update_func
-	pulse.value = util.pread("ponymix get-volume")
-	pulse.muted = util.pread("sh -c 'ponymix is-muted; echo -n $?;'") == "0"
-	pulse.update(pulse.muted, pulse.value)
+
+	local status = pulse.update()
+
+
 	return pulse
 end
 
+function pulse.poll()
+    local status = {}
+    for val in string.gmatch(call("full-status"), "%S+") do
+  		table.insert(status, val)
+	end
+
+	pulse.value = tonumber(status[1])
+	pulse.mute.speaker = status[2] == "yes"
+	pulse.mute.mic = status[3] == "yes";
+	pulse.update(pulse.mute, pulse.value)
+end
+
 function pulse.increase()
-	pulse.value = ponymix("increase "..pulse.step or 1, false)
-	pulse.update(pulse.muted, pulse.value)
+	pulse.value = call("up "..pulse.step or 1)
+	poll()
 end
 
 function pulse.decrease()
-	pulse.value = ponymix("decrease "..pulse.step or 1, false)
-	pulse.update(pulse.muted, pulse.value)
+	pulse.value = call("down "..pulse.step or 1)
+	poll()
 end
 
-function pulse.mute(bool)
-	if bool then
-		ponymix("mute")
-	else
-		ponymix("unmute")
-	end
-	pulse.muted = bool
-	pulse.update(pulse.muted, pulse.value)
+function pulse.mute(what)
+	call(what == "speaker" and "mute" or "mute-input")
+	poll()
 end
 
-function pulse.togglemute()
-	pulse.mute(pulse.muted == false)
+function pulse.toggleMic()
+	pulse.mute("mic")
 end
+
+function pulse.toggleSpeaker()
+	pulse.mute("speaker")
+end
+
 
 function pulse.mt:__call(...)
 	return pulse.new(...)

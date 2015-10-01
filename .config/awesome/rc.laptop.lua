@@ -176,10 +176,10 @@ widget.volume = {} --awful.widget.progressbar({ width = 50 })
 widget.volume.icon = wibox.widget.textbox()
 --widget.volume.icon:set_font(theme.font_name .. ' ' .. (theme.font_size + 2))
 widget.volume.data = wibox.widget.textbox()
-widget.volume.func = function(muted, val)
+widget.volume.func = function(mute, val)
 	local col = "#BDB76B"
 	local icon = "&#xf0ba;"
-	if muted then
+	if mute.speaker then
 		col = "#948D60"
 		icon = "&#xf080;"
 	end
@@ -194,7 +194,7 @@ widget.volume.func = function(muted, val)
 	end
 	widget.volume.muted = muted;
 end
-local volume = mods.pulse(widget.volume.func, 5)
+--local volume = mods.pulse(widget.volume.func, 5)
 
 -- CPU
 widget.cpu = {}
@@ -475,7 +475,7 @@ local rules = {
 	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[1][3] } },
 	{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = tags[1][3] } },
 	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
-	{ rule_any = { class = { "mplayer2", "mplayer", "mpv" }},	properties = { tag = tags[1][5] } },
+--	{ rule_any = { class = { "mplayer2", "mplayer", "mpv" }},	properties = { tag = tags[1][5] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
 

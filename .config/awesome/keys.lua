@@ -77,9 +77,10 @@ local globalkeys = awful.util.table.join(
 		awful.key({ modkey }, "d", function() exec("dinu") end),
 
 		-- Volume
-		awful.key({ }, "XF86AudioMute",     	pulse.togglemute),
+		awful.key({ }, "XF86AudioMute",     	pulse.toggleSpeaker),
 		awful.key({ }, "XF86AudioRaiseVolume",  pulse.increase),
 		awful.key({ }, "XF86AudioLowerVolume",  pulse.decrease),
+		awful.key({ }, "XF86AudioMicMute",  	pulse.toggleMic),
 
 		-- Media
 		awful.key({ }, "XF86AudioPlay", function () exec("mpc -h ".. my.mpd.host .." toggle"); my.widget.mpd.worker.update() end),
