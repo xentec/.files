@@ -114,8 +114,6 @@ for s = 2, screen.count() do
 	tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
 end
 
-my.tags = tags
-
 -- ########################################
 --                                                  
 -- ▄     ▄   ▀        █                  ▄          
@@ -127,7 +125,8 @@ my.tags = tags
 --                         ▀▀                       
 -- ########################################
 
-widget = {}
+my.widget = {}
+local widget = my.widget
 
 widget.spacer = {}
 widget.spacer.h = wibox.widget.textbox(color('gray', ' ┆ '))
@@ -194,7 +193,7 @@ widget.volume.func = function(mute, val)
 	end
 	widget.volume.muted = muted;
 end
---local volume = mods.pulse(widget.volume.func, 5)
+widget.volume.worker = mods.pulse(widget.volume.func, 5)
 
 -- CPU
 widget.cpu = {}
@@ -290,7 +289,6 @@ widget.battery.func = function(w, d)
 end
 --widget.battery.worker = lain.widgets.bat({ timeout = 5, notify = "off", settings = widget.battery.func })
 vicious.register(widget.battery, vicious.widgets.bat, widget.battery.func, 2, 'BAT0')
-
 
 -- ########################################
 -- ▄▄▄▄▄                      

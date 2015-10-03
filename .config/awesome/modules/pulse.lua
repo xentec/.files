@@ -1,11 +1,12 @@
 local setmetatable = setmetatable
+local type = type
 local os = os
 
 local util = require("awful.util")
 
 local pulse = { mt = {}, mute = {} }
 
-local function call(arg)
+local function ctl(arg)
 	return util.pread("pulseaudio-ctl "..arg);
 end
 
@@ -13,46 +14,44 @@ function pulse.new(update_func, step)
 	if type(update_func) ~= "function" then return nil end
 	pulse.step = step or 1
 	pulse.update = update_func
-
-	local status = pulse.update()
-
-
 	return pulse
 end
 
 function pulse.poll()
-    local status = {}
-    for val in string.gmatch(call("full-status"), "%S+") do
-  		table.insert(status, val)
-	end
+	local volume, mute_speaker, mute_mic = string.gmatch(ctl("full-status"), "%d+ %S+ %S+")
 
-	pulse.value = tonumber(status[1])
-	pulse.mute.speaker = status[2] == "yes"
-	pulse.mute.mic = status[3] == "yes";
+	pulse.value = tonumber(volume)
+	pulse.mute.speaker = mute_speaker == "yes"
+	pulse.mute.mic = mute_mic == "yes"
 	pulse.update(pulse.mute, pulse.value)
 end
 
 function pulse.increase()
-	pulse.value = call("up "..pulse.step or 1)
+	pulse.value = ctl("up "..pulse.step or 1)
 	poll()
 end
 
 function pulse.decrease()
-	pulse.value = call("down "..pulse.step or 1)
+	pulse.value = ctl("down "..pulse.step or 1)
 	poll()
 end
 
 function pulse.mute(what)
-	call(what == "speaker" and "mute" or "mute-input")
+	local mute = "mute"
+	if what ~= nil then
+		mute = mute.."-"..what
+	end
+
+	ctl(mute)
 	poll()
 end
 
 function pulse.toggleMic()
-	pulse.mute("mic")
+	pulse.mute("input")
 end
 
 function pulse.toggleSpeaker()
-	pulse.mute("speaker")
+	pulse.mute()
 end
 
 
