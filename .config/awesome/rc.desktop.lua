@@ -201,7 +201,7 @@ widget.volume:set_background_color("#716D40")
 widget.volume:set_color("#BDB76B")
 widget.volume:set_max_value(100)
 widget.volume.func = function(muted, val)
-	if muted then
+	if muted.speaker then
 		widget.volume:set_color("#716D40")
 	else
 		widget.volume:set_color("#BDB76B")

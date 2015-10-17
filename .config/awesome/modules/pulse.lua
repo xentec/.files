@@ -1,10 +1,12 @@
+
+local string = { match = string.match }
 local setmetatable = setmetatable
+local tonumber = tonumber
 local type = type
-local os = os
 
 local util = require("awful.util")
 
-local pulse = { mt = {}, mute = {} }
+local pulse = { mt = {}, muted = {} }
 
 local function ctl(arg)
 	return util.pread("pulseaudio-ctl "..arg);
@@ -14,26 +16,27 @@ function pulse.new(update_func, step)
 	if type(update_func) ~= "function" then return nil end
 	pulse.step = step or 1
 	pulse.update = update_func
+	pulse.poll()
 	return pulse
 end
 
 function pulse.poll()
-	local volume, mute_speaker, mute_mic = string.gmatch(ctl("full-status"), "%d+ %S+ %S+")
+	local volume, mute_speaker, mute_mic = string.match(ctl("full-status"), "(%d+) (%S+) (%S+)")
 
 	pulse.value = tonumber(volume)
-	pulse.mute.speaker = mute_speaker == "yes"
-	pulse.mute.mic = mute_mic == "yes"
-	pulse.update(pulse.mute, pulse.value)
+	pulse.muted.speaker = mute_speaker == "yes"
+	pulse.muted.mic = mute_mic == "yes"
+	pulse.update(pulse.muted, pulse.value)
 end
 
 function pulse.increase()
 	pulse.value = ctl("up "..pulse.step or 1)
-	poll()
+	pulse.poll()
 end
 
 function pulse.decrease()
 	pulse.value = ctl("down "..pulse.step or 1)
-	poll()
+	pulse.poll()
 end
 
 function pulse.mute(what)
@@ -43,7 +46,7 @@ function pulse.mute(what)
 	end
 
 	ctl(mute)
-	poll()
+	pulse.poll()
 end
 
 function pulse.toggleMic()
@@ -60,5 +63,3 @@ function pulse.mt:__call(...)
 end
 
 return setmetatable(pulse, pulse.mt)
-
--- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
