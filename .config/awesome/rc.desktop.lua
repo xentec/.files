@@ -45,12 +45,6 @@ do
 		end)
 end
 
-
-naughty.config.notify_callback = function(args)
---	args.icon_size = 16
-	return args;
-end
-
 naughty.config.presets.warning = 
 {
 	bg = "#ffaa00",

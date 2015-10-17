@@ -46,11 +46,6 @@ do
 end
 -- }}}
 
-naughty.config.notify_callback = function(args)
-	args.icon_size = 16
-	return args;
-end
-
 naughty.config.presets.warning = 
 {
 	bg = "#ffaa00",
@@ -139,7 +134,7 @@ widget.layoutbox = {}
 widget.clock = awful.widget.textclock('%H:%M %a %d.%m.%y')
 
 -- Calendar
-lain.widgets.calendar:attach(widget.clock, { font = beautiful.font_mono, cal = "/usr/bin/cal -3" })
+lain.widgets.calendar:attach(widget.clock, { font = beautiful.font_mono, cal = "/usr/bin/cal -n 2" })
 
 -- Network
 widget.network = wibox.widget.textbox()
@@ -196,28 +191,34 @@ widget.volume.func = function(mute, val)
 end
 widget.volume.worker = mods.pulse(widget.volume.func, 5)
 
--- CPU
-widget.cpu = {}
-widget.cpu.count = 4
-for i = 1,widget.cpu.count do
-	widget.cpu[i] = awful.widget.progressbar({ width = 50/widget.cpu.count })
-	widget.cpu[i]:set_background_color("#876333")
-	widget.cpu[i]:set_color("#DF8F26")
-end
-widget.cpu.func = function()
-	for i = 1,w.count do
-		cpu[i]:set_value(data[i+1]/100)
-	end
+-- Battery 
+widget.battery = {} 
+widget.battery.icon = wibox.widget.textbox('&#xF0E7;')
+widget.battery.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
+widget.battery.data = wibox.widget.textbox()
+widget.battery.func = function(w, d)
+	local w = my.widget.battery
+	local p = tonumber(bat_now.perc)
+	local s = bat_now.status == "Charged" and 'F' or bat_now.status[1]
 
-	return data
-end
---vicious.register(widget.cpu, vicious.widgets.cpu, widget.cpu.func, 2)
+	local critical = 10
+	local low = 30
 
--- Memory
-widget.mem = awful.widget.progressbar({ width = 50 })
-widget.mem:set_background_color("#3A6D8A")
-widget.mem:set_color("#269CDF")
---vicious.register(widget.mem, vicious.widgets.mem, "$1")
+	local icon = (s == 'C' or s == 'F') and '&#xF0E7;' or
+				 p > 75 and '&#xF240;' or
+				 p > 50 and '&#xF241;' or
+				 p > 25 and '&#xF242;' or
+				 p > 5  and '&#xF243;' or '&#xF244;'
+
+	local col = (s == 'C' or s == 'F') and '#00CCCC' or
+				p > low and '#03cc00' or 
+				p > critical and '#FBE72A' or '#FB6B24'
+
+	w.icon:set_markup(color(col, string.format('%s', icon)))
+	w.data:set_markup(color(col, string.format('%3d', p)))
+	return
+end
+widget.battery.worker = lain.widgets.bat({ timeout = 5, settings = widget.battery.func })
 
 -- Wifi
 widget.wifi = {}
@@ -243,41 +244,6 @@ widget.wifi.func = function(w, data)
 	end
 end
 vicious.register(widget.wifi.data, vicious.widgets.wifi, widget.wifi.func, 2, 'wl')
-
--- Battery 
-widget.battery = {} 
-widget.battery.icon = wibox.widget.textbox('&#xF0E7;')
-widget.battery.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
-widget.battery.data = wibox.widget.textbox()
---[[widget.battery.tip = awful.tooltip({
-	objects = { widget.battery.icon },
-	timer_function = function()
-		--return color('DarkCyan', ' '..widget.battery.data..' ')
-	end,
-})]]
-widget.battery.func = function(w, d)
-	local w = my.widget.battery
-	local p = tonumber(bat_now.perc)
-	local s = bat_now.status == "Charged" and 'F' or bat_now.status[1]
-
-	local critical = 10
-	local low = 30
-
-	local icon = (s == 'C' or s == 'F') and '&#xF0E7;' or
-				 p > 75 and '&#xF240;' or
-				 p > 50 and '&#xF241;' or
-				 p > 25 and '&#xF242;' or
-				 p > 5  and '&#xF243;' or '&#xF244;'
-
-	local col = (s == 'C' or s == 'F') and '#00CCCC' or
-				p > low and '#03cc00' or 
-				p > critical and '#FBE72A' or '#FB6B24'
-
-	w.icon:set_markup(color(col, string.format('%s', icon)))
-	w.data:set_markup(color(col, string.format('%3d', p)))
-	return
-end
-widget.battery.worker = lain.widgets.bat({ timeout = 5, settings = widget.battery.func })
 
 -- ########################################
 -- ▄▄▄▄▄                      
@@ -367,12 +333,6 @@ do
 	left:add(wibox.widget.systray())
 	left:add(bar.main.prompt[monitor.main])
 	left = wibox.widget.background(wibox.layout.margin(left,0,4), beautiful.bg_normal)
-
-	local cpu = wibox.layout.fixed.horizontal()
-	for i=1,widget.cpu.count do
-		widget.cpu[i]:set_height(4)
-		cpu:add(widget.cpu[i])
-	end
 
 	local right = wibox.layout.fixed.horizontal()
 	right:add(widget.network)
