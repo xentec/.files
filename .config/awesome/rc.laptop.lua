@@ -249,7 +249,6 @@ widget.battery = {}
 widget.battery.icon = wibox.widget.textbox('&#xF0E7;')
 widget.battery.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
 widget.battery.data = wibox.widget.textbox()
-widget.battery.warning = 0
 --[[widget.battery.tip = awful.tooltip({
 	objects = { widget.battery.icon },
 	timer_function = function()
@@ -257,38 +256,28 @@ widget.battery.warning = 0
 	end,
 })]]
 widget.battery.func = function(w, d)
-	--local w = widget.battery
-	--local d = bat_now
+	local w = my.widget.battery
+	local p = tonumber(bat_now.perc)
+	local s = bat_now.status == "Charged" and 'F' or bat_now.status[1]
 
 	local critical = 10
 	local low = 30
-	if d[1] == '−' and d[2] <= critical and w.warning ~= d[2] and (w.warning == 0 or d[2] % 5 == 0) then
-		naughty.notify({ preset = naughty.config.presets.critical,
-						 title = " Battery",
-						 text = string.format("%3.0f %% remaining. Charge me up!", d[2]) })
-		w.warning = d[2]
-	end
 
-	local icon = 	(d[1] == '+' or d[1] == '↯') and '&#xF0E7;'  or 
-					d[2] > 75 and '&#xF240;' or 
-					d[2] > 50 and '&#xF241;' or
-					d[2] > 25 and '&#xF242;' or
-					d[2] > 5  and '&#xF243;' or 
-									 '&#xF244;'
+	local icon = (s == 'C' or s == 'F') and '&#xF0E7;' or
+				 p > 75 and '&#xF240;' or
+				 p > 50 and '&#xF241;' or
+				 p > 25 and '&#xF242;' or
+				 p > 5  and '&#xF243;' or '&#xF244;'
 
+	local col = (s == 'C' or s == 'F') and '#00CCCC' or
+				p > low and '#03cc00' or 
+				p > critical and '#FBE72A' or '#FB6B24'
 
-	local col = 	d[1] == '↯' and '#00CCCC' or 
-					d[1] == '+' and '#00CCCC' or
-					d[2] > low and '#03cc00' or 
-					d[2] > critical and '#FBE72A' or 
-										'#FB6B24'
-	--naughty.notify({title = d[1], text = d[2]})
 	w.icon:set_markup(color(col, string.format('%s', icon)))
-	w.data:set_markup(color(col, string.format('%3.0f', d[2])))
+	w.data:set_markup(color(col, string.format('%3d', p)))
 	return
 end
---widget.battery.worker = lain.widgets.bat({ timeout = 5, notify = "off", settings = widget.battery.func })
-vicious.register(widget.battery, vicious.widgets.bat, widget.battery.func, 2, 'BAT0')
+widget.battery.worker = lain.widgets.bat({ timeout = 5, settings = widget.battery.func })
 
 -- ########################################
 -- ▄▄▄▄▄                      
