@@ -276,7 +276,7 @@ mods.gpu({
 -- MPD
 widget.mpd = {}
 widget.mpd.icon = wibox.widget.textbox()
-widget.mpd.icon:set_font('octicons')
+widget.mpd.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
 widget.mpd.nfo = wibox.widget.textbox()
 widget.mpd.nfo:set_font(theme.font_name .. ' ' .. (theme.font_size - 2))
 widget.mpd.bar = awful.widget.progressbar({ height = 2 })
@@ -289,9 +289,9 @@ widget.mpd.func = function()
 	local nfo = ""
 	local time = 0
 	local state = {
-		play = '&#xF0BF;',
-		pause = '&#xF0BB;',
-		stop = '&#xF053;'
+		play = '&#xF04B;',
+		pause = '&#xF04C;',
+		stop = '&#xF04D;'
 	}
 
 	if state[d.state] then

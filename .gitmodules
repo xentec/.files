@@ -1,6 +1,3 @@
-[submodule "extern/octicons"]
-	path = extern/octicons
-	url = https://github.com/github/octicons
 [submodule "extern/cv"]
 	path = extern/cv
 	url = https://github.com/Xfennec/cv

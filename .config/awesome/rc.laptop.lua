@@ -173,14 +173,15 @@ widget.network.worker = lain.widgets.net({ settings = widget.network.func })
 -- Volume
 widget.volume = {} --awful.widget.progressbar({ width = 50 })
 widget.volume.icon = wibox.widget.textbox()
---widget.volume.icon:set_font(theme.font_name .. ' ' .. (theme.font_size + 2))
+widget.volume.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
 widget.volume.data = wibox.widget.textbox()
 widget.volume.func = function(mute, val)
 	local col = "#BDB76B"
-	local icon = "&#xf0ba;"
+	local icon = "&#xF028;"
+
 	if mute.speaker then
 		col = "#948D60"
-		icon = "&#xf080;"
+		icon = "&#xF026;"
 	end
 	widget.volume.icon:set_markup(color(col, string.format('%s', icon)))
 	widget.volume.data:set_markup(color(col, string.format('%3.0f', val)))
@@ -220,8 +221,8 @@ widget.mem:set_color("#269CDF")
 
 -- Wifi
 widget.wifi = {}
-widget.wifi.icon = wibox.widget.textbox(color('DarkCyan', '&#xf034;'))
---widget.wifi.icon:set_font(theme.font_name .. ' ' .. (theme.font_size + 2))
+widget.wifi.icon = wibox.widget.textbox(color('DarkCyan', '&#xF1EB;'))
+widget.wifi.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
 widget.wifi.data =  wibox.widget.textbox()
 widget.wifi.tip = awful.tooltip({
 	objects = { widget.wifi.icon, widget.wifi.data },
@@ -236,7 +237,7 @@ widget.wifi.func = function(w, data)
 	widget.wifi.tipdata = s
 
 	if data['{linp}'] > 0 then
-		return color('DarkCyan', markup.monospace(string.format(' %3.0f', data['{linp}'])))
+		return color('DarkCyan', markup.monospace(string.format('%3.0f', data['{linp}'])))
 	else
 		return ""
 	end
@@ -245,8 +246,8 @@ vicious.register(widget.wifi.data, vicious.widgets.wifi, widget.wifi.func, 2, 'w
 
 -- Battery 
 widget.battery = {} 
-widget.battery.icon = wibox.widget.textbox('&#xE001;')
-widget.battery.icon:set_font('flaticon '..theme.font_size)
+widget.battery.icon = wibox.widget.textbox('&#xF0E7;')
+widget.battery.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
 widget.battery.data = wibox.widget.textbox()
 widget.battery.warning = 0
 --[[widget.battery.tip = awful.tooltip({
@@ -268,13 +269,12 @@ widget.battery.func = function(w, d)
 		w.warning = d[2]
 	end
 
-	local icon = 	(d[1] == '+' or d[1] == '↯') and '&#xE001;'  or 
-					d[2] > 80 and '&#xE006;' or 
-					d[2] > 60 and '&#xE004;' or
-					d[2] > 40 and '&#xE002;' or
-					d[2] > 20 and '&#xE005;' or 
-					d[2] > 5  and '&#xE003;' or 
-									 '&#xE007;'
+	local icon = 	(d[1] == '+' or d[1] == '↯') and '&#xF0E7;'  or 
+					d[2] > 75 and '&#xF240;' or 
+					d[2] > 50 and '&#xF241;' or
+					d[2] > 25 and '&#xF242;' or
+					d[2] > 5  and '&#xF243;' or 
+									 '&#xF244;'
 
 
 	local col = 	d[1] == '↯' and '#00CCCC' or 
