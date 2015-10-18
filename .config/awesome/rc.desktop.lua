@@ -482,7 +482,7 @@ if screen.count() > 1 then
 		gpu.usage.sub:add(widget.gpu.vl)
 		gpu.usage.sub:add(widget.gpu.pcie)
 		gpu.usage:add(widget.gpu.gl)
-		gpu.usage:add(gpu.usage.sub,1,0,0)
+		gpu.usage:add(gpu.usage.sub)
 		gpu:add(gpu.usage)
 		gpu:add(widget.gpu.mem)
 
