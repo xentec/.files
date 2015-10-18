@@ -166,28 +166,29 @@ widget.network.func =
 widget.network.worker = lain.widgets.net({ settings = widget.network.func })
 
 -- Volume
-widget.volume = {} --awful.widget.progressbar({ width = 50 })
+widget.volume = {}
 widget.volume.icon = wibox.widget.textbox()
 widget.volume.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
 widget.volume.data = wibox.widget.textbox()
-widget.volume.func = function(mute, val)
-	local col = "#BDB76B"
-	local icon = "&#xF028;"
+widget.volume.func = 
+function(mute, val)
+	local w = my.widget.volume
+
+	local spkr = { icon = '&#xF028;', color = "#BDB76B" }
+	local mic = { icon = '&#xF130;', color = "#BDB76B" }
+
+	if mute.mic then
+		mic.color = "#948D60"
+		mic.icon = '&#xF131;'
+	end
 
 	if mute.speaker then
-		col = "#948D60"
-		icon = "&#xF026;"
+		spkr.color = "#948D60"
+		spkr.icon = '&#xF026;'
 	end
-	widget.volume.icon:set_markup(color(col, string.format('%s', icon)))
-	widget.volume.data:set_markup(color(col, string.format('%3.0f', val)))
-	
-	if widget.volume.muted ~= muted then
-		naughty.notify({
-			title = "Sound", 
-			text = muted and "Muted" or "Unmuted"
-		})
-	end
-	widget.volume.muted = muted;
+
+	w.icon:set_markup(color(mic.color, mic.icon) .." ".. color(spkr.color, spkr.icon))
+	w.data:set_markup(color(spkr.color, string.format('%3d', val)))
 end
 widget.volume.worker = mods.pulse(widget.volume.func, 5)
 
