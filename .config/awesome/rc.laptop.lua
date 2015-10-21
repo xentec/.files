@@ -12,7 +12,6 @@ local lain = require("lain")
 local vicious = require("vicious")
 
 local keys = require("keys")
-local common = require("common")
 local mods = require("modules")
 
 -- Override
@@ -307,7 +306,6 @@ bar.main.tasklist.buttons =
 		end)
 	)
 
-bar.main.tasklist.update = common.list_update
 bar.main.layout_buttons = 
 	awful.util.table.join(
 		awful.button({ }, 1, function() awful.layout.inc(layouts, 1) end),
@@ -327,7 +325,7 @@ do
 	widget.layoutbox[monitor.main]:buttons(bar.main.layout_buttons)
 
 	bar.main.taglist[monitor.main] = awful.widget.taglist(monitor.main, awful.widget.taglist.filter.all, bar.main.taglist.buttons)
-	bar.main.tasklist[monitor.main] = awful.widget.tasklist(monitor.main, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update)
+	bar.main.tasklist[monitor.main] = awful.widget.tasklist(monitor.main, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons)
 
 	local left = wibox.layout.fixed.horizontal()
 	left:add(bar.main.taglist[monitor.main])
