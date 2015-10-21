@@ -23,7 +23,7 @@ end
 function pulse.poll()
 	local volume, mute_speaker, mute_mic = string.match(ctl("full-status"), "(%d+) (%S+) (%S+)")
 
-	pulse.value = tonumber(volume)
+	pulse.value = tonumber(volume) or 0
 	pulse.muted.speaker = mute_speaker == "yes"
 	pulse.muted.mic = mute_mic == "yes"
 	pulse.update(pulse.muted, pulse.value)
