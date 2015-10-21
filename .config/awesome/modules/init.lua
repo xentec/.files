@@ -1,16 +1,11 @@
----------------------------------------------------
--- Licensed under the GNU General Public License v2
---  * (c) 2010, Adrian C. <anrxc@sysphere.org>
----------------------------------------------------
-
--- {{{ Setup environment
 local setmetatable = setmetatable
-local wrequire = require("vicious.helpers").wrequire
+local rawget = rawget
+local require = require
 
--- Vicious: widgets for the awesome window manager
--- vicious.widgets
+local function wrequire(table, key)
+    local module = rawget(table, key)
+    return module or require(table._NAME .. "." .. key)
+end
+
 local widgets = { _NAME = "modules" }
--- }}}
-
--- Load modules at runtime as needed
 return setmetatable(widgets, { __index = wrequire })

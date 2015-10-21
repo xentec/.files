@@ -21,29 +21,28 @@ local mods = require("modules")
 local markup = lain.util.markup
 local color = markup.fg.color
 
-
--- {{{ Error handling
+-- Error handling
 if awesome.startup_errors then
-		naughty.notify({ preset = naughty.config.presets.critical,
-										 title = "Oops, there were errors during startup!",
-										 text = awesome.startup_errors })
+	naughty.notify({ preset = naughty.config.presets.critical,
+					 title = "Oops, there were errors during startup!",
+					 text = awesome.startup_errors })
 end
 
 -- Handle runtime errors after startup
 do
 	local in_error = false
-	awesome.connect_signal("debug::error", function(err)
-		-- Make sure we don't go into an endless error loop
-		if in_error then return end
-		in_error = true
+	awesome.connect_signal("debug::error", 
+		function(err)
+			-- Make sure we don't go into an endless error loop
+			if in_error then return end
+			in_error = true
 
-		naughty.notify({ preset = naughty.config.presets.warning,
-						 title = "Oops, an error happened!",
-						 text = err })
-		in_error = false
-	end)
+			naughty.notify({ preset = naughty.config.presets.warning,
+							 title = "Oops, an error happened!",
+							 text = err })
+			in_error = false
+		end)
 end
--- }}}
 
 naughty.config.presets.warning = 
 {

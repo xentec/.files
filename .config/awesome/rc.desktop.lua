@@ -12,7 +12,6 @@ local lain = require("lain")
 local vicious = require("vicious")
 
 local keys = require("keys")
-local common = require("common")
 local mods = require("modules")
 
 -- Override
