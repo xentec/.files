@@ -1,36 +1,28 @@
 !## URxvt
-URxvt*font: xft:Terminus:size=8
+URxvt*font: xft:Terminus:size=8:antialias=false
 
-URxvt*saveLines: 4096
-URxvt*scrollBar: false
+URxvt*saveLines: 8192
 URxvt*borderLess: false
 
 URxvt.perl-ext-common: default,matcher,clipboard
+! url
 URxvt.url-launcher: /usr/bin/chromium
 URxvt.matcher.button: 1
 URxvt.keysym.C-Delete: perl:matcher:last
 URxvt.keysym.M-Delete: perl:matcher:list
+! copy-paste
+URxvt.iso14755: False
+URxvt.keysym.Shift-Control-C: perl:clipboard:copy
+URxvt.keysym.Shift-Control-V: perl:clipboard:paste
+URxvt.clipboard.copycmd:  xsel -ib
+URxvt.clipboard.pastecmd: xsel -ob
+! scroll
+URxvt.secondaryScreen: 1
+URxvt.secondaryScroll: 0
 
-!URxvt.depth: 32
+URxvt.scrollBar: true
+URxvt.scrollstyle: plain
+
+URxvt*depth: 32
 URxvt*transparent: true
-URxvt*shading: 10
-
-URxvt*background: #0d1926
-URxvt*foreground: #d9e6f2
-
-URxvt*color0: #000000
-URxvt*color8: #393939
-URxvt*color1: #ed4545
-URxvt*color9: #f6a2a2
-URxvt*color2: #45ed45
-URxvt*color10: #a2f6a2
-URxvt*color3: #eded45
-URxvt*color11: #f6f6a2
-URxvt*color4: #4545ed
-URxvt*color12: #a2a2f6
-URxvt*color5: #ed45ed
-URxvt*color13: #f6a2f6
-URxvt*color6: #45eded
-URxvt*color14: #a2f6f6
-URxvt*color7: #d9d9d9
-URxvt*color15: #ffffff
+URxvt*shading: 5
