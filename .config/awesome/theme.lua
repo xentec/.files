@@ -8,26 +8,27 @@ theme = {}
 
 theme.font_name 	= "Bitstream Vera Sans"
 theme.font_size		= 10
-theme.font 			= theme.font_name .. " " .. tostring(theme.font_size)
 theme.font_mono		= "Source Code Pro" 
 theme.font_icon		= "Font Awesome"
+theme.font 			= theme.font_name .. " " .. tostring(theme.font_size)
 
-theme.bg_bg         = "#22222200"
-theme.bg_normal     = "#222222AA"
-theme.bg_focus      = "#535d6cFF"
-theme.bg_urgent     = "#ff0000"
-theme.bg_minimize   = "#444444AA"
+theme.bg_bg         = "#44444400"
+theme.bg_normal     = "#444444AA"
+theme.bg_focus      = "#444444DD"
+theme.bg_urgent     = "#ff0000FF"
+theme.bg_minimize   = "#44444488"
 theme.bg_systray    = theme.bg_normal
 
-theme.fg_normal     = "#aaaaaa"
+theme.fg_normal     = "#888888"
 theme.fg_focus      = "#ffffff"
 theme.fg_urgent     = "#ffffff"
 theme.fg_minimize   = "#ffffff"
 
+theme.useless_gap   = 4
 theme.border_width  = 4
-theme.border_normal = "#000000"
-theme.border_focus  = "#535d6c"
-theme.border_marked = "#91231c"
+theme.border_normal = "#44444488"
+theme.border_focus  = "#444444AA"
+theme.border_marked = "#444444DD"
 
 theme.taglist_bg_occupied = "#444444"
 theme.tooltip_opacity = 1
@@ -50,20 +51,23 @@ theme.tooltip_opacity = 1
 -- theme.wallpaper = "/usr/share/awesome/themes/default/background.png"
 
 -- You can use your own layout icons like this:
-local aPath = "/usr/share/awesome/themes/default/layouts/"
-
-theme.layout_fairh = aPath .. "fairhw.png"
-theme.layout_fairv = aPath .. "fairvw.png"
-theme.layout_floating  = aPath .. "floatingw.png"
-theme.layout_magnifier = aPath .. "magnifierw.png"
-theme.layout_max = aPath .. "maxw.png"
-theme.layout_fullscreen = aPath .. "fullscreenw.png"
-theme.layout_tilebottom = aPath .. "tilebottomw.png"
-theme.layout_tileleft   = aPath .. "tileleftw.png"
-theme.layout_tile = aPath .. "tilew.png"
-theme.layout_tiletop = aPath .. "tiletopw.png"
-theme.layout_spiral  = aPath .. "spiralw.png"
-theme.layout_dwindle = aPath .. "dwindlew.png"
+theme.awesome_icons = "/usr/share/awesome/themes/default/layouts/"
+theme.layout_fairh      = theme.awesome_icons .. "fairhw.png"
+theme.layout_fairv      = theme.awesome_icons .. "fairvw.png"
+theme.layout_floating   = theme.awesome_icons .. "floatingw.png"
+theme.layout_magnifier  = theme.awesome_icons .. "magnifierw.png"
+theme.layout_max        = theme.awesome_icons .. "maxw.png"
+theme.layout_fullscreen = theme.awesome_icons .. "fullscreenw.png"
+theme.layout_tilebottom = theme.awesome_icons .. "tilebottomw.png"
+theme.layout_tileleft   = theme.awesome_icons .. "tileleftw.png"
+theme.layout_tile       = theme.awesome_icons .. "tilew.png"
+theme.layout_tiletop    = theme.awesome_icons .. "tiletopw.png"
+theme.layout_spiral     = theme.awesome_icons .. "spiralw.png"
+theme.layout_dwindle    = theme.awesome_icons .. "dwindlew.png"
+theme.layout_cornernw   = theme.awesome_icons .. "cornernww.png"
+theme.layout_cornerne   = theme.awesome_icons .. "cornernew.png"
+theme.layout_cornersw   = theme.awesome_icons .. "cornersww.png"
+theme.layout_cornerse   = theme.awesome_icons .. "cornersew.png"
 
 theme.lain_icons         = "/usr/share/awesome/lib/lain/icons/layout/default/"
 theme.layout_termfair    = theme.lain_icons .. "termfairw.png"
