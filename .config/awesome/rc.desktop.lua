@@ -350,7 +350,7 @@ bar.main.tasklist.buttons =
 				-- :isvisible() makes no sense
 				c.minimized = false
 				if not c:isvisible() then
-					awful.tag.viewonly(c:tags()[1])
+					awful.tag.viewonly(c.first_tag)
 				end
 				-- This will also un-minimize
 				-- the client, if needed

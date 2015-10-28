@@ -198,7 +198,7 @@ widget.battery.data = wibox.widget.textbox()
 widget.battery.func = function(w, d)
 	local w = my.widget.battery
 	local p = tonumber(bat_now.perc)
-	local s = bat_now.status == "Charged" and 'F' or bat_now.status[1]
+	local s = bat_now.status == "Charged" and 'F' or bat_now.status:sub(1,1)
 
 	local critical = 10
 	local low = 30
