@@ -68,7 +68,7 @@ local function worker(args)
                 gpu_now.freq.core = tonumber(freq_core)
                 gpu_now.freq.mem = tonumber(freq_memory)
             end
-            if i => #default_query then break end -- were done here
+            if i >= #default_query then break end -- were done here
 
             i = i+1
         end

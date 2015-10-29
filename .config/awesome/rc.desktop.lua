@@ -375,7 +375,6 @@ bar.main.tasklist.buttons =
 			if client.focus then client.focus:raise() end
 		end)
 	)
-bar.main.tasklist.update = common.list_update
 bar.main.layout_buttons = 
 	awful.util.table.join(
 		awful.button({ }, 1, function() awful.layout.inc(layouts, 1) end),
