@@ -39,8 +39,8 @@ UC=$G				# user's color
 PS1=\
 "$UC\u$N@$MACOL\h$N :: \
 $EMB\t$N :: \
-$EMG\w $G(\$(ls -1 | wc -l | sed 's: ::g')+.\$(ls -A1 | grep '^\.' | wc -l | sed 's: ::g') files, \$(LC_ALL=C ls -lah | grep -m 1 total | sed 's/total //')b)$N \n \
-\$(RET=\$?; [[ \$RET != 0 ]] && echo '$R'\$RET'$N ' )$EMY»$N "
+$EMG\w $G(\$(ls -1 | wc -l | sed 's: ::g')+.\$(ls -A1 | grep '^\.' | wc -l | sed 's: ::g') files, \$(LC_ALL=C ls -lah | grep -m 1 total | sed 's/total //')b)$N \n\
+$EMY»$N "
 
 # Defaults
 export EDITOR=vim
