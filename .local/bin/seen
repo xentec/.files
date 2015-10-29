@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Expects a server to be mounted to your filesystem.
-ssh_server=bastion:/srv/http/web/dump/scr
+ssh_server=bastion:/srv/http/dump/scr
 url="http://dump.aix0.eu/scr"
 imageEncoding=".png"
 videoEncoding=".webm"
