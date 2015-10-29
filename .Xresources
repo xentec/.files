@@ -1,2 +1,3 @@
 #include ".Xres/colors"
 #include ".Xres/urxvt"
+#include ".Xres/dpi"
