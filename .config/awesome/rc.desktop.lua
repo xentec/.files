@@ -76,19 +76,6 @@ my =
 	}
 }
 
-my.editor_cmd = my.terminal .. " -e " .. my.editor
-
--- Set the terminal for applications that require it
-menubar.utils.terminal = my.terminal
-mods.autostart.terminal = my.terminal
-
-beautiful.init(my.theme)
-mods.wallpaper.add(my.wallpapers)
-mods.autostart.add(my.autostart)
-
-mods.autostart.addXDG()
-
-
 -- Table of layouts to cover with awful.layout.inc, order matters.
 local awm = awful.layout.suit
 local ln = lain.layout
@@ -105,6 +92,20 @@ layouts =
 }
 
 monitor = { main = 1, info = 2 }
+
+my.editor_cmd = my.terminal .. " -e " .. my.editor
+
+-- Set the terminal for applications that require it
+menubar.utils.terminal = my.terminal
+mods.autostart.terminal = my.terminal
+
+beautiful.init(my.theme)
+beautiful.xresources.set_dpi(158, monitor.main)
+beautiful.xresources.set_dpi(94, monitor.info)
+
+mods.wallpaper.add(my.wallpapers)
+mods.autostart.add(my.autostart)
+mods.autostart.addXDG()
 
 
 -- Tags
@@ -447,7 +448,7 @@ if screen.count() > 1 then
 		layout:set_middle(bar.main.tasklist[monitor.info])
 		layout:set_right(right)
 
-		bar.main["iu"] = awful.wibox({ position = "top", screen = monitor.info })
+		bar.main["iu"] = awful.wibox({ position = "top", screen = monitor.info, height = 22 })
 		bar.main["iu"]:set_bg(beautiful.bg_bg)
 		bar.main["iu"]:set_widget(layout)
 	end
@@ -513,7 +514,7 @@ if screen.count() > 1 then
 		layout:set_left(left)
 		layout:set_right(right)
 
-		bar.info["ib"] = awful.wibox({ position = "bottom", screen = monitor.info })
+		bar.info["ib"] = awful.wibox({ position = "bottom", screen = monitor.info, height = 22 })
 		bar.info["ib"]:set_bg(beautiful.bg_bg)
 		bar.info["ib"]:set_widget(layout)
 	end
