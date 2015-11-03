@@ -504,7 +504,7 @@ if screen.count() > 1 then
 		left = wibox.widget.background(wibox.layout.margin(left,4,4,3,3), beautiful.bg_normal)
 
 		local right = wibox.layout.fixed.horizontal()
-		right:add(wibox.layout.constraint(mpd.w,'max', 600))
+		right:add(wibox.layout.constraint(mpd, 'max', 600))
 		right:add(widget.spacer.h)
 		right:add(widget.volume)
 		right = wibox.widget.background(wibox.layout.margin(right,4,4,3,3), beautiful.bg_normal)
