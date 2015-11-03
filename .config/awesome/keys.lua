@@ -1,6 +1,7 @@
 local awful = require("awful")
 local menubar = require("menubar")
-local vicious = require("vicious")
+
+local lain = require("lain")
 
 local pulse = require("modules.pulse")
 local wallpaper = require("modules.wallpaper")
@@ -57,17 +58,17 @@ local globalkeys = awful.util.table.join(
 		awful.key({ modkey, "Shift"   }, "l",     function () awful.tag.incnmaster(-1)      end),
 		awful.key({ modkey, "Control" }, "h",     function () awful.tag.incncol( 1)         end),
 		awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end),
-		awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
-		awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
+		awful.key({ modkey,           }, "space", function () awful.layout.inc(my.layout,  1) end),
+		awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(my.layout, -1) end),
 
 		awful.key({ modkey, "Control" }, "n", awful.client.restore),
 
 		-- Prompt
-		awful.key({ modkey }, "r", function () bar.main.prompt[mouse.screen]:run() end),
+		awful.key({ modkey }, "r", function () my.monitor.main.prompt:run() end),
 		awful.key({ modkey }, "x",
 			function ()
 					awful.prompt.run({ prompt = "Run Lua code: " },
-					bar.main.prompt[mouse.screen].widget,
+					my.monitor.main.prompt.widget,
 					awful.util.eval, nil,
 					awful.util.getdir("cache") .. "/history_eval")
 			end),
@@ -107,7 +108,11 @@ local globalkeys = awful.util.table.join(
 
 		-- launch short cut
 		awful.key({ modkey,	          }, "q",      function() spawn(my.browser) end),
-		awful.key({ modkey,           }, "Return", function () spawn(my.terminal) end)
+		awful.key({ modkey,           }, "Return", function () spawn(my.terminal) end),
+
+		-- Tasks
+		awful.key({ modkey,         }, "y", function () lain.widgets.contrib.task.show() end),
+		awful.key({ modkey, "Shift" }, "y", lain.widgets.contrib.task.prompt_search)
 )
 
 local clientkeys = awful.util.table.join(

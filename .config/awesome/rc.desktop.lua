@@ -44,12 +44,8 @@ do
 		end)
 end
 
-naughty.config.presets.warning = 
-{
-	bg = "#ffaa00",
-	fg = "#ffffff",
-	timeout = 10,
-}
+local awmL = awful.layout.suit
+local lnL = lain.layout
 
 -- Variable definitions
 my = 
@@ -58,40 +54,54 @@ my =
 
 	browser = "chromium",
 	terminal = "urxvtc",
-	editor = os.getenv("EDITOR") or "vim",
+	editor = os.getenv("EDITOR") or "nano",
 
 	wallpapers = "~/lold/wg",
 	autostart = {
 --		{"dropboxd","dropbox"},
 		"steam",
 --		{"weechat", term = true},
-		"skype",
+--		"skype",
 		"utox",
 		"compton",
 	},
+	monitor = { 
+		main =
+		{
+			i = 1,
+			dpi = 158
+		}, 
+		info = {
+			i = 2,
+			dpi = 94
+		} 
+	},
 
+	layout = {
+		awmL.tile,
+		awmL.tile.top,
+		awmL.fair,
+		awmL.fair.horizontal,
+		awmL.corner.nw,
+		awmL.floating
+	},
 	mpd = {
 		host = "keeper",
 		music_dir = "/mnt/fridge/music",
+	},
+	tags = {}
+}
+
+my.tags.config = {
+	{ 
+		names = { "main", "web", "code", "script", "media", "gaming", "other" },
+		layout = my.layout[1]
+	},
+	{
+		names = { "chat", "media", "vm" }, 
+		layout = my.layout[2]
 	}
 }
-
--- Table of layouts to cover with awful.layout.inc, order matters.
-local awm = awful.layout.suit
-local ln = lain.layout
-layouts =
-{
-	ln.uselesstile,
-	awm.tile,
-	awm.fair,
-	ln.uselessfair,
-	awm.fair.horizontal,
-	ln.uselessfair.horizontal,
-	ln.centerwork,
-	awm.floating
-}
-
-monitor = { main = 1, info = 2 }
 
 my.editor_cmd = my.terminal .. " -e " .. my.editor
 
@@ -100,46 +110,45 @@ menubar.utils.terminal = my.terminal
 mods.autostart.terminal = my.terminal
 
 beautiful.init(my.theme)
-beautiful.xresources.set_dpi(158, monitor.main)
-beautiful.xresources.set_dpi(94, monitor.info)
+beautiful.xresources.set_dpi(my.monitor.main.dpi, my.monitor.main.i)
+beautiful.xresources.set_dpi(my.monitor.info.dpi, my.monitor.info.i)
 
 mods.wallpaper.add(my.wallpapers)
+mods.wallpaper.init()
+
 mods.autostart.add(my.autostart)
 mods.autostart.addXDG()
+mods.autostart.launch()
+
+
+naughty.config.presets.warning = 
+{
+	bg = "#ffaa00",
+	fg = "#ffffff",
+	timeout = 10,
+}
 
 
 -- Tags
-my.tags = {}
 local tags = my.tags
-tags.config = {
-	{ 
-		names = { "main", "web", "code", "script", "media", "gaming", "other" },
-		layout = layouts[1]
-	},
-	{
-		names = { "chat", "media", "vm" }, 
-		layout = layouts[6]
-	}
-}
 for s = 1, screen.count() do
 	if tags.config[s] then
 		tags[s] = awful.tag(tags.config[s].names, s, tags.config[s].layout)
 	else
-		tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
+		tags[s] = awful.tag({ 1, 2, 3, 4 }, s, my.layout[1])
 	end
 end
 
-
--- ########################################
+-- ##################################################
 --                                                  
 -- ▄     ▄   ▀        █                  ▄          
 -- █  █  █ ▄▄▄     ▄▄▄█   ▄▄▄▄   ▄▄▄   ▄▄█▄▄   ▄▄▄  
--- ▀ █▀█ █   █    █▀ ▀█  █▀ ▀█  █▀  █    █    █   ▀ 
---  ██ ██▀   █    █   █  █   █  █▀▀▀▀    █     ▀▀▀▄ 
+-- █ █▀█ █   █    █▀ ▀█  █▀ ▀█  █▀  █    █    █   ▀ 
+-- ▀██ ██▀   █    █   █  █   █  █▀▀▀▀    █     ▀▀▀▄ 
 --  █   █  ▄▄█▄▄  ▀█▄██  ▀█▄▀█  ▀█▄▄▀    ▀▄▄  ▀▄▄▄▀ 
 --                        ▄  █                      
 --                         ▀▀                       
--- ########################################
+-- ##################################################
 
 my.widget = {}
 local widget = my.widget
@@ -160,10 +169,16 @@ widget.clock = awful.widget.textclock('%H:%M %a %d.%m.%y')
 -- Calendar
 lain.widgets.calendar:attach(widget.clock, { font = beautiful.font_mono, cal = "/usr/bin/cal -3" })
 
+-- Task
+lain.widgets.contrib.task:attach(widget.clock)
+
+-- Keyboard Layout
+widget.kbd = awful.widget.keyboardlayout()
+
+
 -- Network
 widget.network = wibox.widget.textbox()
-widget.network.func = 
-	function()
+widget.network.func = function()
 		local function humanBytes(bytes)
 			local unit = {"K", "M", "G", "T", "P", "E"}
 			local i = 1
@@ -262,10 +277,7 @@ widget.gpu.func = function()
 	w.mem:set_value(gpu_now.mem.used/gpu_now.mem.total)
 	w.temp:set_markup(color('#4F8A3A', markup.monospace(' '..gpu_now.temp..'°C')))
 end
-mods.gpu({
-	settings = widget.gpu.func
-})
-
+mods.gpu({ settings = widget.gpu.func })
 
 -- MPD
 widget.mpd = {}
@@ -317,246 +329,6 @@ widget.mpd.worker = lain.widgets.mpd({
 	music_dir = my.mpd.music_dir,
 	settings = widget.mpd.func,
 })
-
--- ########################################
--- ▄▄▄▄▄                      
--- █    █  ▄▄▄    ▄ ▄▄   ▄▄▄  
--- █▄▄▄▄▀ ▀   █   █▀  ▀ █   ▀ 
--- █    █ ▄▀▀▀█   █      ▀▀▀▄ 
--- █▄▄▄▄▀ ▀▄▄▀█   █     ▀▄▄▄▀ 
---                            
--- ########################################
-
-my.bar = {}
-local bar = my.bar
-
-bar.main = {}
-bar.main.prompt = {}
-bar.main.taglist = {}
-bar.main.taglist.buttons = 
-	awful.util.table.join(
-		awful.button({ }, 1, awful.tag.viewonly),
-		awful.button({ keys.mod }, 1, awful.client.movetotag),
-		awful.button({ }, 3, awful.tag.viewtoggle),
-		awful.button({ keys.mod }, 3, awful.client.toggletag)
-	)
-bar.main.tasklist = {}
-bar.main.tasklist.buttons = 
-	awful.util.table.join(
-		awful.button({ }, 1, function(c)
-			if c == client.focus then
-				c.minimized = true
-			else
-				-- Without this, the following
-				-- :isvisible() makes no sense
-				c.minimized = false
-				if not c:isvisible() then
-					awful.tag.viewonly(c.first_tag)
-				end
-				-- This will also un-minimize
-				-- the client, if needed
-				client.focus = c
-				c:raise()
-			end
-		end),
-		 awful.button({ }, 3, function()
-			if instance then
-				instance:hide()
-				instance = nil
-			else
-				instance = awful.menu.clients({ width=250 })
-			end
-		end),
-		awful.button({ }, 4, function()
-			awful.client.focus.byidx(1)
-			if client.focus then client.focus:raise() end
-		end),
-		awful.button({ }, 5, function()
-			awful.client.focus.byidx(-1)
-			if client.focus then client.focus:raise() end
-		end)
-	)
-bar.main.layout_buttons = 
-	awful.util.table.join(
-		awful.button({ }, 1, function() awful.layout.inc(layouts, 1) end),
-		awful.button({ }, 3, function() awful.layout.inc(layouts, -1) end)
-	)
-
-bar.info = {}
-
--- ########################################
--- ## Main screens
--- ########################################
-
-	-- Main ###################################
-do
-	bar.main.prompt[monitor.main] = awful.widget.prompt()
-
-	widget.layoutbox[monitor.main] = awful.widget.layoutbox(monitor.main)
-	widget.layoutbox[monitor.main]:buttons(bar.main.layout_buttons)
-
-	bar.main.taglist[monitor.main] = awful.widget.taglist(monitor.main, awful.widget.taglist.filter.all, bar.main.taglist.buttons)
-	bar.main.tasklist[monitor.main] = awful.widget.tasklist(monitor.main, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update)
-
-	local left = wibox.layout.fixed.horizontal()
-	left:add(widget.layoutbox[monitor.main])
-	left:add(widget.spacer.h)
-	left:add(bar.main.taglist[monitor.main])
-	left:add(bar.main.prompt[monitor.main])
-	left = wibox.widget.background(wibox.layout.margin(left,0,4), beautiful.bg_normal)
-
-	local right = wibox.layout.fixed.horizontal()
-	right:add(wibox.widget.systray())
-	right:add(widget.spacer.h)
-	right:add(widget.clock)
-	right = wibox.widget.background(wibox.layout.margin(right,4,4), beautiful.bg_normal)
-
-	local layout = wibox.layout.align.horizontal()
-	layout:set_left(left)
-	layout:set_middle(bar.main.tasklist[monitor.main])
-	layout:set_right(right)
-
-	bar.main[monitor.info] = awful.wibox({ position = "top", screen = monitor.main })
-	bar.main[monitor.info]:set_bg(beautiful.bg_bg)
-	bar.main[monitor.info]:set_widget(layout)
-end
-
-	-- Info ###################################
-
-if screen.count() > 1 then
-	do
-		widget.layoutbox[monitor.info] = awful.widget.layoutbox(monitor.info)
-		widget.layoutbox[monitor.info]:buttons(bar.main.layout_buttons)
-
-		bar.main.taglist[monitor.info] = awful.widget.taglist(monitor.info, awful.widget.taglist.filter.all, bar.main.taglist.buttons)
-		bar.main.tasklist[monitor.info] = awful.widget.tasklist(monitor.info, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update)
-
-		local left = wibox.layout.fixed.horizontal()
-		left:add(widget.layoutbox[monitor.info])
-		left:add(widget.spacer.h)
-		left:add(bar.main.taglist[monitor.info])
-		left:add(widget.spacer.h)
-		left:add(bar.main.prompt[monitor.main])
-		left = wibox.widget.background(wibox.layout.margin(left,0,4), beautiful.bg_normal)
-
-		local right = wibox.layout.fixed.horizontal()
-		right:add(widget.clock)
-		right = wibox.widget.background(wibox.layout.margin(right,4,4), beautiful.bg_normal)
-
-		local layout = wibox.layout.align.horizontal()
-		layout:set_left(left)
-		layout:set_middle(bar.main.tasklist[monitor.info])
-		layout:set_right(right)
-
-		bar.main["iu"] = awful.wibox({ position = "top", screen = monitor.info, height = 22 })
-		bar.main["iu"]:set_bg(beautiful.bg_bg)
-		bar.main["iu"]:set_widget(layout)
-	end
-
-	--=======================================================
-
-	do
-		local cpu = wibox.layout.fixed.vertical()
-		for i=1,widget.cpu.count do
-			widget.cpu[i]:set_height(16/widget.cpu.count)
-			cpu:add(widget.cpu[i])
-		end
-
-		local mem = wibox.layout.fixed.vertical()
-		widget.mem.ram:set_height(8)
-		widget.mem.swap:set_height(8)
-		mem:add(widget.mem.ram)
-		mem:add(widget.mem.swap)
-
-		local gpu = wibox.layout.fixed.vertical()
-		gpu.usage = wibox.layout.fixed.horizontal()
-		gpu.usage.sub = wibox.layout.fixed.vertical()
-		widget.gpu.gl:set_height(8)
-		widget.gpu.gl:set_width(widget.def.barLen*2/3)
-		widget.gpu.vl:set_height(4)
-		widget.gpu.vl:set_width(widget.def.barLen/3)
-		widget.gpu.pcie:set_height(4)
-		widget.gpu.pcie:set_width(widget.def.barLen/3)
-		widget.gpu.mem:set_height(8)
-		gpu.usage.sub:add(widget.gpu.vl)
-		gpu.usage.sub:add(widget.gpu.pcie)
-		gpu.usage:add(widget.gpu.gl)
-		gpu.usage:add(gpu.usage.sub)
-		gpu:add(gpu.usage)
-		gpu:add(widget.gpu.mem)
-
-		local mpd = wibox.layout.fixed.horizontal()
-		mpd.ib = wibox.layout.fixed.vertical()
-		mpd.ib:add(widget.mpd.nfo)
-		mpd.ib:add(widget.mpd.bar)
-		mpd:add(wibox.layout.margin(widget.mpd.icon,4,8))
-		mpd:add(mpd.ib)
-
-		local left = wibox.layout.fixed.horizontal()
-		left:add(cpu)
-		left:add(widget.cpu.temp)
-		left:add(widget.spacer.h)
-		left:add(mem)
-		left:add(widget.spacer.h)
-		left:add(gpu)
-		left:add(widget.gpu.temp)
-		left:add(widget.spacer.h)
-		left:add(widget.network)
-		left = wibox.widget.background(wibox.layout.margin(left,4,4,3,3), beautiful.bg_normal)
-
-		local right = wibox.layout.fixed.horizontal()
-		right:add(wibox.layout.constraint(mpd, 'max', 600))
-		right:add(widget.spacer.h)
-		right:add(widget.volume)
-		right = wibox.widget.background(wibox.layout.margin(right,4,4,3,3), beautiful.bg_normal)
-
-		local layout = wibox.layout.align.horizontal()
-		layout:set_left(left)
-		layout:set_right(right)
-
-		bar.info["ib"] = awful.wibox({ position = "bottom", screen = monitor.info, height = 22 })
-		bar.info["ib"]:set_bg(beautiful.bg_bg)
-		bar.info["ib"]:set_widget(layout)
-	end
-end
-
--- ########################################
--- ## Futher screens
--- ########################################
-
-for s = 3, screen.count() do
-	if not awful.util.table.hasitem(monitor, s) then
-		-- Create an imagebox widget which will contains an icon indicating which layout we're using.
-		-- We need one layoutbox per screen.
-		widget.layoutbox[s] = awful.widget.layoutbox(s)
-		widget.layoutbox[s]:buttons(bar.main.layout_buttons)
-		-- Create a taglist widget
-		bar.main.taglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, bar.main.taglist.buttons)
-
-		-- Create a tasklist widget
-		bar.main.tasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update)
-
-		-- Widgets that are aligned to the left
-		local left = wibox.layout.fixed.horizontal()
-		left:add(bar.main.taglist[s])
-		left:add(bar.main.prompt[monitor.main])
-
-		-- Widgets that are aligned to the right
-		local right = wibox.layout.fixed.horizontal()
-		right:add(widget.clock)
-		right:add(widget.layoutbox[s])
-
-		-- Now bring it all together (with the tasklist in the middle)
-		local layout = wibox.layout.align.horizontal()
-		layout:set_left(left)
-		layout:set_middle(bar.main.tasklist[s])
-		layout:set_right(right)
-
-		-- Create the wibox
-		bar.main[s] = awful.wibox({ position = "top", screen = s })
-		bar.main[s]:set_widget(layout)
-	end
-end
 
 
 -- ########################################
@@ -614,36 +386,262 @@ end
 
 -- Signals
 -- Signal function to execute when a new client appears.
-client.connect_signal("manage", function(c, startup)
-	-- Enable sloppy focus
-	c:connect_signal("mouse::enter", 
-		function(c)
-			if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
-				and awful.client.focus.filter(c) then
-				client.focus = c
+client.connect_signal("manage", function(c) 
+		if not awesome.startup then
+			-- Set the windows at the slave,
+			-- i.e. put it at the end of others instead of setting it master.
+			-- awful.client.setslave(c)
+
+			-- Put windows in a smart way, only if they do not set an initial position.
+			if not c.size_hints.user_position and not c.size_hints.program_position then
+				awful.placement.no_overlap(c)
+				awful.placement.no_offscreen(c)
 			end
-		end)
-
-	if not startup then
-		-- Set the windows at the slave,
-		-- i.e. put it at the end of others instead of setting it master.
-		-- awful.client.setslave(c)
-		local g = c:geometry()
-		--require("gears.debug").dump(g)
-		if(g.width < 800 or g.height < 600) then
-		--	awful.client.floating.set(c, true);
-		end
-
-		-- Put windows in a smart way, only if they does not set an initial position.
-		if not c.size_hints.user_position and not c.size_hints.program_position then
-			awful.placement.no_overlap(c)
+		elseif not (c.size_hints.user_position or c.size_hints.program_position) then
+			-- Prevent clients from being unreachable after screen count changes.
 			awful.placement.no_offscreen(c)
 		end
-	end
-end)
+	end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
+-- Enable sloppy focus
+client.connect_signal("mouse::enter", function(c)
+		if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier and awful.client.focus.filter(c) then
+			client.focus = c
+		end
+	end)
+----
 
-mods.wallpaper.init()
-mods.autostart.launch()
+-- ########################################
+-- ▄    ▄  ▄▄▄▄  ▄▄   ▄ ▄▄▄▄▄ ▄▄▄▄▄▄▄  ▄▄▄▄  ▄▄▄▄▄ 
+-- ██  ██ ▄▀  ▀▄ █▀▄  █   █      █    ▄▀  ▀▄ █   ▀█
+-- █ ██ █ █    █ █ █▄ █   █      █    █    █ █▄▄▄▄▀
+-- █ ▀▀ █ █    █ █  █ █   █      █    █    █ █   ▀▄
+-- █    █  █▄▄█  █   ██ ▄▄█▄▄    █     █▄▄█  █    █
+--
+-- ########################################
+
+local monitor = my.monitor
+
+local buttons = 
+{
+	taglist = awful.util.table.join(
+		awful.button({}, 1, awful.tag.viewonly),
+		awful.button({ keys.mod }, 1, awful.client.movetotag),
+		awful.button({}, 3, awful.tag.viewtoggle),
+		awful.button({ keys.mod }, 3, awful.client.toggletag)
+	),
+	tasklist = awful.util.table.join(
+		awful.button({}, 1, function(c)
+			if c == client.focus then
+				c.minimized = true
+			else
+				-- Without this, the following
+				-- :isvisible() makes no sense
+				c.minimized = false
+				if not c:isvisible() then
+					awful.tag.viewonly(c.first_tag)
+				end
+				-- This will also un-minimize
+				-- the client, if needed
+				client.focus = c
+				c:raise()
+			end
+		end),
+		 awful.button({}, 3, function()
+			if instance then
+				instance:hide()
+				instance = nil
+			else
+				instance = awful.menu.clients({ width=250 })
+			end
+		end),
+		awful.button({}, 4, function()
+			awful.client.focus.byidx(1)
+			if client.focus then client.focus:raise() end
+		end),
+		awful.button({}, 5, function()
+			awful.client.focus.byidx(-1)
+			if client.focus then client.focus:raise() end
+		end)
+	),
+	layoutbox = awful.util.table.join(
+		awful.button({}, 1, function() awful.layout.inc(my.layout, 1) end),
+		awful.button({}, 3, function() awful.layout.inc(my.layout, -1) end)
+	)
+}
+-- ########################################
+-- ## Main screens
+-- ########################################
+
+-- Main ###################################
+do
+	local s = monitor.main.i
+
+	monitor.main.prompt = awful.widget.prompt()
+	
+	monitor.main.layoutbox = awful.widget.layoutbox(s)
+	monitor.main.layoutbox:buttons(buttons.layoutbox)
+
+	monitor.main.taglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, buttons.taglist)
+	monitor.main.tasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, buttons.tasklist)
+
+	local left = wibox.layout.fixed.horizontal()
+	left:add(monitor.main.layoutbox)
+	left:add(widget.spacer.h)
+	left:add(monitor.main.taglist)
+	left:add(monitor.main.prompt)
+	left = wibox.widget.background(wibox.layout.margin(left,0,4))
+
+	local right = wibox.layout.fixed.horizontal()
+	right:add(wibox.widget.systray())
+	right:add(widget.spacer.h)
+	right:add(widget.kbd)
+	right:add(widget.spacer.h)
+	right:add(widget.clock)
+	right = wibox.widget.background(wibox.layout.margin(right,4,4))
+
+	local layout = wibox.layout.align.horizontal(left, monitor.main.tasklist, right)
+
+	monitor.main.bar = awful.wibox({ position = "top", screen = s })
+	monitor.main.bar:set_bg(beautiful.bg_bg)
+	monitor.main.bar:set_widget(layout)
+end
+
+-- Info ###################################
+if screen.count() > 1 then
+
+	monitor.info.bar = {}
+
+	local s = monitor.info.i	
+	do
+		monitor.info.layoutbox = awful.widget.layoutbox(s)
+		monitor.info.layoutbox:buttons(buttons.layoutbox)
+
+		monitor.info.taglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, buttons.taglist)
+		monitor.info.tasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, buttons.tasklist)
+
+		local left = wibox.layout.fixed.horizontal()
+		left:add(monitor.info.layoutbox)
+		left:add(widget.spacer.h)
+		left:add(monitor.info.taglist)
+		left:add(widget.spacer.h)
+		left:add(monitor.main.prompt) -- ! two prompts are overkill
+		left = wibox.widget.background(wibox.layout.margin(left,0,4))
+
+		local right = wibox.layout.fixed.horizontal()
+		right:add(widget.clock)
+		right = wibox.widget.background(wibox.layout.margin(right,4,4))
+
+		local layout = wibox.layout.align.horizontal(left, monitor.info.tasklist, right)
+
+		monitor.info.bar.top = awful.wibox({ position = "top", screen = s, height = 24 })
+		monitor.info.bar.top:set_bg(beautiful.bg_bg)
+		monitor.info.bar.top:set_widget(layout)
+	end
+
+	--=======================================================
+
+	do
+		local cpu = wibox.layout.fixed.vertical()
+		for i=1,widget.cpu.count do
+			widget.cpu[i]:set_height(16/widget.cpu.count)
+			cpu:add(widget.cpu[i])
+		end
+
+		local mem = wibox.layout.fixed.vertical()
+		widget.mem.ram:set_height(8)
+		widget.mem.swap:set_height(8)
+		mem:add(widget.mem.ram)
+		mem:add(widget.mem.swap)
+
+		local gpu = wibox.layout.fixed.vertical()
+		gpu.usage = wibox.layout.fixed.horizontal()
+		gpu.usage.sub = wibox.layout.fixed.vertical()
+		widget.gpu.gl:set_height(8)
+		widget.gpu.gl:set_width(widget.def.barLen*2/3)
+		widget.gpu.vl:set_height(4)
+		widget.gpu.vl:set_width(widget.def.barLen/3)
+		widget.gpu.pcie:set_height(4)
+		widget.gpu.pcie:set_width(widget.def.barLen/3)
+		widget.gpu.mem:set_height(8)
+		gpu.usage.sub:add(widget.gpu.vl)
+		gpu.usage.sub:add(widget.gpu.pcie)
+		gpu.usage:add(widget.gpu.gl)
+		gpu.usage:add(gpu.usage.sub)
+		gpu:add(gpu.usage)
+		gpu:add(widget.gpu.mem)
+
+		local mpd = wibox.layout.fixed.horizontal()
+		mpd.ib = wibox.layout.fixed.vertical()
+		mpd.ib:add(widget.mpd.nfo)
+		mpd.ib:add(widget.mpd.bar)
+		mpd:add(wibox.layout.margin(widget.mpd.icon,4,8))
+		mpd:add(mpd.ib)
+
+		local left = wibox.layout.fixed.horizontal()
+		left:add(cpu)
+		left:add(widget.cpu.temp)
+		left:add(widget.spacer.h)
+		left:add(mem)
+		left:add(widget.spacer.h)
+		left:add(gpu)
+		left:add(widget.gpu.temp)
+		left:add(widget.spacer.h)
+		left:add(widget.network)
+		left = wibox.widget.background(wibox.layout.margin(left,4,4,3,3))
+
+		local right = wibox.layout.fixed.horizontal()
+		right:add(wibox.layout.constraint(mpd, 'max', 600))
+		right:add(widget.spacer.h)
+		right:add(widget.volume)
+		right = wibox.widget.background(wibox.layout.margin(right,4,4,3,3))
+
+		local layout = wibox.layout.align.horizontal()
+		layout:set_left(left)
+		layout:set_right(right)
+
+		monitor.info.bar.bottom = awful.wibox({ position = "bottom", screen = s, height = 24 })
+		monitor.info.bar.bottom:set_bg(beautiful.bg_bg)
+		monitor.info.bar.bottom:set_widget(layout)
+	end
+
+	-- ########################################
+	-- ## Futher screens
+	-- ########################################
+
+	for s = 3, screen.count() do
+		-- Create an imagebox widget which will contains an icon indicating which layout we're using.
+		-- We need one layoutbox per screen.
+		monitor[s].layoutbox = awful.widget.layoutbox(s)
+		widget.layoutbox:buttons(buttons.layoutbox)
+		-- Create a taglist widget
+		monitor[s].taglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, buttons.taglist)
+
+		-- Create a tasklist widget
+		monitor[s].tasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, buttons.tasklist)
+
+		-- Widgets that are aligned to the left
+		local left = wibox.layout.fixed.horizontal()
+		left:add(monitor[s].taglist)
+		left:add(monitor.main.prompt)
+
+		-- Widgets that are aligned to the right
+		local right = wibox.layout.fixed.horizontal()
+		right:add(widget.clock)
+		right:add(widget.layoutbox)
+
+		-- Now bring it all together (with the tasklist in the middle)
+		local layout = wibox.layout.align.horizontal()
+		layout:set_left(left)
+		layout:set_middle(monitor[s].tasklist)
+		layout:set_right(right)
+
+		-- Create the wibox
+		monitor[s].bar = awful.wibox({ position = "top", screen = s })		
+		monitor[s].bar:set_bg(beautiful.bg_bg)
+		monitor[s].bar:set_widget(layout)
+	end
+end
+

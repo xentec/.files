@@ -12,26 +12,27 @@ theme.font_mono		= "Source Code Pro"
 theme.font_icon		= "Font Awesome"
 theme.font 			= theme.font_name .. " " .. tostring(theme.font_size)
 
-theme.bg_bg         = "#44444400"
+theme.bg_bg         = "#44444466"
+theme.bg_minimize   = "#44444488"
 theme.bg_normal     = "#444444AA"
 theme.bg_focus      = "#444444DD"
 theme.bg_urgent     = "#ff0000FF"
-theme.bg_minimize   = "#44444488"
-theme.bg_systray    = theme.bg_normal
+theme.bg_systray    = theme.bg_normal:sub(1,6)
 
 theme.fg_normal     = "#888888"
 theme.fg_focus      = "#ffffff"
 theme.fg_urgent     = "#ffffff"
 theme.fg_minimize   = "#ffffff"
 
-theme.useless_gap   = 4
 theme.border_width  = 4
 theme.border_normal = "#44444488"
 theme.border_focus  = "#444444AA"
 theme.border_marked = "#444444DD"
 
+theme.useless_gap_width = 10
+
 theme.taglist_bg_occupied = "#444444"
-theme.tooltip_opacity = 1
+theme.tooltip_opacity = 0.7
 
 -- There are other variable sets
 -- overriding the default one when
@@ -76,10 +77,6 @@ theme.layout_cascade     = theme.lain_icons .. "cascadew.png"
 theme.layout_cascadetile = theme.lain_icons .. "cascadebrowsew.png"
 theme.layout_centerwork  = theme.lain_icons .. "centerworkw.png"
 
-theme.layout_uselesstile = theme.layout_tile
-theme.layout_uselessfair = theme.layout_termfair
-
-theme.useless_gap_width = 10
 
 theme.awesome_icon = "/usr/share/awesome/icons/awesome16.png"
 
