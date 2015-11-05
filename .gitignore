@@ -1,5 +1,6 @@
 # Awesome
 rc.lua
+private.lua
 
 # Bash
 .bash.d/local

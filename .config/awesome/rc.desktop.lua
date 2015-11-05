@@ -13,6 +13,7 @@ local vicious = require("vicious")
 
 local keys = require("keys")
 local mods = require("modules")
+local private = require("private")
 
 -- Override
 -- nothing here (yet)
@@ -170,16 +171,31 @@ widget.layoutbox = {}
 
 -- Clock
 widget.clock = awful.widget.textclock('%H:%M %a %d.%m.%y')
-
 -- Calendar
 lain.widgets.calendar:attach(widget.clock, { font = beautiful.font_mono, cal = "/usr/bin/cal -3" })
-
 -- Task
 lain.widgets.contrib.task:attach(widget.clock)
 
+-- Mail
+widget.mail = lain.widgets.imap({
+	timeout = 60,
+	server = private.mail.server,
+	mail = private.mail.user, 
+	password = 'keyring get '..private.mail.server..' '..private.mail.user,
+	settings = function()
+		local w = my.widget.mail
+
+		if mailcount > 0 then
+			w:set_markup('&#xf0e0; '..mailcount)
+		else
+			w:set_markup('&#xf003;')
+		end
+	end
+})
+widget.mail:set_font(theme.font_icon .. ' ' .. (theme.font_size))
+
 -- Keyboard Layout
 widget.kbd = awful.widget.keyboardlayout()
-
 
 -- Network
 widget.network = wibox.widget.textbox()
@@ -503,6 +519,8 @@ do
 
 	local right = wibox.layout.fixed.horizontal()
 	right:add(wibox.widget.systray())
+	right:add(widget.spacer.h)
+	right:add(widget.mail)
 	right:add(widget.spacer.h)
 	right:add(widget.kbd)
 	right:add(widget.spacer.h)
