@@ -44,12 +44,8 @@ do
 		end)
 end
 
-naughty.config.presets.warning = 
-{
-	bg = "#ffaa00",
-	fg = "#ffffff",
-	timeout = 10,
-}
+local awmL = awful.layout.suit
+local lnL = lain.layout
 
 -- Variable definitions
 my = 
@@ -65,8 +61,33 @@ my =
 --		{"dropboxd","dropbox"},
 --		{"weechat", term = true},
 	},
+	monitor = { 
+		main =
+		{
+			i = 1,
+			dpi = 96
+		}
+	},
+	layout = {
+		awmL.tile,
+		awmL.tile.top,
+		awmL.fair,
+		awmL.fair.horizontal,
+		awmL.corner.nw,
+		awmL.floating
+	},
+	mpd = {
+		host = "localhost",
+		music_dir = "~/mobile.music"
+	},
+	tags = {}
+}
 
-	mpd_host = "keeper",
+my.tags.config = {
+	{
+		names = { "main", "web", "chat", "code", "media", "other" },
+		layout = my.layout[1]
+	}
 }
 
 my.editor_cmd = my.terminal .. " -e " .. my.editor
@@ -76,35 +97,33 @@ menubar.utils.terminal = my.terminal
 mods.autostart.terminal = my.terminal
 
 beautiful.init(my.theme)
+for mon in pairs(my.monitor) do
+	beautiful.xresources.set_dpi(mon.dpi, mon.i)
+end
+
 mods.wallpaper.add(my.wallpapers)
+mods.wallpaper.init()
+
 mods.autostart.add(my.autostart)
-
 mods.autostart.addXDG()
+mods.autostart.launch()
 
-monitor = { main = 1 }
 
--- Table of layouts to cover with awful.layout.inc, order matters.
-local awm = awful.layout.suit
-local ln = lain.layout
-layouts =
+naughty.config.presets.warning = 
 {
-	ln.uselesstile,
-	awm.tile,
-	awm.fair,
-	awm.fair.horizontal,
-	ln.uselessfair,
-	ln.centerwork,
-	awm.floating
+	bg = "#ffaa00",
+	fg = "#ffffff",
+	timeout = 10,
 }
 
 -- Tags
-my.tags = {}
 local tags = my.tags
-
-tags[1] = awful.tag({ "main", "web", "chat", "code", "media", "other" }, 1, layouts[1])
-for s = 2, screen.count() do
-	-- Each screen has its own tag table.
-	tags[s] = awful.tag({ 1, 2, 3, 4 }, s, layouts[1])
+for s = 1, screen.count() do
+	if tags.config[s] then
+		tags[s] = awful.tag(tags.config[s].names, s, tags.config[s].layout)
+	else
+		tags[s] = awful.tag({ 1, 2, 3, 4 }, s, my.layout[1])
+	end
 end
 
 -- ########################################
@@ -244,34 +263,82 @@ widget.wifi.func = function(w, data)
 end
 vicious.register(widget.wifi.data, vicious.widgets.wifi, widget.wifi.func, 2, 'wl')
 
+
 -- ########################################
--- ▄▄▄▄▄                      
--- █    █  ▄▄▄    ▄ ▄▄   ▄▄▄  
--- █▄▄▄▄▀ ▀   █   █▀  ▀ █   ▀ 
--- █    █ ▄▀▀▀█   █      ▀▀▀▄ 
--- █▄▄▄▄▀ ▀▄▄▀█   █     ▀▄▄▄▀ 
---                            
+-- ▄    ▄   ▀                 
+-- ██  ██ ▄▄▄     ▄▄▄    ▄▄▄  
+-- █ ██ █   █    █   ▀  █▀  ▀ 
+-- █ ▀▀ █   █     ▀▀▀▄  █     
+-- █    █ ▄▄█▄▄  ▀▄▄▄▀  ▀█▄▄▀  
+-- 
 -- ########################################
 
-my.bar = {}
-local bar = my.bar
+-- Set keys
+root.keys(keys.global);
 
-bar.main = {}
-bar.main = {}
-bar.main.prompt = {}
-bar.main.taglist = {}
-bar.main.taglist.buttons = awful.util.table.join(
-						awful.button({ }, 1, awful.tag.viewonly),
-						awful.button({ modkey }, 1, awful.client.movetotag),
-						awful.button({ }, 3, awful.tag.viewtoggle),
-						awful.button({ modkey }, 3, awful.client.toggletag),
-						awful.button({ }, 4, function(t) awful.tag.viewnext(awful.tag.getscreen(t)) end),
-						awful.button({ }, 5, function(t) awful.tag.viewprev(awful.tag.getscreen(t)) end)
-					)
-bar.main.tasklist = {}
-bar.main.tasklist.buttons = 
-	awful.util.table.join(
-		awful.button({ }, 1, function(c)
+-- Rules per monitor
+local rules = {
+	{ rule = { class = "Chromium" },					properties = { tag = tags[1][2] } },
+	{ rule = { class = "Firefox" },						properties = { tag = tags[1][2] } },
+	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[1][3] } },
+	{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = tags[1][3] } },
+	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
+--	{ rule_any = { class = { "mplayer2", "mplayer", "mpv" }},	properties = { tag = tags[1][5] } },
+}
+awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"), rules)
+----
+
+-- Signals
+-- Signal function to execute when a new client appears.
+client.connect_signal("manage", function(c) 
+		if not awesome.startup then
+			-- Set the windows at the slave,
+			-- i.e. put it at the end of others instead of setting it master.
+			-- awful.client.setslave(c)
+
+			-- Put windows in a smart way, only if they do not set an initial position.
+			if not c.size_hints.user_position and not c.size_hints.program_position then
+				awful.placement.no_overlap(c)
+				awful.placement.no_offscreen(c)
+			end
+		elseif not (c.size_hints.user_position or c.size_hints.program_position) then
+			-- Prevent clients from being unreachable after screen count changes.
+			awful.placement.no_offscreen(c)
+		end
+	end)
+
+client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
+client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
+-- Enable sloppy focus
+client.connect_signal("mouse::enter", function(c)
+		if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier and awful.client.focus.filter(c) then
+			client.focus = c
+		end
+	end)
+----
+
+-- ########################################
+-- ▄    ▄  ▄▄▄▄  ▄▄   ▄ ▄▄▄▄▄ ▄▄▄▄▄▄▄  ▄▄▄▄  ▄▄▄▄▄ 
+-- ██  ██ ▄▀  ▀▄ █▀▄  █   █      █    ▄▀  ▀▄ █   ▀█
+-- █ ██ █ █    █ █ █▄ █   █      █    █    █ █▄▄▄▄▀
+-- █ ▀▀ █ █    █ █  █ █   █      █    █    █ █   ▀▄
+-- █    █  █▄▄█  █   ██ ▄▄█▄▄    █     █▄▄█  █    █
+--
+-- ########################################
+
+local monitor = my.monitor
+
+-- Common button
+local buttons = 
+{
+	taglist = awful.util.table.join(
+		awful.button({}, 1, awful.tag.viewonly),
+		awful.button({ keys.mod }, 1, awful.client.movetotag),
+		awful.button({}, 3, awful.tag.viewtoggle),
+		awful.button({ keys.mod }, 3, awful.client.toggletag)
+	),
+	tasklist = awful.util.table.join(
+		awful.button({}, 1, function(c)
 			if c == client.focus then
 				c.minimized = true
 			else
@@ -279,7 +346,7 @@ bar.main.tasklist.buttons =
 				-- :isvisible() makes no sense
 				c.minimized = false
 				if not c:isvisible() then
-					awful.tag.viewonly(c:tags()[1])
+					awful.tag.viewonly(c.first_tag)
 				end
 				-- This will also un-minimize
 				-- the client, if needed
@@ -287,7 +354,7 @@ bar.main.tasklist.buttons =
 				c:raise()
 			end
 		end),
-		 awful.button({ }, 3, function()
+		 awful.button({}, 3, function()
 			if instance then
 				instance:hide()
 				instance = nil
@@ -295,42 +362,44 @@ bar.main.tasklist.buttons =
 				instance = awful.menu.clients({ width=250 })
 			end
 		end),
-		awful.button({ }, 4, function()
+		awful.button({}, 4, function()
 			awful.client.focus.byidx(1)
 			if client.focus then client.focus:raise() end
 		end),
-		awful.button({ }, 5, function()
+		awful.button({}, 5, function()
 			awful.client.focus.byidx(-1)
 			if client.focus then client.focus:raise() end
 		end)
+	),
+	layoutbox = awful.util.table.join(
+		awful.button({}, 1, function() awful.layout.inc(my.layout, 1) end),
+		awful.button({}, 3, function() awful.layout.inc(my.layout, -1) end)
 	)
-
-bar.main.layout_buttons = 
-	awful.util.table.join(
-		awful.button({ }, 1, function() awful.layout.inc(layouts, 1) end),
-		awful.button({ }, 3, function() awful.layout.inc(layouts, -1) end),
-		awful.button({ }, 4, function() awful.layout.inc(layouts, 1) end),
-		awful.button({ }, 5, function() awful.layout.inc(layouts, -1) end)
-	)
-
+}
+----
 
 -- ########################################
 -- ## Main screen
 -- ########################################
 do
-	bar.main.prompt[monitor.main] = awful.widget.prompt()
+	local s = monitor.main.i
 
-	widget.layoutbox[monitor.main] = awful.widget.layoutbox(monitor.main)
-	widget.layoutbox[monitor.main]:buttons(bar.main.layout_buttons)
+	monitor.main.prompt = awful.widget.prompt()
+	
+	monitor.main.layoutbox = awful.widget.layoutbox(s)
+	monitor.main.layoutbox:buttons(buttons.layoutbox)
 
-	bar.main.taglist[monitor.main] = awful.widget.taglist(monitor.main, awful.widget.taglist.filter.all, bar.main.taglist.buttons)
-	bar.main.tasklist[monitor.main] = awful.widget.tasklist(monitor.main, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons)
+	monitor.main.taglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, buttons.taglist)
+	monitor.main.tasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, buttons.tasklist)
 
 	local left = wibox.layout.fixed.horizontal()
-	left:add(bar.main.taglist[monitor.main])
+	left:add(monitor.main.layoutbox)
+	left:add(widget.spacer.h)
+	left:add(monitor.main.taglist)
+	left:add(widget.spacer.h)
 	left:add(wibox.widget.systray())
-	left:add(bar.main.prompt[monitor.main])
-	left = wibox.widget.background(wibox.layout.margin(left,0,4), beautiful.bg_normal)
+	left:add(monitor.main.prompt)
+	left = wibox.widget.background(wibox.layout.margin(left,0,4))
 
 	local right = wibox.layout.fixed.horizontal()
 	right:add(widget.network)
@@ -346,112 +415,48 @@ do
 	right:add(widget.spacer.h)
 	right:add(widget.clock)
 	right:add(widget.spacer.h)
-	right:add(widget.layoutbox[monitor.main])
-	right = wibox.widget.background(wibox.layout.margin(right,4,4), beautiful.bg_normal)
+	right = wibox.widget.background(wibox.layout.margin(right,4,4))
 
-	local layout = wibox.layout.align.horizontal()
-	layout:set_left(left)
-	layout:set_middle(bar.main.tasklist[monitor.main])
-	layout:set_right(right)
+	local layout = wibox.layout.align.horizontal(left, monitor.main.tasklist, right)
 
-	bar.main[monitor.main] = awful.wibox({ position = "top", screen = monitor.main })
-	bar.main[monitor.main]:set_bg(beautiful.bg_bg)
-	bar.main[monitor.main]:set_widget(layout)
+	monitor.main.bar = awful.wibox({ position = "top", screen = s })
+	monitor.main.bar:set_bg(beautiful.bg_bg)
+	monitor.main.bar:set_widget(layout)
 end
 
 -- ########################################
 -- ## Futher screens
 -- ########################################
 
-for s = 1, screen.count() do
-	if s ~= monitor.main then
-		-- Create an imagebox widget which will contains an icon indicating which layout we're using.
-		-- We need one layoutbox per screen.
-		widget.layoutbox[s] = awful.widget.layoutbox(s)
-		widget.layoutbox[s]:buttons(bar.main.layout_buttons)
-		-- Create a taglist widget
-		bar.main.taglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, bar.main.taglist.buttons)
+for s = 2, screen.count() do
+	-- Create an imagebox widget which will contains an icon indicating which layout we're using.
+	-- We need one layoutbox per screen.
+	monitor[s].layoutbox = awful.widget.layoutbox(s)
+	widget.layoutbox:buttons(buttons.layoutbox)
+	-- Create a taglist widget
+	monitor[s].taglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, buttons.taglist)
 
-		-- Create a tasklist widget
-		bar.main.tasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, bar.main.tasklist.buttons, nil, bar.main.tasklist.update)
+	-- Create a tasklist widget
+	monitor[s].tasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, buttons.tasklist)
 
-		-- Create the wibox
-		bar.main[s] = awful.wibox({ position = "top", screen = s })
+	-- Widgets that are aligned to the left
+	local left = wibox.layout.fixed.horizontal()
+	left:add(monitor[s].taglist)
+	left:add(monitor.main.prompt)
 
-		-- Widgets that are aligned to the left
-		local left = wibox.layout.fixed.horizontal()
-		left:add(bar.main.taglist[s])
-		left:add(widget.spacer.h)
-		left:add(bar.main.prompt[monitor.main])
+	-- Widgets that are aligned to the right
+	local right = wibox.layout.fixed.horizontal()
+	right:add(widget.clock)
+	right:add(widget.layoutbox)
 
-		-- Widgets that are aligned to the right
-		local right = wibox.layout.fixed.horizontal()
-		right:add(widget.clock)
-		right:add(widget.spacer.h)
-		right:add(widget.layoutbox[s])
+	-- Now bring it all together (with the tasklist in the middle)
+	local layout = wibox.layout.align.horizontal()
+	layout:set_left(left)
+	layout:set_middle(monitor[s].tasklist)
+	layout:set_right(right)
 
-		-- Now bring it all together (with the tasklist in the middle)
-		local layout = wibox.layout.align.horizontal()
-		layout:set_left(left)
-		layout:set_middle(bar.main.tasklist[s])
-		layout:set_right(right)
-
-		bar.main[s]:set_widget(layout)
-	end
+	-- Create the wibox
+	monitor[s].bar = awful.wibox({ position = "top", screen = s })		
+	monitor[s].bar:set_bg(beautiful.bg_bg)
+	monitor[s].bar:set_widget(layout)
 end
-
-
--- ########################################
--- ▄    ▄   ▀                 
--- ██  ██ ▄▄▄     ▄▄▄    ▄▄▄  
--- █ ██ █   █    █   ▀  █▀  ▀ 
--- █ ▀▀ █   █     ▀▀▀▄  █     
--- █    █ ▄▄█▄▄  ▀▄▄▄▀  ▀█▄▄▀  
--- 
--- ########################################
-
-root.keys(keys.global)
-
--- Rules
-awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"))
-local rules = {
-	{ rule = { class = "Chromium" },					properties = { tag = tags[1][2] } },
-	{ rule = { class = "Firefox" },						properties = { tag = tags[1][2] } },
-	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = tags[1][3] } },
-	{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = tags[1][3] } },
-	{ rule = { class = "Steam" },						properties = { tag = tags[1][6] } },
---	{ rule_any = { class = { "mplayer2", "mplayer", "mpv" }},	properties = { tag = tags[1][5] } },
-}
-awful.rules.rules = awful.util.table.join(awful.rules.rules, rules)
-
-
--- Signals
--- Signal function to execute when a new client appears.
-client.connect_signal("manage", function(c, startup)
-		-- Enable sloppy focus
-		c:connect_signal("mouse::enter", 
-			function(c)
-				if awful.layout.get(c.screen) ~= awful.layout.suit.magnifier
-						and awful.client.focus.filter(c) then
-						client.focus = c
-				end
-			end)
-
-		if not startup then
-			-- Set the windows at the slave,
-			-- i.e. put it at the end of others instead of setting it master.
-			awful.client.setslave(c)
-
-			-- Put windows in a smart way, only if they does not set an initial position.
-			if not c.size_hints.user_position and not c.size_hints.program_position then
-					awful.placement.no_overlap(c)
-					awful.placement.no_offscreen(c)
-			end
-		end
-end)
-
-client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
-client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
-
-mods.wallpaper.init()
-mods.autostart.launch()

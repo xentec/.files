@@ -76,7 +76,6 @@ my =
 			dpi = 94
 		} 
 	},
-
 	layout = {
 		awmL.tile,
 		awmL.tile.top,
@@ -382,6 +381,7 @@ do
 		awful.rules.rules = awful.util.table.join(awful.rules.rules, rules[s])
 	end
 end
+----
 
 
 -- Signals
@@ -424,6 +424,7 @@ client.connect_signal("mouse::enter", function(c)
 
 local monitor = my.monitor
 
+-- Common buttons
 local buttons = 
 {
 	taglist = awful.util.table.join(
