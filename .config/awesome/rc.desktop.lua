@@ -138,6 +138,11 @@ for s = 1, screen.count() do
 	end
 end
 
+
+function wibox_default_size(s)
+	return awful.util.round(beautiful.get_font_height() / beautiful.xresources.get_dpi() * beautiful.xresources.get_dpi(s) * 1.5)
+end
+
 -- ##################################################
 --                                                  
 -- ▄     ▄   ▀        █                  ▄          
@@ -537,7 +542,7 @@ if screen.count() > 1 then
 
 		local layout = wibox.layout.align.horizontal(left, monitor.info.tasklist, right)
 
-		monitor.info.bar.top = awful.wibox({ position = "top", screen = s, height = 24 })
+		monitor.info.bar.top = awful.wibox({ position = "top", screen = s, height = wibox_default_size(s) })
 		monitor.info.bar.top:set_bg(beautiful.bg_bg)
 		monitor.info.bar.top:set_widget(layout)
 	end
@@ -603,7 +608,7 @@ if screen.count() > 1 then
 		layout:set_left(left)
 		layout:set_right(right)
 
-		monitor.info.bar.bottom = awful.wibox({ position = "bottom", screen = s, height = 24 })
+		monitor.info.bar.bottom = awful.wibox({ position = "bottom", screen = s, height = wibox_default_size(s) })
 		monitor.info.bar.bottom:set_bg(beautiful.bg_bg)
 		monitor.info.bar.bottom:set_widget(layout)
 	end
