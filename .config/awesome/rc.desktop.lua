@@ -104,6 +104,16 @@ my.tags.config = {
 
 my.editor_cmd = my.terminal .. " -e " .. my.editor
 
+-- Notifications 
+naughty.config.defaults.opacity = 0.8
+naughty.config.defaults.screen = 1
+naughty.config.presets.warning = 
+{
+	bg = "#ffaa00",
+	fg = "#ffffff",
+	timeout = 10,
+}
+
 -- Set the terminal for applications that require it
 menubar.utils.terminal = my.terminal
 mods.autostart.terminal = my.terminal
@@ -120,14 +130,6 @@ mods.autostart.addXDG()
 mods.autostart.launch()
 
 
-naughty.config.presets.warning = 
-{
-	bg = "#ffaa00",
-	fg = "#ffffff",
-	timeout = 10,
-}
-
-
 -- Tags
 local tags = my.tags
 for s = 1, screen.count() do
@@ -137,7 +139,6 @@ for s = 1, screen.count() do
 		tags[s] = awful.tag({ 1, 2, 3, 4 }, s, my.layout[1])
 	end
 end
-
 
 function wibox_default_size(s)
 	return awful.util.round(beautiful.get_font_height() / beautiful.xresources.get_dpi() * beautiful.xresources.get_dpi(s) * 1.5)
