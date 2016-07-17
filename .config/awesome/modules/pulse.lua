@@ -4,12 +4,15 @@ local setmetatable = setmetatable
 local tonumber = tonumber
 local type = type
 
-local util = require("awful.util")
+local spawn = require("awful.spawn")
 
 local pulse = { mt = {}, muted = {} }
 
-local function ctl(arg)
-	return util.pread("pulseaudio-ctl "..arg);
+local function ctl(arg, callback)
+	spawn.easy_async("pulseaudio-ctl "..arg,
+		function (stdout, stderr, _, exist)
+			callback(stdout)
+		end)
 end
 
 function pulse.new(update_func, step)
@@ -21,22 +24,28 @@ function pulse.new(update_func, step)
 end
 
 function pulse.poll()
-	local volume, mute_speaker, mute_mic = string.match(ctl("full-status"), "(%d+) (%S+) (%S+)")
+	ctl("full-status", function(ret)
+		local volume, mute_speaker, mute_mic = string.match(ret, "(%d+) (%S+) (%S+)")
 
-	pulse.value = tonumber(volume) or 0
-	pulse.muted.speaker = mute_speaker == "yes"
-	pulse.muted.mic = mute_mic == "yes"
-	pulse.update(pulse.muted, pulse.value)
+		pulse.value = tonumber(volume) or 0
+		pulse.muted.speaker = mute_speaker == "yes"
+		pulse.muted.mic = mute_mic == "yes"
+		pulse.update(pulse.muted, pulse.value)
+	end)
 end
 
 function pulse.increase()
-	pulse.value = ctl("up "..pulse.step or 1)
-	pulse.poll()
+	ctl("up "..pulse.step or 1, function (ret)
+		pulse.value = ret
+		pulse.poll()
+	end)
 end
 
 function pulse.decrease()
-	pulse.value = ctl("down "..pulse.step or 1)
-	pulse.poll()
+	ctl("down "..pulse.step or 1, function (ret)
+		pulse.value = ret
+		pulse.poll()
+	end)
 end
 
 function pulse.mute(what)
@@ -45,8 +54,9 @@ function pulse.mute(what)
 		mute = mute.."-"..what
 	end
 
-	ctl(mute)
-	pulse.poll()
+	ctl(mute, function( ... )
+		pulse.poll()
+	end)
 end
 
 function pulse.toggleMic()
