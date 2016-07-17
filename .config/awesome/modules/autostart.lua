@@ -16,15 +16,18 @@ function autostart.launch()
 		--naughty.notify({ timeout = 0,
 			--text = (type(app) == "table" and "T:"..app[1] or "S:"..tostring(app)).." > "..(type(proc) == "table" and "T:"..proc[1] or "S:"..tostring(proc))});
 
-		local count = tonumber(awful.util.pread('pgrep -cf '.. proc))
+		awful.spawn.easy_async('pgrep -cf '.. proc,
+			function (stdout, stderr, _, exist)
+				local count = tonumber(stdout)
 
-		if count == 0 then
-			if app.term ~= nil and app.term == true then
-				exec = autostart.terminal .. ' -name ' .. exec .. ' -e '.. exec
-			end
-			awful.util.spawn(exec)
-			table.insert(started, exec)
-		end
+				if count == 0 then
+					if app.term ~= nil and app.term == true then
+						exec = autostart.terminal .. ' -name ' .. exec .. ' -e '.. exec
+					end
+					awful.spawn.spawn(exec)
+					table.insert(started, exec)
+				end
+			end)
 	end
 	if #started > 0 then
 		naughty.notify({ timeout = 5,
