@@ -1,101 +1,106 @@
-#!/bin/bash
+#!/bin/sh
 
-# Expects a server to be mounted to your filesystem.
 ssh_server=bastion:/srv/http/dump/scr
 url="http://dump.aix0.eu/scr"
-imageEncoding=".png"
-videoEncoding=".webm"
-name=`date "+%Y-%m-%d_%H-%M-%S"`
-pidFile="/tmp/seen_record.pid"
-nameFile="/tmp/seen_name"
 
-function notify {
-    if [ "$DISPLAY" ]; then
-        awesome-notify "$1" "$2" $3 "$4"
-    fi
-}
+name=$(date "+%Y-%m-%d_%H-%M-%S")
+capOpt="-b 5 -c 0.5,0.5,0.5,0.8 -n"
+vidOpt="-vf scale=-1:720 -sws_flags lanczos -c:v rawvideo -pix_fmt yuv420p -threads 8 -an"
+convOpt="-c:v libvpx-vp9 -b:v 2M -crf 6 -threads 8 -b:a 192K"
 
-function clipit {
-    echo -n "$1" | xclip -selection clipboard
-}
+pidFile="/tmp/seen.pid"
+nameFile="/tmp/seen.name"
+
+function notify { [ "$DISPLAY" ] && awesome-notify "$1" "$2" $3 "$4"; }
+function clipit { echo -n "$1" | xclip -selection clipboard; }
 
 function upload {
-    FILE=$1
+	local f=$1
+	notify "seen: $f" "Uploading..." 3 "#7777FF"
 
-    notify "seen: $FILE" "Uploading..." 3 "#7777FF"
+	local WHY=$(scp /tmp/$f $ssh_server/$f 2>&1)
+	if [ $? -ne 0 ]; then
+		WHY=$(tr '\r\n' '#' <<< $WHY | cut -f1 -d q'#')
+		notify "seen: $f" "Failed: $WHY" 5 "#CC3333"
+		exit
+	fi
 
-    WHY=$(scp /tmp/$FILE $ssh_server/$FILE 2>&1)
-    if [ $? -ne 0 ]; then
-        WHY=$(tr '\r\n' '#' <<< $WHY | cut -f1 -d q'#')
-        notify "seen: $FILE" "Failed: $WHY" 5 "#CC3333"
-        exit
-    fi
-
-    notify "seen: $FILE" "Done: ${url}/$FILE" 5 "#33CC33"
+	notify "seen: $f" "Done: ${url}/$f" 5 "#33CC33"
 }
 
 function record {
-    ffmpeg -f x11grab -s "${1}x${2}" -i ":0.0+${3},${4}" \
-        -c:v libvpx -quality good -cpu-used 0 -b:v 2M -qmin 0 -qmax 32 -bufsize 1000k -threads 8 -an     \
-        "/tmp/$5"
-    E=$?
-    echo $E > sig
-    if [ $E -gt 0 ] && [ $E -ne 255 ]; then
-        echo -e "\a" && echo -e "\a"
-        rm "$5"
-        rm "$pidFile"
-        rm "$nameFile"
-    fi
+	ffmpeg \
+		-f x11grab -s "${1}x${2}" -framerate 25 -i ":0.0+${3},${4}" \
+		-f alsa -i pulse \
+		$5 "$6"
+
+	local E=$?
+	echo $E > sig
+	if [ $E -gt 0 ] && [ $E -ne 255 ]; then
+		notify "seen: $f" "Failed: $E" 5 "#CC3333"
+		echo -e "\a" && echo -e "\a"
+		rm "$6"
+		rm "$pidFile"
+	fi
 }
 
-type=$1
-if [ "$type" != "image"  ]; then
-    if [ "$type" != "video"  ]; then
-        type="image"
-    fi
-fi
+function convert {
+	ffmpeg -i "$1" $2 "$3"
+	local E=$?
+	echo $E > sig
+	if [ $E -gt 0 ] && [ $E -ne 255 ]; then
+		notify "seen: $f" "Failed: $E" 5 "#CC3333"
+		echo -e "\a" && echo -e "\a"
+		rm "$6"
+		rm "$pidFile"
+	fi
+	rm ~/seen.avi
+}
 
-if [ "$type" == "image" ]; then
-    f=${name}${imageEncoding}
+case $1 in
+	video)
+		f="${name}.webm"
+		if [ ! -f "$pidFile" ]; then
 
-    eval `slop -b 3 -c 1.0,0.3,0.3`
-    if [ "$(($W+$H))" != "0" ]; then
-        maim -g "${W}x${H}+${X}+${Y}" "/tmp/$f"
-    else
-        exit 0
-    fi
+			eval $(slop $capOpt)
+			[ "${Cancel}" = "true" ] && exit 0
+			set -x
 
-    notify "seen: $f" "Optimizing..." 3 "#EEAA00"
-    optipng /tmp/$f
+			echo -e "\a"
+			record ${W} ${H} ${X} ${Y} "$vidOpt" ~/seen.avi &
+			#record ${W} ${H} ${X} ${Y} "$convOpt" "/tmp/$f" &
+			pid=$!
+			echo -n "$pid" > $pidFile
+			echo -n "$f" > $nameFile
+			exit 0
+		fi
 
-    upload $f
-    clipit "${url}/$f"
-    echo "${url}/$f"
+		f=$(cat "$nameFile")
+		pid="$(cat "$pidFile")"
+		rm "$pidFile" "$nameFile"
 
-    rm /tmp/$f
-else
-    f=${name}${videoEncoding}
-    if [ -f "$pidFile" ]; then
-        pkill -TERM -P `cat "$pidFile"`
-        f=`cat "$nameFile"`
-        echo -e "\a"
-        rm "$pidFile" "$nameFile"
+		pkill -TERM -P $pid
+		while [ -e /proc/$pid ]; do sleep .1; done
+		echo -e "\a"
 
-	upload $f
-        clipit "${url}/$f"
-        echo "${url}/$f"
+		notify "seen: $f" "Converting..." 3 "#EEAA00"
+		convert ~/seen.avi "$convOpt" "/tmp/$f"
 
-        rm /tmp/$f
-        exit 0
-    fi
-    eval `slop  -b 3 -c 1.0,0.3,1.0`
-    if [ "$(($W+$H))" != "0" ]; then
-        echo -e "\a"
-        record ${W} ${H} ${X} ${Y} $f &
-        pid=$!
-        echo -n "$pid" > $pidFile
-        echo -n "$f" > $nameFile
-    fi
-fi
+		mpv /tmp/$f
+	;;
+	image|*)
+		f="${name}.png"
 
+		maim -s $capOpt "/tmp/$f"
+		[ $? -ne 0 ] && exit 0
 
+		notify "seen: $f" "Optimizing..." 3 "#EEAA00"
+		optipng /tmp/$f
+	;;
+esac
+
+upload $f
+clipit "${url}/$f"
+echo "${url}/$f"
+
+#rm /tmp/$f
