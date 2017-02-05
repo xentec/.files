@@ -1,38 +1,39 @@
 ---------------------------
--- Default awesome theme --
+-- My awesome theme --
 ---------------------------
 
 theme = {}
 
---theme.font          = "cantarell 9"
-
 theme.font_name 	= "Bitstream Vera Sans"
-theme.font_size		= 10
 theme.font_mono		= "Source Code Pro" 
 theme.font_icon		= "Font Awesome"
+theme.font_size		= 8
 theme.font 			= theme.font_name .. " " .. tostring(theme.font_size)
 
-theme.bg_bg         = "#44444466"
-theme.bg_minimize   = "#44444488"
-theme.bg_normal     = "#444444AA"
-theme.bg_focus      = "#444444DD"
-theme.bg_urgent     = "#ff0000FF"
-theme.bg_systray    = theme.bg_normal:sub(1,6)
 
-theme.fg_normal     = "#888888"
-theme.fg_focus      = "#ffffff"
-theme.fg_urgent     = "#ffffff"
-theme.fg_minimize   = "#ffffff"
+theme.bg_normal     = "#222222BB"
+theme.fg_normal     = "#AAAAAAFF"
 
-theme.border_width  = 4
+
+theme.bg_focus      = "#888888"
+theme.fg_focus      = "#FFFFFF"
+
+theme.bg_minimize   = "#444444"
+theme.fg_minimize   = "#CCCCCC"
+
+theme.bg_urgent     = theme.bg_focus
+theme.fg_urgent     = "#7BDB20"
+
+theme.border_width  = 2
 theme.border_normal = "#44444488"
 theme.border_focus  = "#444444AA"
 theme.border_marked = "#444444DD"
 
-theme.useless_gap_width = 10
+theme.useless_gap = 2
 
 theme.taglist_bg_occupied = "#444444"
-theme.tooltip_opacity = 0.7
+
+theme.tooltip_bg = theme.bg_normal
 
 -- There are other variable sets
 -- overriding the default one when

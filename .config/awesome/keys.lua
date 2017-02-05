@@ -1,7 +1,7 @@
 local awful = require("awful")
 local menubar = require("menubar")
-local hotkeys_popup = require("awful.hotkeys_popup.widget")
-
+local hotkeys_popup = require("awful.hotkeys_popup").widget
+local naughty = require("naughty")
 local lain = require("lain")
 
 local pulse = require("modules.pulse")
@@ -98,16 +98,18 @@ local globalkeys = awful.util.table.join(
 			  {description = "restore minimized", group = "client"}),
 
 	-- Prompt
-	awful.key({ modkey },            "r",     function () mypromptbox[awful.screen.focused()]:run() end,
+	awful.key({ modkey },            "r",     function () my.monitor.main.prompt:run() end,
 			  {description = "run prompt", group = "launcher"}),
 
 	awful.key({ modkey }, "x",
-			function ()
-				awful.prompt.run({ prompt = "Run Lua code: " },
-				mypromptbox[awful.screen.focused()].widget,
-				awful.util.eval, nil,
-				awful.util.getdir("cache") .. "/history_eval")
-			end,
+				function ()
+					awful.prompt.run {
+						prompt       = "Run Lua code: ",
+						textbox      = awful.screen.focused().mypromptbox.widget,
+						exe_callback = awful.util.eval,
+						history_path = awful.util.get_cache_dir() .. "/history_eval"
+					}
+				end,
 			  {description = "lua execute prompt", group = "awesome"}),
 	-- Menubar
 	awful.key({ modkey }, "p", function() menubar.show() end,
@@ -126,21 +128,21 @@ local globalkeys = awful.util.table.join(
 			  {description = "mute speakers", group = "volume"}),
 
 	-- Media
-	awful.key({ }, "XF86AudioPlay", function () exec("mpc -h ".. my.mpd.host .." toggle"); my.widget.mpd.worker.update() end,
+	awful.key({ }, "XF86AudioPlay", function () spawn("mpc -h ".. my.mpd.host .." toggle"); my.widget.mpd.worker.update() end,
 			  {description = "start playing", group = "mpd"}),
-	awful.key({ }, "XF86AudioStop", function () exec("mpc -h ".. my.mpd.host .." stop"); my.widget.mpd.worker.update() end,
+	awful.key({ }, "XF86AudioStop", function () spawn("mpc -h ".. my.mpd.host .." stop"); my.widget.mpd.worker.update() end,
 			  {description = "stop playing", group = "mpd"}),
-	awful.key({ }, "XF86AudioPrev", function () exec("mpc -h ".. my.mpd.host .." prev"); my.widget.mpd.worker.update() end,
+	awful.key({ }, "XF86AudioPrev", function () spawn("mpc -h ".. my.mpd.host .." prev"); my.widget.mpd.worker.update() end,
 			  {description = "switch to previous title", group = "mpd"}),
-	awful.key({ }, "XF86AudioNext", function () exec("mpc -h ".. my.mpd.host .." next"); my.widget.mpd.worker.update() end,
+	awful.key({ }, "XF86AudioNext", function () spawn("mpc -h ".. my.mpd.host .." next"); my.widget.mpd.worker.update() end,
 			  {description = "switch to next song", group = "mpd"}),
-	awful.key({ "Shift" }, "XF86AudioPrev", function () exec("mpc -h ".. my.mpd.host .." seek -5"); my.widget.mpd.worker.update() end,
+	awful.key({ "Shift" }, "XF86AudioPrev", function () spawn("mpc -h ".. my.mpd.host .." seek -5"); my.widget.mpd.worker.update() end,
 			  {description = "jump 5 seconds back", group = "mpd"}),
-	awful.key({ "Shift" }, "XF86AudioNext", function () exec("mpc -h ".. my.mpd.host .." seek +5"); my.widget.mpd.worker.update() end,
+	awful.key({ "Shift" }, "XF86AudioNext", function () spawn("mpc -h ".. my.mpd.host .." seek +5"); my.widget.mpd.worker.update() end,
 			  {description = "jump 5 seconds forward", group = "mpd"}),
-	awful.key({ "Shift" }, "XF86AudioLowerVolume", function () exec("mpc -h ".. my.mpd.host .." seek -1"); my.widget.mpd.worker.update() end,
+	awful.key({ "Shift" }, "XF86AudioLowerVolume", function () spawn("mpc -h ".. my.mpd.host .." seek -1"); my.widget.mpd.worker.update() end,
 			  {description = "scroll through song backward", group = "mpd"}),
-	awful.key({ "Shift" }, "XF86AudioRaiseVolume", function () exec("mpc -h ".. my.mpd.host .." seek +1"); my.widget.mpd.worker.update() end,
+	awful.key({ "Shift" }, "XF86AudioRaiseVolume", function () spawn("mpc -h ".. my.mpd.host .." seek +1"); my.widget.mpd.worker.update() end,
 			  {description = "scroll through song forward", group = "mpd"}),
 
 	-- Backlight
@@ -165,7 +167,15 @@ local globalkeys = awful.util.table.join(
 
 	-- Tasks
 	awful.key({ modkey,         }, "y", function () lain.widgets.contrib.task.show() end),
-	awful.key({ modkey, "Shift" }, "y", lain.widgets.contrib.task.prompt_search)
+	awful.key({ modkey, "Shift" }, "y", lain.widgets.contrib.task.prompt_search),
+
+	awful.key({ modkey }, "c", function()
+		local l = {}
+		for _, c in ipairs(client.get()) do
+			table.insert(l, lain.util.markup.bold(c.name..":").." c:"..tostring(c.class))
+		end
+		naughty.notify{ timeout = 0, text = table.concat(l, "\n")}
+	end)
 )
 
 local clientkeys = awful.util.table.join(
@@ -201,44 +211,55 @@ local clientkeys = awful.util.table.join(
 		{description = "maximize", group = "client"})
 )
 
--- Compute the maximum number of digit we need, limited to 9
---[[ local keynumber = 0
-for s = 1, screen.count() do
-	 keynumber = math.min(9, math.max(#tags[s], keynumber))
-end
-]]
 
 -- Bind all key numbers to tags.
 -- Be careful: we use keycodes to make it works on any keyboard layout.
 -- This should map on the top row of your keyboard, usually 1 to 9.
 for i = 1, 9 do
 	globalkeys = awful.util.table.join(globalkeys,
+		-- View tag only.
 		awful.key({ modkey }, "#" .. i + 9,
 				function()
-					local screen = mouse.screen
-					if my.tags[screen][i] then
-							awful.tag.viewonly(my.tags[screen][i])
+					local screen = awful.screen.focused()
+					local tag = screen.tags[i]
+					if tag then
+						tag:view_only()
 					end
-				end),
+				end,
+				{description = "view tag #"..i, group = "tag"}),
+		-- Toggle tag.
 		awful.key({ modkey, "Control" }, "#" .. i + 9,
 				function()
-					local screen = mouse.screen
-					if my.tags[screen][i] then
-							awful.tag.viewtoggle(my.tags[screen][i])
+					local screen = awful.screen.focused()
+					local tag = screen.tags[i]
+					if tag then
+						awful.tag.viewtoggle(tag)
 					end
-				end),
+				end,
+				{description = "toggle tag #" .. i, group = "tag"}),
+		-- Move client to tag.
 		awful.key({ modkey, "Shift" }, "#" .. i + 9,
 				function()
-					if client.focus and my.tags[client.focus.screen][i] then
-							awful.client.movetotag(my.tags[client.focus.screen][i])
+					if client.focus then
+						local tag = client.focus.screen.tags[i]
+						if tag then
+							client.focus:move_to_tag(tag)
+						end
 					end
-				end),
+				end,
+				{description = "move focused client to tag #"..i, group = "tag"}),
+		-- Toggle tag on focused client.
 		awful.key({ modkey, "Control", "Shift" }, "#" .. i + 9,
 				function()
-					if client.focus and my.tags[client.focus.screen][i] then
-							awful.client.toggletag(my.tags[client.focus.screen][i])
+					if client.focus then
+						local tag = client.focus.screen.tags[i]
+						if tag then
+							client.focus:toggle_tag(tag)
+						end
 					end
-				end))
+				end,
+				{description = "toggle focused client on tag #" .. i, group = "tag"})
+	)
 end
 
 return {
