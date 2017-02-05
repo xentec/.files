@@ -1,37 +1,46 @@
 -- Autostart
 local awful = require("awful")
 local naughty = require("naughty")
-local io = { popen = io.popen }
+local gears = require("gears")
 
 local entries = {}
 local autostart = {}
 
 autostart.terminal = "xterm"
 
+
+local function start(exec, check, term)
+	awful.spawn.easy_async('pgrep -cf '.. check,
+		function (stdout, stderr)
+			if tonumber(stdout) ~= 0 then
+				return
+			end
+
+			if term then
+				exec = autostart.terminal .. ' -name ' .. exec .. ' -e '.. exec
+			end
+			awful.spawn.spawn(exec)
+			naughty.notify({ timeout = 5, text = '$ <span color="Lime">'.. exec .. '</span>' });
+		end)
+end
+
 function autostart.launch()
-	local started = {}
+	awful.spawn.easy_async("dex -d -a -e Awesome",
+		function(stdout, stderr, _, exists)
+			local exec
+			for line in stdout:gmatch("[^\r\n]+")
+			do
+				exec = line:match("[^:]+: (.+)")
+				start(exec, exec:match("([^%s.]+)%s*"))
+			end
+		end)
+
 	for exec,app in pairs(entries) do
 		local proc = app[2] or exec:match("([^%s.]+)%s*")
-
 		--naughty.notify({ timeout = 0,
 			--text = (type(app) == "table" and "T:"..app[1] or "S:"..tostring(app)).." > "..(type(proc) == "table" and "T:"..proc[1] or "S:"..tostring(proc))});
 
-		awful.spawn.easy_async('pgrep -cf '.. proc,
-			function (stdout, stderr, _, exist)
-				local count = tonumber(stdout)
-
-				if count == 0 then
-					if app.term ~= nil and app.term == true then
-						exec = autostart.terminal .. ' -name ' .. exec .. ' -e '.. exec
-					end
-					awful.spawn.spawn(exec)
-					table.insert(started, exec)
-				end
-			end)
-	end
-	if #started > 0 then
-		naughty.notify({ timeout = 5,
-			text = '$ <span color="Lime">'.. table.concat(started,';\n   ') .. '</span>' });
+		start(exec, proc, app.term)
 	end
 end
 
@@ -41,19 +50,12 @@ function autostart.add(app)
 			entries[ap[1] or ap] = ap
 		end
 	else
-		entries[app] = app
+		entries[app] = {}
 	end
 end
 
 function autostart.addXDG()
-	local f = io.popen("dex -d -a -e Awesome")
-	local exec
-	for line in f:lines() do
-		exec = line:match("[^:]+: (.+)")
-		if entries[exec] == nil then
-			entries[exec] = exec
-		end
-    end
+
 end
 
 return autostart
