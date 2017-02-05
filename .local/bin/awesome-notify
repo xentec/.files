@@ -9,9 +9,9 @@ local n = require('naughty');
                 preset = n.config.presets.warning,
                 title = "$1",
                 text = "$2",
-                timeout = ${3:-1},
-                bg = '$4',
-                fg = '$5',
+                timeout = ${3:-2},
+                bg = '${4:-#555555}',
+                fg = '${5:-#ffffff}',
         });
 EOF
 #echo -e "$CALL"
