@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo IPv4:
+ss -tulpen -4 "$@" not dst 127.0.0.1 or not src 127.0.0.1
+echo 
+echo IPv6:
+ss -tulpen -6 "$@" not dst [::1] or not src [::1]
