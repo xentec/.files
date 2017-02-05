@@ -1,4 +1,14 @@
 # Path
+export GOPATH=$(echo ~/.local/share/go)
+if [[ $PATH != *$GOPATH* ]]; then
+	export PATH=$GOPATH:$PATH
+fi
+
+RUSTEXEC=~/.cargo/bin
+if [[ $PATH != *$RUSTEXEC* ]]; then
+	export PATH=$RUSTEXEC:$PATH
+fi
+
 USEREXEC=~/.local/bin
 if [[ $PATH != *$USEREXEC* ]]; then
 	export PATH=$USEREXEC:$PATH
