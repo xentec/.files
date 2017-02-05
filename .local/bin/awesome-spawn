@@ -1,3 +1,2 @@
-#!/bin/env bash
-echo "require('awful').util.spawn('$@')" | awesome-client 
-
+#!/bin/sh
+awesome-client <<< "require('awful').spawn.spawn('$@')"
