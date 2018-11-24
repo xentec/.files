@@ -34,7 +34,7 @@ function fish_right_prompt
 		set -l cmd $history[1]
 		set -l exe (string split -m 1 ' ' $cmd)[1] 
 
-		if not contains -- $exe  fish ssh ncmpcpp less man ranger
+		if not contains -- $exe  fish ssh ncmpcpp less man ranger htop
 			notify-send -a "fish" -t 60000 \
 				"fish: $exe done!" "$dur"
 		end
