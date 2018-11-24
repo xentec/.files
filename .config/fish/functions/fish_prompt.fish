@@ -8,7 +8,7 @@ function fish_prompt --description 'Write out the prompt'
 	set -l color_user
 	set -l suffix
 	switch $USER
-	case root toor
+	case 'root' 'toor'
 		if set -q fish_color_cwd_root
 			set color_cwd $fish_color_cwd_root
 			set color_user $fish_color_cwd_root
@@ -24,8 +24,8 @@ function fish_prompt --description 'Write out the prompt'
 	end
 
 	echo -s \
-	(set_color $color_user) "$USER" @ (set_color yellow) "$__fish_prompt_hostname" (set_color normal) \
-	" :: " (set_color blue) (date "+%H:%m:%S") (set_color normal) \
-	" :: " (set_color $color_cwd) (prompt_pwd)
-	echo -n -s (set_color yellow) "$suffix " (set_color normal)
+		(set_color $color_user) @ (set_color yellow) "$__fish_prompt_hostname" (set_color normal) \
+		" " (set_color $color_cwd) (prompt_pwd) \
+		" " (set_color yellow) "$suffix " (set_color normal)
+#	echo -n -s (set_color yellow) "$suffix " (set_color normal)
 end
