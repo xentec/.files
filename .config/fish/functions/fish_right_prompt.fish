@@ -19,10 +19,16 @@ function fish_right_prompt
 		if [ $num_hours -gt 0 ]; set dur {$dur}{$num_hours}":"; end
 		if [ $num_mins -gt 0 ];  set dur {$dur}{$num_mins}":";  end
 
-		set dur "+"{$dur}{$num_secs}"."(printf '%003d' $num_millis)"s"
+		set dur "+"{$dur}{$num_secs}"."(printf '%003d' $num_millis)"s "
 	end
 
-	echo -s (set_color green) $dur " " (set_color blue) (date '+%H:%M:%S') (set_color normal)
+	set_color green
+	if [ $__fish_last_status -ne 0 ]
+		echo -s (set_color -o red) "$__fish_last_status! " (set_color normal)
+		set_color red
+	end
+
+	echo -s $dur (set_color blue) (date '+%H:%M:%S') (set_color normal) " "
 
 	if [ $CMD_DURATION -gt 10000 ]
 		set -l cmd $history[1]
