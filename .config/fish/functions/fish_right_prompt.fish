@@ -30,7 +30,7 @@ function fish_right_prompt
 
 	echo -s $dur (set_color blue) (date '+%H:%M:%S') (set_color normal) " "
 
-	if [ $CMD_DURATION -gt 10000 ]
+	if [ $CMD_DURATION -gt 30000 ]; and command -qs notify-send
 		set -l cmd $history[1]
 		set -l exe (string split -m 1 ' ' $cmd)[1] 
 
