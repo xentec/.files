@@ -34,7 +34,7 @@ function delayed_notify --on-event fish_postexec
 	set dur {$dur}{$num_secs}"."(printf '%003d' $num_millis)"s"
 	set __fish_cmd_duration "$dur"
 
-	[ $cmd_dur -gt 1000 ]
+	[ $cmd_dur -gt 30000 ]
 		or return
 
 	set -l cmd (string split -m 1 ' ' $argv)
