@@ -37,6 +37,8 @@ function delayed_notify --on-event fish_postexec
 	contains -- $exe $fish_notify_exclude
 		and return
 
+	echo -nes "\a" # bell (will flash terminal)
+
 	command -qs notify-send; and \
 		notify-send -a "fish" -t 10000 "fish: $exe done!" "$dur" &
 end
