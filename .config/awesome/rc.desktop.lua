@@ -7,10 +7,10 @@ local naughty = require("naughty")
 local menubar = require("menubar")
 
 local lain = require("lain")
-local vicious = require("vicious")
 
 local keys = require("keys")
 local mods = require("modules")
+local lay = require("layout")
 local private = require("private")
 
 require("awful.autofocus")
@@ -32,7 +32,7 @@ end
 -- Handle runtime errors after startup
 do
 	local in_error = false
-	awesome.connect_signal("debug::error", 
+	awesome.connect_signal("debug::error",
 		function(err)
 			-- Make sure we don't go into an endless error loop
 			if in_error then return end
@@ -49,64 +49,71 @@ local awmL = awful.layout.layouts
 local lnL = lain.layout
 
 -- Variable definitions
-my = 
+my =
 {
 	theme = awful.util.get_configuration_dir() .. "theme.lua",
 
-	browser = "chromium",
-	terminal = "urxvtc",
+	browser = "firefox",
+	terminal = "alacritty",
 	editor = "subl3",
 
 	wallpapers = "~/lold/wg",
 	autostart = {
 		"QSyncthingTray",
---		{"dropboxd","dropbox"},
 		{"steam-native", "steam"},
---		{"weechat", term = true},
---		"skype",
-		"utox",
-		"compton",
+--      {"weechat", term = true},
+		"picom",
 		"hexchat",
-		"task sync",
+		{ "task sync", force = true },
 	},
-	monitor = { 
+	monitor = {
 		main =
 		{
 			i = 1,
-			--dpi = 158
 			dpi = 158,
-			tags = { 
-				names = { "main", "web", "code", "script", "media", "gaming", "other" },
+--			dpi = 96,
+			tags = {
+				names = { "main", "web", "code", "script", "chat", "media", "gaming", "other" },
 				layout = 1
 			}
-		}, 
+		},
 		info = {
-			i = 3,
-			--dpi = 94
+			i = 2,
 			dpi = 96,
-			tags = 	{
-				names = { "chat", "media", "vm" }, 
+			tags =  {
+				names = { "irc", "media", "w:mapr", "w:oth", "w:of" },
 				layout = 2
 			}
-		} 
+		},
+		_ex = {
+			dpi = 96,
+			tags =  {
+				names = { "1", "2", "3", "4" },
+				layout = 4
+			}
+		}
 	},
-	layout = awmL,
+	layout = gears.table.join({lay.block, lay.block.horizontal}, awmL, { lnL.termfair }),
 	mpd = {
 		host = "keeper",
 		music_dir = "/mnt/fridge/music",
+--        host = "localhost",
+--        music_dir = "~/music",
 	},
 }
 
 my.monitor._lk = {
-	['DP-0'] = "main",
-	['HDMI-0'] = "info",
+	['DisplayPort-0'] = "main",
+	['HDMI-A-0'] = "info",
 }
 
-beautiful.init(my.theme)
-beautiful.xresources.set_dpi(my.monitor.main.dpi, my.monitor.main.i)
-beautiful.xresources.set_dpi(my.monitor.info.dpi, my.monitor.info.i)
+if screen.count == 1 then
+	my.monitor.info.i = my.monitor.main.i
+end
 
--- Notifications 
+beautiful.init(my.theme)
+
+-- Notifications
 naughty.config.defaults.opacity = 0.8
 naughty.config.defaults.screen = 1
 naughty.config.defaults.fg = beautiful.fg_normal:sub(1,7)
@@ -117,15 +124,43 @@ naughty.config.presets.warning = {
 	fg = "#ffffff",
 	timeout = 10,
 }
-table.insert(naughty.dbus.config.mapping,
-	{{appname = "Discord Canary"},
+
+
+naughty.dbus.config.mapping = gears.table.join(naughty.dbus.config.mapping, {
+	{{appname = "Discord"},
 	{
 		bg = "#7289da",
 		fg = "#ffffff",
-		icon_size = 32,
-		timeout = 10, 
-	}}
-)
+		timeout = 20,
+	}},
+	{{appname = "Electron"}, --Slack actually
+	{
+		bg = "#303E4D",
+		fg = "#ffffff",
+		timeout = 20,
+	}},
+	{{appname = "ScudCloud"}, --Slack actually
+	{
+		bg = "#303E4D",
+		fg = "#ffffff",
+		timeout = 20,
+	}},
+	{{appname = "fish"},
+	{
+		bg = "#308F4A",
+		fg = "#ffffff",
+	}},
+})
+
+
+naughty.config.notify_callback = function(n)
+	n.icon_size = 128
+	if n.dont then return n end
+	--naughty.notify({ title = "Notify args", text = gears.debug.dump_return(n, ""), timeout = 0, dont = true })
+	return n
+end
+
+
 -- Set the terminal for applications that require it
 menubar.utils.terminal = my.terminal
 mods.autostart.terminal = my.terminal
@@ -134,28 +169,27 @@ mods.wallpaper.add(my.wallpapers)
 mods.wallpaper.launch()
 
 mods.autostart.add(my.autostart)
-mods.autostart.launch()
 
 function wibar_default_size(s)
 	return math.ceil(beautiful.get_font_height() / beautiful.xresources.get_dpi() * beautiful.xresources.get_dpi(s) * 1.5)
 end
 
 -- ##################################################
---                                                  
--- ▄     ▄   ▀        █                  ▄          
--- █  █  █ ▄▄▄     ▄▄▄█   ▄▄▄▄   ▄▄▄   ▄▄█▄▄   ▄▄▄  
--- █ █▀█ █   █    █▀ ▀█  █▀ ▀█  █▀  █    █    █   ▀ 
--- ▀██ ██▀   █    █   █  █   █  █▀▀▀▀    █     ▀▀▀▄ 
---  █   █  ▄▄█▄▄  ▀█▄██  ▀█▄▀█  ▀█▄▄▀    ▀▄▄  ▀▄▄▄▀ 
---                        ▄  █                      
---                         ▀▀                       
+--
+-- ▄     ▄   ▀        █                  ▄
+-- █  █  █ ▄▄▄     ▄▄▄█   ▄▄▄▄   ▄▄▄   ▄▄█▄▄   ▄▄▄
+-- █ █▀█ █   █    █▀ ▀█  █▀ ▀█  █▀  █    █    █   ▀
+-- ▀██ ██▀   █    █   █  █   █  █▀▀▀▀    █     ▀▀▀▄
+--  █   █  ▄▄█▄▄  ▀█▄██  ▀█▄▀█  ▀█▄▄▀    ▀▄▄  ▀▄▄▄▀
+--                        ▄  █
+--                         ▀▀
 -- ##################################################
 
 my.widget = {}
 local widget = my.widget
 
 widget.def = {}
-widget.def.barLen = 80
+widget.def.barLen = dpi(60)
 
 widget.spacer = {}
 widget.spacer.h = wibox.widget.textbox(color('gray', ' ┆ '))
@@ -167,39 +201,48 @@ widget.layoutbox = {}
 -- Clock
 widget.clock = wibox.widget.textclock('%H:%M %a %d.%m.%y')
 -- Calendar
-widget.calendar = lain.widgets.calendar({ font = beautiful.font_mono, attach_to = {widget.clock} })
+widget.calendar = awful.widget.calendar_popup.month()
+widget.calendar:attach(widget.clock, "tr")
 -- Task
---lain.widgets.contrib.task:attach(widget.clock)
+--lain.widget.contrib.task:attach(widget.clock)
 
 -- Mail
-widget.mail = lain.widgets.imap({
-	timeout = 60,
+--[[widget.mail = lain.widget.imap({
+	timeout = 5,
 	server = private.mail.server,
-	mail = private.mail.user, 
+	mail = private.mail.user,
 	password = 'keyring get '..private.mail.server..' '..private.mail.user,
 	settings = function()
 		local w = my.widget.mail.widget
 
 		if mailcount > 0 then
-			w:set_markup('&#xf0e0; '..mailcount)
+			w:set_markup(color('#BDB76B', '<b>&#xF0E0;</b> '..mailcount))
 		else
-			w:set_markup('&#xf003;')
+			w:set_markup(color(theme.fg_normal, '&#xF0E0;'))
 		end
 	end
 })
+widget.mail.widget:set_font(theme.font_icon .. ' ' .. (theme.font_size))
+widget.mail.widget:set_markup('&#xF0E0;')
+widget.mail.widget:buttons(awful.button({ }, 1, function() awful.spawn.spawn('xdg-open "https://'..private.mail.server..'"') end))
 --widget.mail:set_font(theme.font_icon .. ' ' .. (theme.font_size))
+]]
 
 -- Keyboard Layout
 widget.kbd = awful.widget.keyboardlayout()
 
 -- Network
-widget.network = wibox.widget.textbox()
+widget.network = {}
+widget.network.up = wibox.widget.textbox()
+--widget.network.up:set_font(theme.font_name .. ' ' .. (theme.font_size - 2))
+widget.network.down = wibox.widget.textbox()
+--widget.network.down:set_font(theme.font_name .. ' ' .. (theme.font_size - 2))
 widget.network.func = function()
 		local function humanBytes(bytes)
 			local unit = {"K", "M", "G", "T", "P", "E"}
 			local i = 1
 			bytes = tonumber(bytes)
-			while bytes > 1024 do
+			while bytes > 1000 do
 				bytes = bytes / 1024
 				i = i+1
 			end
@@ -208,17 +251,23 @@ widget.network.func = function()
 
 		local w = my.widget.network
 
-		if net_now.carrier == "1" 
+		if net_now.devices['enp9s0'].carrier == '1'
 		then
 			local down, down_suf = humanBytes(net_now.received);
 			local up, up_suf = humanBytes(net_now.sent);
 
-			w:set_markup(color("DodgerBlue", markup.monospace(string.format('↓ %5.1f %s ↑ %5.1f %s', down, down_suf, up, up_suf))))
+			w.up  :set_markup(color("#269CDF", markup.monospace(string.format('↑ %5.1f %s', up, up_suf))))
+			w.down:set_markup(color("#269CDF", markup.monospace(string.format('↓ %5.1f %s', down, down_suf))))
 		else
-			w:set_markup(color("#8c8c8c", markup.monospace(' DC ')))
+			w.up  :set_markup(color("#DF8F26", markup.monospace(' !! ')))
+			w.down:set_markup(color("#DF8F26", markup.monospace(' DC ')))
 		end
 	end
-widget.network.worker = lain.widgets.net({ settings = widget.network.func })
+widget.network.worker = lain.widget.net({
+	settings = widget.network.func,
+	iface = { "enp9s0" },
+	eth_state = "on",
+})
 
 -- Volume
 widget.volume = wibox.widget.progressbar()
@@ -238,76 +287,137 @@ local volume = mods.pulse(widget.volume.func, 5)
 
 -- CPU
 widget.cpu = {}
-widget.cpu.count = 8
+widget.cpu.count = 16
 for i = 1,widget.cpu.count do
 	widget.cpu[i] = wibox.widget.progressbar()
 	widget.cpu[i]:set_background_color("#876333")
 	widget.cpu[i]:set_color("#DF8F26")
+	widget.cpu[i]:set_ticks(true)
+	widget.cpu[i]:set_ticks_size(widget.def.barLen/10-1)
 end
-widget.cpu.func = function(w, data)
+widget.cpu.func = function()
+	local w = my.widget.cpu
 	for i = 1,w.count do
-		w[i]:set_value(data[i+1]/100)
+		w[i]:set_value(cpu_now[i-1].usage/100)
 	end
+end
+lain.widget.cpu({ settings = widget.cpu.func })
 
-	return data
-end
-vicious.register(widget.cpu, vicious.widgets.cpu, widget.cpu.func, 2)
 widget.cpu.temp = wibox.widget.textbox();
-widget.cpu.temp.func = function(w, data)
-	return color("#876333", markup.monospace(' '..string.format("%.0f", data[1])..'°C'));
-end
-vicious.register(widget.cpu.temp, mods.thermal, widget.cpu.temp.func, 2, {'hwmon0', 'hwmon'})
+widget.cpu.temp:set_font(theme.font_name .. ' ' .. (theme.font_size + 2))
+widget.cpu.temp.worker = gears.timer {
+	timeout   = 2,
+	call_now  = true,
+	autostart = true,
+	callback  = function()
+		local helpers = require("lain.helpers")
+		local temp_path = "/sys/class/hwmon/hwmon2/temp4_input"
+		local temp = tonumber(helpers.first_line(temp_path)) or 0
+
+		widget.cpu.temp:set_markup(color('#DF8F26', markup.monospace(string.format("%.0f°C", temp/1000))))
+	end
+}
 
 -- Memory
 widget.mem = {}
-widget.mem.ram = wibox.widget.progressbar({ forced_width = widget.def.barLen, forced_height = 8 })
+widget.mem.ram = wibox.widget.progressbar()
 widget.mem.ram:set_background_color("#3A6D8A")
 widget.mem.ram:set_color("#269CDF")
-widget.mem.swap = wibox.widget.progressbar({ forced_width = widget.def.barLen, forced_height = 8 })
-widget.mem.swap:set_background_color("#3A6D8A")
-widget.mem.swap:set_color("#269CDF")
+widget.mem.ram:set_ticks(true)
+widget.mem.ram:set_ticks_size(widget.def.barLen/8-1)
+widget.mem.ram:set_max_value(100)
 widget.mem.func = function()
-	my.widget.mem.ram:set_value(mem_now.used/mem_now.total)
-	my.widget.mem.swap:set_value(mem_now.swapused/(mem_now.swap or 1))
+	my.widget.mem.ram:set_value(mem_now.perc)
+	--naughty.notify{ text = tostring(mem_now.perc)}
 end
-widget.mem.worker = lain.widgets.mem({ settings = widget.mem.func })
+widget.mem.worker = lain.widget.mem({ settings = widget.mem.func })
 
 -- GPU
+---[[
 widget.gpu = {}
-widget.gpu.gl = wibox.widget.progressbar({ forced_width = widget.def.barLen/2, forced_height = 8 })
+widget.gpu.gl = wibox.widget.progressbar()
 widget.gpu.gl:set_background_color("#4F8A3A")
 widget.gpu.gl:set_color("#3FC51E")
-
-widget.gpu.vl = wibox.widget.progressbar({ forced_width = widget.def.barLen/2, forced_height = 4 })
+widget.gpu.vl = wibox.widget.progressbar()
 widget.gpu.vl:set_background_color("#40702F")
 widget.gpu.vl:set_color("#3FC51E")
-
-widget.gpu.pcie = wibox.widget.progressbar({ forced_width = widget.def.barLen/2, forced_height = 4 })
+widget.gpu.pcie = wibox.widget.progressbar()
 widget.gpu.pcie:set_background_color("#40702F")
 widget.gpu.pcie:set_color("#3FC51E")
-
-widget.gpu.mem = wibox.widget.progressbar({ forced_width = widget.def.barLen, forced_height = 8 })
+widget.gpu.mem = wibox.widget.progressbar()
 widget.gpu.mem:set_background_color("#4F8A3A")
 widget.gpu.mem:set_color("#3FC51E")
+widget.gpu.mem:set_ticks(true)
+widget.gpu.mem:set_ticks_size(widget.def.barLen/8-1)
+widget.gpu.temp = wibox.widget.textbox()
+widget.gpu.temp:set_font(theme.font_name .. ' ' .. (theme.font_size + 2))
+widget.gpu.timer = gears.timer {
+	timeout   = 2,
+	call_now  = true,
+	autostart = true,
+	callback  = function()
+		local helpers = require("lain.helpers")
+		local gpu_path = "/sys/class/graphics/fb0/device/"
 
-widget.gpu.temp = wibox.widget.textbox();
-widget.gpu.func = function()
-	local w = my.widget.gpu
+		local query_number = function(attr)
+			return tonumber(helpers.first_line(gpu_path..attr)) or 0
+		end
 
-	w.gl:set_value(gpu_now.usage.graphics/100)
-	w.vl:set_value(gpu_now.usage.video/100)
-	w.pcie:set_value(gpu_now.usage.pcie/100)
-	w.mem:set_value(gpu_now.mem.used/gpu_now.mem.total)
-	w.temp:set_markup(color('#4F8A3A', markup.monospace(' '..gpu_now.temp..'°C')))
+		local w = widget.gpu
+		w.gl:set_value(query_number('gpu_busy_percent')/100.0)
+		w.vl:set_value(0)
+		w.pcie:set_value(query_number('mem_busy_percent')/100.0)
+		w.mem:set_value(query_number('mem_info_vram_used') / query_number('mem_info_vram_total'))
+		w.temp:set_markup(color('#3FC51E', markup.monospace(string.format("%.0f°C", query_number('hwmon/hwmon4/temp1_input')/1000))))
+	end
+}
+--]]
+
+-- Storage
+---[[
+widget.ssd = {}
+widget.ssd.usage = {}
+widget.ssd.usage.root = wibox.widget.progressbar()
+widget.ssd.usage.root:set_background_color("#555555")
+widget.ssd.usage.root:set_color("#777777")
+widget.ssd.usage.root:set_ticks(true)
+widget.ssd.usage.root:set_ticks_size(widget.def.barLen/8-1)
+widget.ssd.usage.root:set_max_value(100)
+widget.ssd.usage.home = wibox.widget.progressbar()
+widget.ssd.usage.home:set_background_color("#555555")
+widget.ssd.usage.home:set_color("#777777")
+widget.ssd.usage.home:set_ticks(true)
+widget.ssd.usage.home:set_ticks_size(widget.def.barLen/8-1)
+widget.ssd.usage.home:set_max_value(100)
+widget.ssd.temp = wibox.widget.textbox()
+widget.ssd.temp:set_font(theme.font_name .. ' ' .. (theme.font_size + 2))
+widget.ssd.func = function()
+	my.widget.ssd.usage.root:set_value(fs_now["/"].percentage)
+	my.widget.ssd.usage.home:set_value(fs_now["/home"].percentage)
+
+	local helpers = require("lain.helpers")
+	local path = "/sys/class/nvme/nvme0"
+
+	local query_number = function(attr)
+		return tonumber(helpers.first_line(path..attr)) or 0
+	end
+	my.widget.ssd.temp:set_markup(color('#777777', markup.monospace(string.format("%.0f°C", query_number('/hwmon1/temp1_input')/1000))))
 end
---mods.gpu({ settings = widget.gpu.func })
+widget.ssd.worker = lain.widget.fs({
+	settings = widget.ssd.func,
+	widget = widget.ssd.usage.root,
+	partition = "/",
+	timeout = 5,
+})
+
+
 
 -- MPD
 widget.mpd = {}
-widget.mpd.icon = wibox.widget.textbox()
-widget.mpd.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
-widget.mpd.nfo = wibox.widget.textbox()
-widget.mpd.nfo:set_font(theme.font_name .. ' ' .. (theme.font_size - 2))
+widget.mpd.icon = wibox.widget.textbox('&#xF04D;')
+widget.mpd.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 4))
+widget.mpd.nfo = wibox.widget.textbox(' ')
+widget.mpd.nfo:set_font(theme.font_name .. ' ' .. (theme.font_size))
 widget.mpd.bar = wibox.widget.progressbar()
 widget.mpd.bar:set_background_color("#716D40")
 widget.mpd.bar:set_color("#BDB76B")
@@ -352,8 +462,9 @@ widget.mpd.func = function()
 
 	w.nfo:set_markup(color('#BDB76B', nfo))
 	w.bar:set_value(time)
+	w.bar.forced_width = w.nfo:get_preferred_size()
 end
-widget.mpd.worker = lain.widgets.mpd({
+widget.mpd.worker = lain.widget.mpd({
 	timeout = 2,
 	host = my.mpd.host,
 	music_dir = my.mpd.music_dir,
@@ -361,9 +472,21 @@ widget.mpd.worker = lain.widgets.mpd({
 	settings = widget.mpd.func,
 })
 
+
 -- Task
 widget.task = {}
+widget.task.w = wibox.widget.textbox()
+widget.task.w:set_font(theme.font_mono..' '..theme.font_size)
+widget.task.w.valign = "top"
+widget.task.w.ellipsize = "end"
+
 widget.task.wb = wibox{ type = "desktop" }
+widget.task.wb.border_width = dpi(2, screen.primary)
+widget.task.wb.visible = false
+do
+	local m = dpi(4, screen.primary)
+	widget.task.wb:set_widget(wibox.container.margin(widget.task.w, m, m, m, m))
+end
 
 widget.task.w = awful.widget.watch('task next', 10,
 	function (w, stdout, stderr, er, ec)
@@ -374,31 +497,28 @@ widget.task.w = awful.widget.watch('task next', 10,
 			end
 		end
 		w:set_text(table.concat(lines, "\n"))
-	end)
 
-widget.task.w:set_font(theme.font_mono..' '..theme.font_size)
-widget.task.w.valign = "top"
-widget.task.w.ellipsize = "end"
-widget.task.wb.border_width = 2
+		local w, h = w:get_preferred_size(screen.primary)
+		w = w + dpi(10, screen.primary)
+		h = h + dpi(10, screen.primary)
+		widget.task.wb:geometry
+		{
+			height = h,
+			width = w,
+			x = screen.primary.workarea.x + screen.primary.workarea.width - w - dpi(20, screen.primary),
+			y = screen.primary.workarea.y + screen.primary.workarea.height - h - dpi(20, screen.primary),
+		}
+		widget.task.wb.visible = true
+	end, widget.task.w)
 
-do
-	local m = dpi(4, screen.primary)
-	widget.task.wb:set_widget(wibox.container.margin(widget.task.w, m, m, m, m))
-end
-
-widget.task.wb.height = dpi(300, screen.primary) --height = 100, width = 200, visible = true 
-widget.task.wb.width = dpi(700, screen.primary)
-widget.task.wb.x = screen.primary.workarea.x + screen.primary.workarea.width - widget.task.wb.width - dpi(40, screen.primary)
-widget.task.wb.y = screen.primary.workarea.y + dpi(40, screen.primary)
-widget.task.wb.visible = true
 
 -- ########################################
--- ▄    ▄   ▀                 
--- ██  ██ ▄▄▄     ▄▄▄    ▄▄▄  
--- █ ██ █   █    █   ▀  █▀  ▀ 
--- █ ▀▀ █   █     ▀▀▀▄  █     
--- █    █ ▄▄█▄▄  ▀▄▄▄▀  ▀█▄▄▀  
--- 
+-- ▄    ▄   ▀
+-- ██  ██ ▄▄▄     ▄▄▄    ▄▄▄
+-- █ ██ █   █    █   ▀  █▀  ▀
+-- █ ▀▀ █   █     ▀▀▀▄  █
+-- █    █ ▄▄█▄▄  ▀▄▄▄▀  ▀█▄▄▀
+--
 -- ########################################
 
 -- Set keys
@@ -407,28 +527,33 @@ root.keys(keys.global);
 -- Rules per monitor
 local rules =
 {
-	{ rule = { class = "Chromium" },					properties = { screen = screen.primary, tag = "web" } },
-	{ rule = { class = "Firefox" },						properties = { screen = screen.primary, tag = "web" } },
-	{ rule = { class = "Steam" },						properties = { screen = screen.primary, tag = "gaming" },
+	{ rule = { class = "Chromium" },                    properties = { screen = screen.primary, tag = "web" } },
+	{ rule = { class = "Firefox" },                     properties = { screen = screen.primary, tag = "web" } },
+	{ rule = { class = "Steam" },                       properties = { screen = screen.primary, tag = "gaming" },
 		callback = function(c)
 			if c.name and c.name:find("Chat",1,true) then
 				awful.rules.execute(c, { floating = false, screen = my.monitor.info.i, tag = "chat" })
 			end
 		end
 	},
-	{ rule = { class = "URxvt", instance = "irssi" },	properties = { screen = my.monitor.info.i, tag = "chat" } },
-	{ rule = { class = "URxvt", instance = "weechat" },	properties = { screen = my.monitor.info.i, tag = "chat" } },
-	{ rule = { class = "Skype" },						properties = { screen = my.monitor.info.i, tag = "chat" } },
-	{ rule = { class = "Pidgin" },						properties = { screen = my.monitor.info.i, tag = "chat" } },
-	{ rule = { class = "utox" },						properties = { screen = my.monitor.info.i, tag = "chat" } },
-	{ rule = { class = "Hexchat" },						properties = { screen = my.monitor.info.i, tag = "chat" } },
+	{ rule = { class = "URxvt", instance = "irssi" },   properties = { screen = my.monitor.info.i, tag = "irc" } },
+	{ rule = { class = "URxvt", instance = "weechat" }, properties = { screen = my.monitor.info.i, tag = "irc" } },
+	{ rule = { class = "Skype" },                       properties = { screen = my.monitor.main.i, tag = "chat" } },
+	{ rule = { class = "Pidgin" },                      properties = { screen = my.monitor.main.i, tag = "chat" } },
+	{ rule = { class = "Hexchat" },                     properties = { screen = my.monitor.info.i, tag = "irc" } },
+	{ rule = { class = "utox" },                        properties = { screen = my.monitor.main.i, tag = "chat" } },
+	{ rule = { class = "qTox" },                        properties = { screen = my.monitor.main.i, tag = "chat" } },
+	{ rule = { class = "TelegramDesktop" },             properties = { screen = my.monitor.main.i, tag = "chat" } },
+	{ rule = { class = "discord" },                     properties = { screen = my.monitor.main.i, tag = "chat" } },
+	{ rule = { class = "Slack" },                       properties = { screen = my.monitor.main.i, tag = "chat" } },
+	{ rule = { class = "mpv" },                         properties = { screen = my.monitor.main.i } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"), rules)
 ----
 
 -- Signals
 -- Signal function to execute when a new client appears.
-client.connect_signal("manage", function(c) 
+client.connect_signal("manage", function(c)
 		-- Set the windows at the slave,
 		-- i.e. put it at the end of others instead of setting it master.
 		-- if not awesome.startup then awful.client.setslave(c) end
@@ -436,7 +561,7 @@ client.connect_signal("manage", function(c)
 		if awesome.startup and
 			not c.size_hints.user_position
 			and not c.size_hints.program_position then
-			
+
 			-- Prevent clients from being unreachable after screen count changes.
 			awful.placement.no_offscreen(c)
 		end
@@ -455,7 +580,7 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 ----
 
 -- ########################################
--- ▄    ▄  ▄▄▄▄  ▄▄   ▄ ▄▄▄▄▄ ▄▄▄▄▄▄▄  ▄▄▄▄  ▄▄▄▄▄ 
+-- ▄    ▄  ▄▄▄▄  ▄▄   ▄ ▄▄▄▄▄ ▄▄▄▄▄▄▄  ▄▄▄▄  ▄▄▄▄▄
 -- ██  ██ ▄▀  ▀▄ █▀▄  █   █      █    ▄▀  ▀▄ █   ▀█
 -- █ ██ █ █    █ █ █▄ █   █      █    █    █ █▄▄▄▄▀
 -- █ ▀▀ █ █    █ █  █ █   █      █    █    █ █   ▀▄
@@ -466,15 +591,15 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 local monitor = my.monitor
 
 -- Common buttons
-local buttons = 
+local buttons =
 {
-	taglist = awful.util.table.join(
+	taglist = gears.table.join(
 		awful.button({}, 1, function(t) t:view_only() end),
 		awful.button({ keys.mod }, 1,  function(t) if client.focus then client.focus:move_to_tag(t) end end),
 		awful.button({}, 3, awful.tag.viewtoggle),
 		awful.button({ keys.mod }, 3, function(t) if client.focus then client.focus:toggle_tag(t) end end)
 	),
-	tasklist = awful.util.table.join(
+	tasklist = gears.table.join(
 		awful.button({}, 1, function(c)
 			if c == client.focus then
 				c.minimized = true
@@ -498,18 +623,30 @@ local buttons =
 			awful.client.focus.byidx(-1)
 		end)
 	),
-	layoutbox = awful.util.table.join(
+	layoutbox = gears.table.join(
 		awful.button({}, 1, function() awful.layout.inc(my.layout, 1) end),
 		awful.button({}, 3, function() awful.layout.inc(my.layout, -1) end)
 	)
 }
 
-function setupUnknownScreen(scr)
 
-	-- Create the tags
-	awful.tag({ "1", "2", "3", "4" }, scr, my.layout[1])
+-- ########################################
+-- ## Screens
+-- ########################################
 
-	scr.prompt = awful.widget.prompt()
+awful.screen.connect_for_each_screen(function(scr)
+
+	local mon_output = tostring(next(scr.outputs));
+	local mon_type = monitor._lk[mon_output] or "_ex"
+	local mon_config = monitor[mon_type];
+
+	beautiful.xresources.set_dpi(mon_config.dpi, scr)
+
+	naughty.notify{screen = scr, title = "Monitor #"..scr.index.." @ "..mon_output, text = "dpi: ".. beautiful.xresources.get_dpi(scr) .."\n" .. mon_type, timeout = 100}
+
+	if mon_config.tags then
+		awful.tag(mon_config.tags.names, scr, my.layout[mon_config.tags.layout])
+	end
 
 	-- Create an imagebox widget which will contains an icon indicating which layout we're using.
 	-- We need one layoutbox per screen.
@@ -521,251 +658,196 @@ function setupUnknownScreen(scr)
 	scr.tasklist = awful.widget.tasklist(scr, awful.widget.tasklist.filter.currenttags, buttons.tasklist)
 
 	-- Create the wibox
-	scr.bar = awful.wibar({ position = "top", screen = scr, height = wibar_default_size(scr) })
-	scr.bar:setup
+	scr.bar = {}
+	scr.bar.top = awful.wibar({ position = "top", screen = scr, height = wibar_default_size(scr) })
+	scr.bar.top:setup
 	{
 		layout = wibox.layout.align.horizontal,
 		{
 			-- Widgets that are aligned to the left
 			layout = wibox.layout.fixed.horizontal,
+			spacing = dpi(8),
+			spacing_widget = wibox.widget.separator,
 			scr.layoutbox,
-			widget.spacer.h,
 			scr.taglist,
-			widget.spacer.h,
-			scr.prompt,
+			wibox.widget.base.empty_widget(),
 		},
 		scr.tasklist,
-		{
-			-- Widgets that are aligned to the right
-			layout = wibox.layout.fixed.horizontal,
-			widget.spacer.h,
-			widget.clock,
-		},
+		widget.clock,
 	}
-end
 
-
--- ########################################
--- ## Screens
--- ########################################
-
-awful.screen.connect_for_each_screen(function(scr)
-
-local montype = ""
-
--- Main ###################################
-if scr.index == monitor.main.i then
-
-	montype = "main"
-
-	if monitor.main.tags then
-		awful.tag(monitor.main.tags.names, scr, my.layout[monitor.main.tags.layout])
-	end
-
-	scr.prompt = awful.widget.prompt()
-	
-	scr.layoutbox = awful.widget.layoutbox(scr)
-	scr.layoutbox:buttons(buttons.layoutbox)
-
-	scr.taglist = awful.widget.taglist(scr, awful.widget.taglist.filter.all, buttons.taglist)
-	scr.tasklist = awful.widget.tasklist(scr, awful.widget.tasklist.filter.currenttags, buttons.tasklist)
-
-	scr.bar = awful.wibar({ position = "top", screen = scr, height = wibar_default_size(scr) })
-	scr.bar:setup 
-	{
-		layout = wibox.layout.align.horizontal,
-		{ -- Left
-			layout = wibox.layout.fixed.horizontal,
-			scr.layoutbox,
-			widget.spacer.h,
-			scr.taglist,
-			widget.spacer.h,
-			scr.prompt,
-		},
-		scr.tasklist, -- Middle
+	-- Main ###################################
+	if mon_type == "main" then
+		scr.bar.top.widget.third = wibox.widget.base.make_widget_declarative
 		{ -- Right
 			layout = wibox.layout.fixed.horizontal,
+			spacing = dpi(8),
+			spacing_widget = wibox.widget.separator,
 			wibox.widget.systray(),
-			widget.spacer.h,
 			widget.mail,
-			widget.spacer.h,
 			widget.kbd,
-			widget.spacer.h,
 			widget.clock,
 		}
-	}
-
--- Info ###################################
-elseif scr.index == monitor.info.i then
-
-	montype = "info"
-
-	if monitor.info.tags then
-		awful.tag(monitor.info.tags.names, scr, my.layout[monitor.info.tags.layout])
 	end
 
-	scr.prompt = awful.widget.prompt()
+	-- Info ###################################
+	if mon_type == "info" then
 
-	scr.layoutbox = awful.widget.layoutbox(scr)
-	scr.layoutbox:buttons(buttons.layoutbox)
+		local cpu = wibox.layout.flex.vertical()
+		for i=1,widget.cpu.count do
+			cpu:add(widget.cpu[i])
+		end
 
-	scr.taglist = awful.widget.taglist(scr, awful.widget.taglist.filter.all, buttons.taglist)
-	scr.tasklist = awful.widget.tasklist(scr, awful.widget.tasklist.filter.currenttags, buttons.tasklist)
-
-	scr.bar = {}
-	scr.bar.top = awful.wibar({ position = "top", screen = scr, height = wibar_default_size(scr) })
-	scr.bar.top:setup 
-	{
-		layout = wibox.layout.align.horizontal,
-		{ -- Left
-			layout = wibox.layout.fixed.horizontal(),
-			scr.layoutbox,
-			widget.spacer.h,
-			scr.taglist,
-			widget.spacer.h,
-			scr.prompt,
-		},
-		scr.tasklist, -- Middle
-		{ -- Right
-			layout = wibox.layout.fixed.horizontal(),
-			widget.spacer.h,
-			widget.clock,
-		}
-	}
-
---=======================================================
-
-	local cpu = wibox.layout.fixed.vertical()
-	for i=1,widget.cpu.count do
-		cpu:add(wibox.container.constraint(widget.cpu[i], 'max', nil, 2))
-	end
-
-	scr.bar.bottom = awful.wibar({ position = "bottom", screen = scr, height = wibar_default_size(scr) })
-	scr.bar.bottom:set_bg("#AA0000")
---	scr.bar.bottom:set_bg(beautiful.bg_normal:sub(1,7) .. "00")
-	scr.bar.bottom:setup
-	{
-		layout = wibox.layout.align.horizontal, 
+		scr.bar.bottom = awful.wibar({ position = "bottom", screen = scr, height = dpi(20) })
+	--  scr.bar.bottom:set_bg("#AA0000")
+		scr.bar.bottom:set_bg(beautiful.bg_normal:sub(1,7) .. "00")
+		scr.bar.bottom:setup
 		{
-			-- left
-			widget = wibox.container.background, bg = beautiful.bg_normal,
+			layout = wibox.layout.align.horizontal,
 			{
-				widget = wibox.container.margin, left = 4, right = 4,
+				-- left
+				widget = wibox.container.background, bg = beautiful.bg_normal,
 				{
-					layout = wibox.layout.fixed.horizontal,			
+					widget = wibox.container.margin,
+					left = dpi(2), right = dpi(2), top = dpi(2), bottom = dpi(2),
 					{
-						id = "cpu",
 						layout = wibox.layout.fixed.horizontal,
+						spacing = dpi(8),
+						spacing_widget = wibox.widget.separator,
 						{
-							widget = wibox.container.constraint,
-							width = widget.def.barLen,
+							id = "cpu",
+							layout = wibox.layout.fixed.horizontal,
 							{
-								layout = wibox.container.margin, top = 4, bottom = 4,
+								widget = wibox.container.constraint,
+								strategy = "max",
+								width = widget.def.barLen,
 								cpu,
+							},
+							{
+								widget = wibox.container.margin,
+								left = dpi(2),
+								widget.cpu.temp,
 							}
 						},
-						widget.cpu.temp,
-					},
-					widget.spacer.h,
-					{
-						id = "mem",
-						widget = wibox.container.margin, top = 4, bottom = 4,
 						{
+							id = "mem",
 							widget = wibox.container.constraint,
+							strategy = "max",
 							width = widget.def.barLen,
-							{
-								layout = wibox.layout.fixed.vertical,
-								widget.mem.ram,
-								widget.mem.swap,
-							}
-						}
-					},
-					widget.spacer.h,
-					{
-						id = "gpu",
-						layout = wibox.layout.fixed.horizontal,
+							widget.mem.ram,
+						},
+
 						{
-							widget = wibox.container.margin, top = 4, bottom = 4,
+							id = "gpu",
+							layout = wibox.layout.fixed.horizontal,
+							{
+--								widget = wibox.container.margin, top = dpi(2), bottom = dpi(2),
+--								{
+									widget = wibox.container.constraint,
+									width = widget.def.barLen,
+									{
+										layout = wibox.layout.flex.vertical,
+--[[									{
+											layout = wibox.layout.fixed.horizontal,
+											{
+												layout = wibox.layout.flex.vertical,
+												widget.gpu.vl,
+												widget.gpu.pcie,
+											},
+										},
+--]]
+										widget.gpu.gl,
+										widget.gpu.mem
+									}
+--								},
+							},
+							{
+								widget = wibox.container.margin,
+								left = dpi(2),
+								widget.gpu.temp,
+							}
+						},
+						{
+							id = "ssd",
+							layout = wibox.layout.fixed.horizontal,
 							{
 								widget = wibox.container.constraint,
 								width = widget.def.barLen,
 								{
-									layout = wibox.layout.fixed.vertical,
+									layout = wibox.layout.flex.vertical,
+									spacing = 1,
+									wibox.widget {
+										layout = wibox.layout.stack,
+										widget.ssd.usage.root,
+										wibox.widget.textbox(color('#222222', " /")),
+									},
+									wibox.widget {
+										layout = wibox.layout.stack,
+										widget.ssd.usage.home,
+										wibox.widget.textbox(color('#222222', " /home")),
+									},
+								}
+							},
+							{
+								widget = wibox.container.margin,
+								left = dpi(2),
+								widget.ssd.temp,
+							}
+						},
+						{
+							id = "network",
+							layout = wibox.layout.fixed.vertical,
+							widget.network.up,
+							widget.network.down,
+						}
+					}
+				}
+			},
+			nil,
+			{
+				-- right
+				widget = wibox.container.background, bg = beautiful.bg_normal,
+				{
+					widget = wibox.container.margin,
+					left = dpi(2), right = dpi(2), top = dpi(2), bottom = dpi(2),
+					{
+						layout = wibox.layout.fixed.horizontal,
+						spacing = dpi(8),
+						spacing_widget = wibox.widget.separator,
+						{
+							widget = wibox.container.constraint,
+							strategy = "max",
+							width = dpi(200),
+							{
+									id = "mpd",
+									layout = wibox.layout.fixed.horizontal,
 									{
-										layout = wibox.layout.fixed.horizontal,
-										widget.gpu.gl,
+										widget = wibox.container.margin,
+										left = dpi(2), right = dpi(2),
+										widget.mpd.icon
+									},
+									{
+										widget = wibox.container.margin,
+										left = dpi(2), top = dpi(3), bottom = dpi(3),
 										{
 											layout = wibox.layout.fixed.vertical,
-											widget.gpu.vl,
-											widget.gpu.pcie,
-										},
-									},
-									widget.gpu.mem
-								}
-							},
+											widget.mpd.nfo,
+											widget.mpd.bar
+										}
+									}
+							}
 						},
-						widget.gpu.temp,
-					},
-					widget.spacer.h,
-					widget.network,
-				}
-			}
-		},
-		nil,
-		{
-			-- right
-			widget = wibox.container.background, bg = beautiful.bg_normal,
-			{
-				widget = wibox.container.margin, left = 4, right = 4, top = 4, bottom = 4,
-				{
-					layout = wibox.layout.fixed.horizontal,
-					{
-						widget = wibox.container.constraint,
-						strategy = "max",
-						width = 600,
 						{
-							id = "mpd",
-							layout = wibox.layout.fixed.horizontal,
-							{
-								widget = wibox.container.margin,
-								left = 2, right = 2,
-								widget.mpd.icon
-							},
-							{
-								widget = wibox.container.margin,
-								left = 2,
-								{
-									layout = wibox.layout.fixed.vertical,
-									widget.mpd.nfo,
-									widget.mpd.bar,
-								}
-							},
-
+							id = "volume",
+							widget = wibox.container.constraint,
+							width = widget.def.barLen,
+							widget.volume
 						}
-					},
-					widget.spacer.h,
-					{
-						id = "volume",
-						widget = wibox.container.constraint,
-						width = widget.def.barLen,
-						widget.volume
 					}
 				}
 			}
 		}
-	}
-
-
--- Further screens ########################
-else
-	montype = "ex"
-
-	setupUnknownScreen(scr)
-end
-
-if scr.outputs then
-	naughty.notify{screen = scr, title = "Monitor #"..scr.index.." @ "..tostring(next(scr.outputs)), text = montype, timeout = 10}
-end
-
-
+	end
 end)
+
+mods.autostart.launch()

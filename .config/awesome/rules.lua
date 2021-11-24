@@ -24,26 +24,65 @@ local rules = {
 			placement = awful.placement.no_offscreen,
 		}
 	},
+    {
+	    rule_any = {
+	        instance = {
+		        "DTA",  -- Firefox addon DownThemAll.
+		        "copyq",  -- Includes session name in class.
+		        "pinentry",
+		        "exe", -- Youtube Fullscreen
+	        },
+	        class = {
+	        	"Arandr",
+	        	"Blueman-manager",
+	        	"Gpick",
+	        	"Kruler",
+	        	"MessageWin",  -- kalarm.
+	        	"Sxiv",
+	        	"Tor Browser", -- Needs a fixed window size to avoid fingerprinting by screen size.
+	        	"Wpa_gui",
+	        	"veromix",
+	        	"xtightvncviewer",
+
+	        	"Steam",
+	        	"CaveStory+",
+	        	"gimp",
+	        },
+
+	        -- Note that the name property shown in xprop might be set slightly after creation of the client
+	        -- and the name shown there might not match defined rules here.
+	        name = {
+	        	"Event Tester",  -- xev.
+	        },
+	        role = {
+	        	"AlarmWindow",    -- Thunderbird's calendar.
+	        	"ConfigManager",  -- Thunderbird's about:config.
+	        	"pop-up",         -- e.g. Google Chrome's (detached) Developer Tools.
+	        },
+	    },
+	    properties = { floating = true }
+  	},
 	-- #######################################
-	{ rule = { class = "CaveStory+" },	properties = { floating = true } },
-	{ rule = { class = "Steam" },		properties = { floating = true } },
-
-	{ rule = { class = "pinentry" },	properties = { floating = true } },
-	{ rule = { class = "gimp" },		properties = { floating = true } },
-	-- Youtube Fullscreen
-	{ rule = { instance = "exe" },		properties = { floating = true } },
-
 --	{ rule_any = { class = { "Chromium", "Firefox" }},	properties = { switchtotag = true } },
-	{ rule_any = { class = { "mplayer", "mplayer2", "mpv" }},
+	{
+		rule_any = { class = { "mplayer", "mplayer2", "mpv" }},
 		properties = {
 			floating = true,
-			border_width = 0
+			border_width = 0,
+			placement = awful.placement.centered,
+			screen = awful.screen.focused,
+			callback = function(c)
+     			c.screen = awful.screen.focused()
+  			end
 		},
-		placement = awful.placement.centered
 	},
-	{ rule = { instance = "novo" },
-		properties = { floating = true, border_width = 0 },
-		placement = awful.placement.top_right
+	{
+		rule = { class = "Novo" },
+		properties = {
+			floating = true,
+			border_width = 0,
+			placement = awful.placement.top_right,
+		},
 	},
 
 }

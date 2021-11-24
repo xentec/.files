@@ -21,6 +21,7 @@ local private = require("private")
 -- Short cuts
 local markup = lain.util.markup
 local color = markup.fg.color
+local dpi = beautiful.xresources.apply_dpi
 
 -- Error handling
 if awesome.startup_errors then
@@ -32,7 +33,7 @@ end
 -- Handle runtime errors after startup
 do
 	local in_error = false
-	awesome.connect_signal("debug::error", 
+	awesome.connect_signal("debug::error",
 		function(err)
 			-- Make sure we don't go into an endless error loop
 			if in_error then return end
@@ -49,11 +50,11 @@ local awmL = awful.layout.suit
 local lnL = lain.layout
 
 -- Variable definitions
-my = 
+my =
 {
 	theme = awful.util.get_configuration_dir() .. "theme.lua",
 
-	browser = "chromium",
+	browser = "firefox-nightly",
 	terminal = "urxvtc",
 	editor = os.getenv("EDITOR") or "vim",
 
@@ -61,9 +62,12 @@ my =
 	autostart = {
 --		{"dropboxd","dropbox"},
 --		{"weechat", term = true},
-		"urxvtd"
+		"urxvtd",
+		"compton",
+		{ "task sync", force = true },
+		"QSyncthingTray"
 	},
-	monitor = { 
+	monitor = {
 		main =
 		{
 			i = 1,
@@ -110,37 +114,48 @@ mods.autostart.add(my.autostart)
 mods.autostart.launch()
 
 
-naughty.config.presets.warning = 
+naughty.config.presets.warning =
 {
 	bg = "#ffaa00",
 	fg = "#ffffff",
 	timeout = 10,
 }
 table.insert(naughty.dbus.config.mapping,
-	{{appname = "Discord Canary"},
+	{{appname = "Discord"},
 	{
 		bg = "#7289da",
 		fg = "#ffffff",
 		icon_size = 32,
-		timeout = 10, 
+		timeout = 10,
 	}}
 )
-naughty.config.notify_callback = function (a)
-	if a.dont then return a end
-	--naughty.notify({ title = "Notify args", text = gears.debug.dump_return(a, ""), timeout = 0, dont = true })
-	return a
+table.insert(naughty.dbus.config.mapping,
+	{{appname = "Electron"},
+	{
+		bg = "#303E4D",
+		fg = "#ffffff",
+		icon_size = 32,
+		timeout = 20,
+	}}
+)
+
+naughty.config.notify_callback = function(n)
+	n.icon_size = 32
+	if n.dont then return n end
+	--naughty.notify({ title = "Notify args", text = gears.debug.dump_return(n, ""), timeout = 0, dont = true })
+	return n
 end
 
--- ########################################
---                                                  
--- ▄     ▄   ▀        █                  ▄          
--- █  █  █ ▄▄▄     ▄▄▄█   ▄▄▄▄   ▄▄▄   ▄▄█▄▄   ▄▄▄  
--- ▀ █▀█ █   █    █▀ ▀█  █▀ ▀█  █▀  █    █    █   ▀ 
---  ██ ██▀   █    █   █  █   █  █▀▀▀▀    █     ▀▀▀▄ 
---  █   █  ▄▄█▄▄  ▀█▄██  ▀█▄▀█  ▀█▄▄▀    ▀▄▄  ▀▄▄▄▀ 
---                        ▄  █                      
---                         ▀▀                       
--- ########################################
+-- ##################################################
+--
+-- ▄     ▄   ▀        █                  ▄
+-- █  █  █ ▄▄▄     ▄▄▄█   ▄▄▄▄   ▄▄▄   ▄▄█▄▄   ▄▄▄
+-- █ █▀█ █   █    █▀ ▀█  █▀ ▀█  █▀  █    █    █   ▀
+-- ▀██ ██▀   █    █   █  █   █  █▀▀▀▀    █     ▀▀▀▄
+--  █   █  ▄▄█▄▄  ▀█▄██  ▀█▄▀█  ▀█▄▄▀    ▀▄▄  ▀▄▄▄▀
+--                        ▄  █
+--                         ▀▀
+-- ##################################################
 
 my.widget = {}
 local widget = my.widget
@@ -157,35 +172,39 @@ end
 widget.layoutbox = {}
 
 -- Clock
-widget.clock = awful.widget.textclock('%H:%M %a %d.%m.%y ')
+widget.clock = wibox.widget.textclock('%H:%M %a %d.%m.%y ')
 -- Calendar
-lain.widgets.calendar.attach(widget.clock, { font = beautiful.font_mono })
+widget.calendar = awful.widget.calendar_popup.month()
+widget.calendar:attach(widget.clock, "tr")
 
---[[ Mail
-widget.mail = lain.widgets.imap({
-	timeout = 60,
+-- Mail
+--[[
+widget.mail = lain.widget.imap({
+	timeout = 5,
 	server = private.mail.server,
-	mail = private.mail.user, 
+	mail = private.mail.user,
 	password = 'keyring get '..private.mail.server..' '..private.mail.user,
 	settings = function()
-		local w = my.widget.mail
+		local w = my.widget.mail.widget
 
 		if mailcount > 0 then
-			w:set_markup('&#xf0e0; '..mailcount)
+			w:set_markup(color('#BDB76B', '<b>&#xF0E0;</b> '..mailcount))
 		else
-			w:set_markup('&#xf003;')
+			w:set_markup(color(theme.fg_normal, '&#xF0E0;'))
 		end
 	end
 })
-widget.mail:set_font(theme.font_icon .. ' ' .. (theme.font_size))
+
+widget.mail.widget:set_font(theme.font_icon .. ' ' .. (theme.font_size))
+widget.mail.widget:set_markup('&#xF0E0;')
+widget.mail.widget:buttons(awful.button({ }, 1, function() awful.spawn.spawn('xdg-open "https://'..private.mail.server..'"') end))
 --]]
 
 -- Network
 widget.network = {}
 widget.network.data = wibox.widget.textbox()
 widget.network.data:set_font(theme.font_name .. ' ' .. (theme.font_size - 2))
-
-widget.network.func = 
+widget.network.func =
 	function()
 		local function humanBytes(bytes)
 			local unit = {"K", "M", "G", "T", "P", "E"}
@@ -200,7 +219,7 @@ widget.network.func =
 
 		local w = my.widget.network.data
 
-		if net_now.carrier == '1'
+		if net_now.devices['en'].carrier == '1' or net_now.devices['wl'].carrier == '1'
 		then
 			local down, down_suf = humanBytes(net_now.received);
 			local up, up_suf = humanBytes(net_now.sent);
@@ -210,12 +229,21 @@ widget.network.func =
 			w:set_markup(color("#8c8c8c", markup.monospace(' DC ')))
 		end
 	end
-widget.network.worker = lain.widgets.net({ settings = widget.network.func })
+widget.network.worker = lain.widget.net({ 
+	settings = widget.network.func,
+	iface = { "en", "wl" },
+	wifi_state = "on",
+	eth_state = "on",
+})
 
 -- Volume
 widget.volume = {}
-widget.volume.icon = wibox.widget.textbox()
-widget.volume.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
+widget.volume.icon = {}
+widget.volume.icon.mic = wibox.widget.textbox()
+widget.volume.icon.spkr = wibox.widget.textbox()
+for _,i in ipairs(widget.volume.icon) do
+	i:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
+end
 widget.volume.data = wibox.widget.textbox()
 widget.volume.func = function(mute, val)
 	local w = my.widget.volume
@@ -230,19 +258,38 @@ widget.volume.func = function(mute, val)
 
 	if mute.speaker then
 		spkr.color = "#948D60"
-		spkr.icon = '&#xF026;'
+		spkr.icon = "&#xF026;"
 	end
 
-	w.icon:set_markup(color(mic.color, mic.icon) .."\n".. color(spkr.color, spkr.icon))
+	w.icon.mic:set_markup(color(mic.color, mic.icon))
+	w.icon.spkr:set_markup(color(spkr.color, spkr.icon))
 	w.data:set_markup(color(spkr.color, string.format('%d', val)))
 end
 widget.volume.worker = mods.pulse(widget.volume.func, 5)
+
+-- CPU
+widget.cpu = {}
+widget.cpu.data = wibox.widget.textbox()
+widget.cpu.func = function()
+	local w = my.widget.cpu.data
+	w:set_markup(color("#DF8F26", cpu_now.usage))
+end
+widget.cpu.worker = lain.widget.cpu({ settings = widget.cpu.func })
+
+-- RAM
+widget.ram = {}
+widget.ram.data = wibox.widget.textbox()
+widget.ram.func = function()
+	local w = my.widget.ram.data
+	w:set_markup(color("#269CDF", mem_now.perc))
+end
+widget.ram.worker = lain.widget.mem({ settings = widget.ram.func })
 
 -- MPD
 widget.mpd = {}
 widget.mpd.icon = wibox.widget.textbox()
 widget.mpd.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size - 2))
-widget.mpd.bar = awful.widget.progressbar()
+widget.mpd.bar = wibox.widget.progressbar()
 widget.mpd.bar:set_background_color("#716D40")
 widget.mpd.bar:set_color("#BDB76B")
 do
@@ -277,7 +324,7 @@ widget.mpd.func = function()
 		if d.artist ~= "N/A" then
 			nfo = d.artist..' - '..nfo
 		end
-				
+
 		if tonumber(d.elapsed) ~= nil and tonumber(d.time) ~= nil then
 			time = tonumber(d.elapsed)/tonumber(d.time)
 		end
@@ -304,22 +351,24 @@ widget.mpd.func = function()
 	w.tip:set_markup(nfo.." "..dur(tonumber(d.elapsed)).." / "..dur(tonumber(d.time)))
 	w.bar:set_value(time)
 end
-widget.mpd.worker = lain.widgets.mpd({
+widget.mpd.worker = lain.widget.mpd {
 	timeout = 1,
 	host = my.mpd.host,
 	music_dir = my.mpd.music_dir,
 	settings = widget.mpd.func,
-})
+}
 
--- Battery 
-widget.battery = {} 
+-- Battery
+widget.battery = {}
 widget.battery.icon = wibox.widget.textbox('&#xF0E7;')
 widget.battery.icon:set_font(theme.font_icon .. ' ' .. (theme.font_size + 2))
 widget.battery.data = wibox.widget.textbox()
 widget.battery.tip = awful.tooltip({ objects = { widget.battery.icon, widget.battery.data } })
-widget.battery.func = function(w, d)
+widget.battery.func = function()
 	local w = my.widget.battery
 	local p = tonumber(bat_now.perc)
+	if not bat_now.status then return end
+
 	local s = bat_now.status == "Charged" and 'F' or bat_now.status:sub(1,1)
 	if s == nil or p == nil then return end
 
@@ -333,16 +382,15 @@ widget.battery.func = function(w, d)
 				 p > 5  and '&#xF243;' or '&#xF244;'
 
 	local col = (s == 'C' or s == 'F') and '#00CCCC' or
-				p > low and '#03cc00' or 
+				p > low and '#03cc00' or
 				p > critical and '#FBE72A' or '#FB6B24'
 
 	w.icon:set_markup(color(col, icon))
 	w.data:set_markup(color(col, string.format('%d', p)))
 
 	w.tip:set_markup(color(col, bat_now.watt.." W - "..bat_now.time))
-	return
 end
-widget.battery.worker = lain.widgets.bat({ timeout = 5, settings = widget.battery.func })
+widget.battery.worker = lain.widget.bat({ timeout = 5, settings = widget.battery.func })
 
 -- Wifi
 widget.wifi = {}
@@ -363,12 +411,11 @@ widget.wifi.func = function(w, data)
 	local s = data['{ssid}'].."\n"
 	s = s.."Channel: "..data['{chan}'].."\n"
 	s = s.."Bit rate: "..data['{rate}'].." MB/s"
-	widget.wifi.tip:set_markup(color('DarkCyan', s)) 
+	widget.wifi.tip:set_markup(color('DarkCyan', s))
 
 	return ""
 end
 vicious.register(widget.wifi, vicious.widgets.wifi, widget.wifi.func, 2, 'wl')
-
 
 
 -- Task
@@ -378,6 +425,14 @@ widget.task.w:set_font(theme.font_mono..' '..theme.font_size)
 widget.task.w.valign = "top"
 widget.task.w.ellipsize = "end"
 
+widget.task.wb = wibox{ type = "desktop" }
+widget.task.wb.border_width = dpi(2, screen.primary)
+widget.task.wb.visible = false
+do
+	local m = dpi(4, screen.primary)
+	widget.task.wb:set_widget(wibox.container.margin(widget.task.w, m, m, m, m))
+end
+
 widget.task.w = awful.widget.watch('task next', 10,
 	function (w, stdout, stderr, er, ec)
 		local lines = {}
@@ -386,23 +441,28 @@ widget.task.w = awful.widget.watch('task next', 10,
 				table.insert(lines, line)
 			end
 		end
-		if widget.task.wb ~= nil then
-			widget.task.wb.height = beautiful.get_font_height(w.font) * #lines + 8
-		end
 		w:set_text(table.concat(lines, "\n"))
+
+		local w, h = w:get_preferred_size(screen.primary)
+		w = w + dpi(10, screen.primary)
+		h = h + dpi(10, screen.primary)
+		widget.task.wb:geometry
+		{
+			height = h,
+			width = w,
+			x = screen.primary.workarea.x + screen.primary.workarea.width - w - dpi(20, screen.primary),
+			y = screen.primary.workarea.y + dpi(20, screen.primary),
+		}
+		widget.task.wb.visible = true
 	end, widget.task.w)
 
-
-
-
-
 -- ########################################
--- ▄    ▄   ▀                 
--- ██  ██ ▄▄▄     ▄▄▄    ▄▄▄  
--- █ ██ █   █    █   ▀  █▀  ▀ 
--- █ ▀▀ █   █     ▀▀▀▄  █     
--- █    █ ▄▄█▄▄  ▀▄▄▄▀  ▀█▄▄▀  
--- 
+-- ▄    ▄   ▀
+-- ██  ██ ▄▄▄     ▄▄▄    ▄▄▄
+-- █ ██ █   █    █   ▀  █▀  ▀
+-- █ ▀▀ █   █     ▀▀▀▄  █
+-- █    █ ▄▄█▄▄  ▀▄▄▄▀  ▀█▄▄▀
+--
 -- ########################################
 
 -- Set keys
@@ -414,7 +474,7 @@ local rules = {
 	{ rule = { class = "Firefox" },						properties = { tag = "web" } },
 	{ rule = { class = "URxvt", instance = "irssi" },	properties = { tag = "chat" } },
 	{ rule = { class = "URxvt", instance = "weechat" },	properties = { tag = "chat" } },
-	{ rule = { class = "Steam" },						properties = { tag = "other" } },
+	{ rule = { class = "Steam" },						properties = { tag = "media" } },
 --	{ rule_any = { class = { "mplayer2", "mplayer", "mpv" }},	properties = { tag = tags[1][5] } },
 }
 awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"), rules)
@@ -422,7 +482,7 @@ awful.rules.rules = awful.util.table.join(awful.rules.rules, require("rules"), r
 
 -- Signals
 -- Signal function to execute when a new client appears.
-client.connect_signal("manage", function(c) 
+client.connect_signal("manage", function(c)
 		-- Set the windows at the slave,
 		-- i.e. put it at the end of others instead of setting it master.
 		-- if not awesome.startup then awful.client.setslave(c) end
@@ -430,7 +490,7 @@ client.connect_signal("manage", function(c)
 		if awesome.startup and
 			not c.size_hints.user_position
 			and not c.size_hints.program_position then
-			
+
 			-- Prevent clients from being unreachable after screen count changes.
 			awful.placement.no_offscreen(c)
 		end
@@ -448,7 +508,7 @@ client.connect_signal("focus", function(c) c.border_color = beautiful.border_foc
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 
 -- ########################################
--- ▄    ▄  ▄▄▄▄  ▄▄   ▄ ▄▄▄▄▄ ▄▄▄▄▄▄▄  ▄▄▄▄  ▄▄▄▄▄ 
+-- ▄    ▄  ▄▄▄▄  ▄▄   ▄ ▄▄▄▄▄ ▄▄▄▄▄▄▄  ▄▄▄▄  ▄▄▄▄▄
 -- ██  ██ ▄▀  ▀▄ █▀▄  █   █      █    ▄▀  ▀▄ █   ▀█
 -- █ ██ █ █    █ █ █▄ █   █      █    █    █ █▄▄▄▄▀
 -- █ ▀▀ █ █    █ █  █ █   █      █    █    █ █   ▀▄
@@ -459,7 +519,7 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 local monitor = my.monitor
 
 -- Common buttons
-local buttons = 
+local buttons =
 {
 	taglist = awful.util.table.join(
 		awful.button({}, 1, function(t) t:view_only() end),
@@ -514,7 +574,7 @@ end
 if scr == screen.primary then
 
 	scr.prompt = awful.widget.prompt()
-	
+
 	scr.layoutbox = awful.widget.layoutbox(scr)
 	scr.layoutbox:buttons(buttons.layoutbox)
 
@@ -581,25 +641,16 @@ if scr == screen.primary then
 			}
 		},
 		widget.spacer.v,
-		widget.volume.icon,
+		widget.volume.icon.mic,
+		widget.volume.icon.spkr,
 		widget.volume.data,
 		widget.spacer.v,
 		widget.kbd,
+		widget.spacer.v,
+		widget.cpu.data,
+		widget.spacer.v,
+		widget.ram.data,
 	}
-
-	widget.task.wb = wibox{ type = "desktop" }
-	widget.task.wb:geometry 
-	{
-		height = 100, --height = 100, width = 200, visible = true 
-		width = 500,
-		x = screen.primary.workarea.x + screen.primary.workarea.width - 500 - 20,
-		y = screen.primary.workarea.y + 20,
-	}
-	widget.task.wb.border_width = 2
-	widget.task.wb.visible = true
-	widget.task.wb:set_widget(wibox.container.margin(widget.task.w, 4, 4, 4, 4))
-
-
 else
 
 	-- ########################################

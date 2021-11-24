@@ -4,21 +4,19 @@
 
 theme = {}
 
-theme.font_name 	= "Bitstream Vera Sans"
-theme.font_mono		= "Source Code Pro" 
-theme.font_icon		= "Font Awesome"
-theme.font_size		= 8
-theme.font 			= theme.font_name .. " " .. tostring(theme.font_size)
-
+theme.font_name = "Bitstream Vera Sans"
+theme.font_mono	= "Source Code Pro" 
+theme.font_icon	= "Font Awesome"
+theme.font_size	= 8
+theme.font      = theme.font_name .. " " .. tostring(theme.font_size)
 
 theme.bg_normal     = "#222222BB"
 theme.fg_normal     = "#AAAAAAFF"
 
-
 theme.bg_focus      = "#888888"
 theme.fg_focus      = "#FFFFFF"
 
-theme.bg_minimize   = "#444444"
+theme.bg_minimize   = "#555555"
 theme.fg_minimize   = "#CCCCCC"
 
 theme.bg_urgent     = theme.bg_focus
@@ -31,7 +29,7 @@ theme.border_marked = "#444444DD"
 
 theme.useless_gap = 2
 
-theme.taglist_bg_occupied = "#444444"
+theme.taglist_bg_occupied = theme.bg_minimize
 
 theme.tooltip_bg = theme.bg_normal
 

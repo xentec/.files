@@ -4,7 +4,7 @@ local require = require
 
 local function load(table, key)
     local module = rawget(table, key)
-    return module or require("modules." .. key)
+    return module or require("layout." .. key)
 end
 
 local mod = {}

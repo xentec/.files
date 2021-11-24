@@ -1,4 +1,5 @@
 local awful = require("awful")
+local gears = require("gears")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup").widget
 local naughty = require("naughty")
@@ -7,8 +8,8 @@ local lain = require("lain")
 local pulse = require("modules.pulse")
 local wallpaper = require("modules.wallpaper")
 
-local exec = awful.util.spawn_with_shell
-local spawn = awful.util.spawn
+local exec = awful.spawn.with_shell
+local spawn = awful.spawn
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
@@ -18,7 +19,7 @@ local spawn = awful.util.spawn
 modkey = "Mod4"
 
 -- {{{ Key bindings
-local globalkeys = awful.util.table.join(
+local globalkeys = gears.table.join(
 	awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
 			  {description = "show help", group = "awesome"}),
 	awful.key({ modkey,           }, "Left",   awful.tag.viewprev,
@@ -88,7 +89,7 @@ local globalkeys = awful.util.table.join(
 
 	awful.key({ modkey, "Control" }, "n",
 			  function ()
-				  c = awful.client.restore()
+				  local c = awful.client.restore()
 				  -- Focus restored client
 				  if c then
 					  client.focus = c
@@ -156,8 +157,8 @@ local globalkeys = awful.util.table.join(
 			  {description = "set brightness to minimum", group = "monitor"}),
 
 	-- Screen capture
-	awful.key({ modkey,           }, "Print", function () spawn("seen")        end),
-	awful.key({ modkey, "Shift"   }, "Print", function () spawn("seen video")  end),
+	awful.key({ modkey,           }, "Print", function () exec("scr")        end),
+	awful.key({ modkey, "Shift"   }, "Print", function () exec("seen video")  end),
 
 	awful.key({ modkey, "Control" }, "Right", wallpaper.next),
 
@@ -165,20 +166,45 @@ local globalkeys = awful.util.table.join(
 	awful.key({ modkey }, "q",      function() spawn(my.browser) end),
 	awful.key({ modkey }, "Return", function () spawn(my.terminal) end),
 
-	-- Tasks
-	awful.key({ modkey,         }, "y", function () lain.widgets.contrib.task.show() end),
-	awful.key({ modkey, "Shift" }, "y", lain.widgets.contrib.task.prompt_search),
-
 	awful.key({ modkey }, "c", function()
 		local l = {}
 		for _, c in ipairs(client.get()) do
 			table.insert(l, lain.util.markup.bold(c.name..":").." c:"..tostring(c.class))
 		end
 		naughty.notify{ timeout = 0, text = table.concat(l, "\n")}
-	end)
+	end),
+
+	-- mpv
+	awful.key({ modkey }, "v",
+		function ()
+			---local v = selection()
+			--if not v then return end
+			naughty.notify{ timeout = 5, title = "Playing..."}
+			exec('mpv (xsel -bo)')
+		end,
+		{description = "play clipboard content in mpv", group = "media"}),
+
+	awful.key({ modkey, "Shift" }, "v",
+		function ()
+			---local v = selection()
+			--if not v then return end
+			naughty.notify{ timeout = 5, title = "Looping..."}
+			exec('mpv --loop (xsel -bo)')
+		end,
+		{description = "loop clipboard content in mpv", group = "media"}),
+
+	awful.key({ modkey }, "XF86AudioRaiseVolume",
+		function ()
+			naughty.notify{ timeout = 5, title = "Volume ignition..."}
+			exec('mpv ~/hl1-sfx.opus')
+		end,
+		{description = "play a short sound to wakeup speakers", group = "media"}),
+
+
+	awful.key({ modkey }, "y", function () spawn("dm-tool lock") end)
 )
 
-local clientkeys = awful.util.table.join(
+local clientkeys = gears.table.join(
 	awful.key({ modkey,           }, "f",
 		function (c)
 			c.fullscreen = not c.fullscreen
